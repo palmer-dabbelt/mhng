@@ -1,0 +1,12 @@
+LANGUAGES   += c
+COMPILEOPTS += -Wall
+COMPILEOPTS += -Wextra
+COMPILEOPTS += -Werror
+COMPILEOPTS += -Wno-unused-parameter
+COMPILEOPTS += -Iinclude/
+
+LIBRARIES   += libmh.so
+SOURCES	    += libmh/library.c
+
+BINARIES    += mhng
+SOURCES	    += mhng/main.c

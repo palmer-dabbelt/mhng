@@ -1,0 +1,9 @@
+/bin/
+/obj/
+/lib/
+
+/Configfiles/local
+/Configfile.*
+Makefile*
+
+*~
