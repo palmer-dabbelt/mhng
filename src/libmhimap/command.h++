@@ -54,6 +54,20 @@ namespace mhimap {
          * _doesn't_ check is_end(), it's expected that the user does
          * that already. */
         bool is_error_end(const char *line);
+
+        /* These are mechanisms for filtering out unwanted lines --
+         * I'm not entirely sure what the proper thing to do here is,
+         * so for now I'm just going to filter them out.  I think it's
+         * probably best to have some kind of more complicated client
+         * state machine that has two streams: the command in progress
+         * and the suprious stuff. */
+        bool is_list(const char *line);
+
+        /* Parses the folder name out of a list command, potentially
+         * destroying "line" in the process.  The returned pointer
+         * will be inside of "line", so there's nothing additional to
+         * free. */
+        char *list_get_folder(char *line);
     };
 }
 

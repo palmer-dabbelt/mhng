@@ -35,6 +35,31 @@ client::client(void)
 {
 }
 
+string_iter client::folder_iter(void)
+{
+    logger l("client::folder_iter()");
+
+    std::vector<std::string> folders;
+
+    l.printf("list(...)");
+    command list(this, "LIST / *");
+
+    char buffer[BUFFER_SIZE];
+    while (gets(buffer, BUFFER_SIZE) > 0) {
+        if (list.is_end(buffer))
+            break;
+
+        if (!list.is_list(buffer)) {
+            fprintf(stderr, "Spurious non-LIST: '%s'\n", buffer);
+            continue;
+        }
+
+        folders.push_back(list.list_get_folder(buffer));
+    }
+
+    return string_iter(folders);
+}
+
 int client::eat_hello(void)
 {
     logger("client::eat_hello()");

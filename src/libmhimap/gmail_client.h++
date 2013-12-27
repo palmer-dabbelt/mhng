@@ -23,6 +23,7 @@
 #define LIBMHIMAP__GMAIL_CLIENT_HXX
 
 #include "ssl_client.h++"
+#include <map>
 #include <string>
 
 namespace mhimap {
@@ -31,6 +32,16 @@ namespace mhimap {
      * connecting to a GMail server. */
     class gmail_client: public ssl_client {
     private:
+        /* These two maps convert between GMail and MH folder names --
+         * the general idea is that GMail has some magic associated
+         * with different folder names and therefor we have to match
+         * their names EXACTLY, lest all hell break loose.  You should
+         * edit these using the helper function below. */
+        /* FIXME: These should really be const, but it appears that
+         * C++ barfs here... */
+        std::map<std::string, std::string> _g2m;
+        std::map<std::string, std::string> _m2g;
+
     public:
         /* Opens a new connection to a GMail server, given just the
          * username and password.  The set of supported authentication
@@ -39,6 +50,17 @@ namespace mhimap {
         gmail_client(const std::string username,
                      const std::string password
             );
+
+        /* This overrides the default IMAP folder listing with one
+         * that closely matches GMail's hard-coded folder expectations
+         * with MH's hard-coded folder expectations. */
+        string_iter folder_iter(void);
+
+    private:
+        /* Installs a folder map entry in both directions -- this
+         * should really be used instead of directly touching the two
+         * maps above. */
+        void add_folder_map(std::string mh, std::string gmail);
     };
 }
 

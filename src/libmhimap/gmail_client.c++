@@ -46,6 +46,40 @@ using namespace mhimap;
 gmail_client::gmail_client(const std::string username,
                            const std::string password)
     : ssl_client(GMAIL_HOSTNAME, GMAIL_PORT, username, password,
-                 "NORMAL" VERS_RC4 VERS_SSLONLY)
+                 "NORMAL" VERS_RC4 VERS_SSLONLY),
+      _g2m(),
+      _m2g()
 {
+    /* FIXME: I'm pretty sure some of these folder names change when
+     * your gmail language isn't English... */
+
+    /* FIXME: Should there be some sort of case-insensitive matching
+     * here? */
+
+    add_folder_map("inbox", "INBOX");
+    add_folder_map("drafts", "[Gmail]/Drafts");
+    add_folder_map("queue", "Queue");
+    add_folder_map("sent", "[Gmail]/Sent Mail");
+    add_folder_map("spam", "[Gmail]/Spam");
+    add_folder_map("trash", "[Gmail]/Trash");
+}
+
+string_iter gmail_client::folder_iter(void)
+{
+    std::vector<std::string> folders;
+
+    for (auto it = ssl_client::folder_iter(); !it.done(); ++it) {
+        if (_g2m.find(*it) == _g2m.end())
+            continue;
+
+        folders.push_back(_g2m.find(*it)->second);
+    }
+
+    return string_iter(folders);
+}
+
+void gmail_client::add_folder_map(const std::string m, const std::string g)
+{
+    _g2m[g] = m;
+    _m2g[m] = g;
 }

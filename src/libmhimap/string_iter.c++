@@ -19,18 +19,12 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <libmhimap/gmail_client.h++>
-#include <libmh/options.h++>
+#include "string_iter.h++"
 
-int main(int argc, const char **argv)
+using namespace mhimap;
+
+string_iter::string_iter(const std::vector<std::string> items)
+    : _items(items),
+      _it(_items.begin())
 {
-    mh::options o(argc, argv);
-
-    mhimap::gmail_client c(GMAIL_USERNAME, GMAIL_PASSWORD);
-
-    for (auto it = c.folder_iter(); !it.done(); ++it) {
-        fprintf(stderr, "folder: '%s'\n", (*it).c_str());
-    }
-
-    return 0;
 }

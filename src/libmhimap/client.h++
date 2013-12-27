@@ -28,6 +28,7 @@ namespace mhimap {
 
 #include "command.h++"
 #include "line_buffer.h++"
+#include "string_iter.h++"
 #include <string>
 
 namespace mhimap {
@@ -57,6 +58,12 @@ namespace mhimap {
          * classes that extend this one rather than calling this
          * directly. */
         client(void);
+
+        /* Returns an iterator that loops through all the folders in
+         * this IMAP account.  Note that this probably isn't very
+         * useful because IMAP has some names that differ from what MH
+         * expects. */
+        virtual string_iter folder_iter(void);
 
     protected:
         /* A pair of functions that do raw readinig and writing

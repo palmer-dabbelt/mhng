@@ -81,3 +81,62 @@ bool command::is_error_end(const char *line)
 
     return true;
 }
+
+bool command::is_list(const char *line)
+{
+    if (strncmp(line, "* LIST ", strlen("* LIST ")) == 0)
+        return true;
+
+    return false;
+}
+
+/* FIXME: God, this is awful...  I'm not really sure how I should go
+ * about parsing IMAP results as it appears that they've all got
+ * different formats. */
+char *command::list_get_folder(char *line)
+{
+    if (!is_list(line))
+        return NULL;
+
+    line += strlen("* LIST");
+
+    while (*line != ')' && *line != '\0')
+        line++;
+
+    if (*line == '\0')
+        return NULL;
+    line++;
+
+    while (*line == ' ' && *line != '\0')
+        line++;
+
+    if (*line == '\0')
+        return NULL;
+
+    if (*line != '"')
+        return NULL;
+    line++;
+
+    while (*line != '"' && *line != '\0')
+        line++;
+
+    if (*line == '\0')
+        return NULL;
+    line++;
+
+    if (*line != ' ')
+        return NULL;
+    line++;
+
+    if (*line != '"')
+        return NULL;
+    line++;
+
+    char *end = line;
+    while (*end != '"' && *end != '\0')
+        end++;
+
+    *end = '\0';
+
+    return line;
+}
