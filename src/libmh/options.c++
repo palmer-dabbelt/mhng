@@ -19,14 +19,13 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <libmhimap/gmail_client.h++>
-#include <libmh/options.h++>
+#include "options.h++"
 
-int main(int argc, const char **argv)
+using namespace mh;
+
+options::options(int argc, const char **argv)
+    : _argc(argc),
+      _argv(argv)
 {
-    mh::options o(argc, argv);
-
-    mhimap::gmail_client c(GMAIL_USERNAME, GMAIL_PASSWORD);
-
-    return 0;
 }
+

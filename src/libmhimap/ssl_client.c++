@@ -56,7 +56,7 @@ static inline void *get_in_addr(const struct sockaddr *sa);
 ssl_client::ssl_client(const std::string hostname,
                        uint16_t port,
                        const std::string username,
-                       const std::string password __attribute__((unused)),
+                       const std::string password,
                        const std::string priority)
     : client(),
       session(),
@@ -90,12 +90,27 @@ ssl_client::ssl_client(const std::string hostname,
         throw std::runtime_error("Handshake failed");
     }
 
-    l.printf("session.recv(...)");
-    while ((ret = session.recv(buffer, buffer_size)) > 0) {
-        buffer[ret] = '\0';
-        fprintf(stderr, "got (%ld): '%s'\n", ret, buffer);
-        l.printf("session.recv(...)");
+    /* We're already secure, so we can proceed directly to the
+     * authentication phase. */
+    if (eat_hello() != 0) {
+        fprintf(stderr, "Unexpected hello from IMAP\n");
+        abort();
     }
+
+    if (authenticate(username, password) != 0) {
+        fprintf(stderr, "Unable to authenticate as '%s'\n", username.c_str());
+        abort();
+    }
+}
+
+ssize_t ssl_client::read(char *buffer, ssize_t buffer_size)
+{
+    return session.recv(buffer, buffer_size);
+}
+
+ssize_t ssl_client::write(char *buffer, ssize_t buffer_size)
+{
+    return session.send(buffer, buffer_size);
 }
 
 void gnutls_ssl_init(void)

@@ -51,6 +51,11 @@ namespace mhimap {
                    const std::string password,
                    const std::string priority="NORMAL"
             );
+
+    protected:
+        /* vtable methods from libmhimap::client. */
+        ssize_t read(char *buffer, ssize_t buffer_size);
+        ssize_t write(char *buffer, ssize_t buffer_size);
     };
 }
 
