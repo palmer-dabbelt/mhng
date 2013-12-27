@@ -1,0 +1,62 @@
+##############################################################################
+# Global Build Options                                                       #
+##############################################################################
+# I'm going to mandate c++11 support for this code because it makes
+# life a whole bunch easier for me to develop with.
+LANGUAGES   += c++
+COMPILEOPTS += -Wall
+COMPILEOPTS += -Werror
+COMPILEOPTS += -Wextra
+COMPILEOPTS += -std=c++11
+COMPILEOPTS += -pedantic
+
+# One of the downsides of C++ is that it appears to define a public
+# interface for libraries.  This header compiler simply copies headers
+# over.
+LANGUAGES   += h
+
+# The best way I've found for building internal C++ library
+# dependencies is to just let everything staticly link.
+LANGUAGES   += c++
+COMPILEOPTS += -Isrc
+
+# This is my global library list.  I'm putting pretty much everything
+# here because there's a bunch of binaries below and I don't want to
+# add every external dependency to every binary.
+LANGUAGES   += c++
+COMPILEOPTS += `ppkg-config sqlite3 --cflags`
+LINKOPTS    += `ppkg-config sqlite3 --libs`
+COMPILEOPTS += `ppkg-config gnutls --cflags`
+LINKOPTS    += `ppkg-config gnutls --libs`
+LINKOPTS    += -lgnutlsxx
+
+##############################################################################
+# Libraries                                                                  #
+##############################################################################
+# The MHNG IMAP client library, which is split out in the hope that it
+# can be used by other applications.
+LIBRARIES   += libmhimap.so
+CONFIG      += libmhimap_sources
+CONFIG      += libmhimap_headers
+
+# Common routines shared by all MHNG programs, provided so external
+# code has essentially the same access as internal code does.
+LIBRARIES   += libmh.so
+CONFIG      += libmh_sources
+CONFIG      += libmh_headers
+
+##############################################################################
+# Local-Access Binaries                                                      #
+##############################################################################
+# Lists the messages in the given folder, defaulting to the currently
+# selected folder.
+BINARIES    += scan
+SOURCES     += scan.c++
+
+##############################################################################
+# Remote-Access Binaries                                                     #
+##############################################################################
+# Watches an GMail account for changes, ensuring that the local .mhdir
+# is always kept up-to-date with the contents of the server.
+BINARIES    += mh-gmail-watch
+SOURCES     += mh-gmail-watch.c++

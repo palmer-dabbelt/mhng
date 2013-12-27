@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cd src
+
+find libmh -iname "*.h++" | while read file
+do
+    echo "HEADERS += $file"
+    echo "SOURCES += $file"
+done
