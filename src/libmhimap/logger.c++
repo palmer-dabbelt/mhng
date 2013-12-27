@@ -27,9 +27,18 @@ using namespace mhimap;
 
 static int global_depth = 0;
 
+#ifdef IMAP_DEBUG
+static bool global_debug = true;
+#else
+static bool global_debug = false;
+#endif
+
 logger::logger(const char *fmt, ...)
     : depth(global_depth++)
 {
+    if (!global_debug)
+        return;
+    
     for (int i = 0; i < this->depth; i++)
         fprintf(stderr, "  ");
 
@@ -43,16 +52,21 @@ logger::logger(const char *fmt, ...)
 
 logger::~logger(void)
 {
+    global_depth--;
+    if (!global_debug)
+        return;
+    
     for (int i = 0; i < this->depth; i++)
         fprintf(stderr, "  ");
 
     fprintf(stderr, "DONE\n");
-
-    global_depth--;
 }
 
 void logger::printf(const char *fmt, ...)
 {
+    if (!global_debug)
+        return;
+
     for (int i = 0; i <= this->depth; i++)
         fprintf(stderr, "  ");
 
