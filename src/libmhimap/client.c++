@@ -30,7 +30,8 @@ using namespace mhimap;
 #endif
 
 client::client(void)
-    : sequence(0)
+    : sequence(0),
+      logged_out(false)
 {
 }
 
@@ -73,14 +74,37 @@ int client::authenticate(const std::string user, const std::string pass)
     return 0;
 }
 
+void client::logout(void)
+{
+    char buffer[BUFFER_SIZE];
+    logger l("client::~client()");
+
+    command logout(this, "LOGOUT");
+
+    do {
+        l.printf("gets(...)");
+        gets(buffer, BUFFER_SIZE);
+
+        l.printf("is_end(...)");
+    } while (!logout.is_end(buffer));
+
+    if (logout.is_error_end(buffer)) {
+        fprintf(stderr, "Error while logging out: '%s'\n", buffer);
+    }
+}
+
 ssize_t client::puts(char *buffer)
 {
     logger l("client::puts('%s')", buffer);
 
     char nbuffer[BUFFER_SIZE + 3];
 
+    l.printf("snprintf(...)");
     snprintf(nbuffer, BUFFER_SIZE + 3, "%s\r\n", buffer);
+
+    l.printf("write(...)");
     write(nbuffer, strlen(nbuffer));
+
     return strlen(nbuffer);
 }
 

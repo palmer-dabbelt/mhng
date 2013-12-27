@@ -52,6 +52,8 @@ namespace mhimap {
                    const std::string priority="NORMAL"
             );
 
+        ~ssl_client(void);
+
     protected:
         /* vtable methods from libmhimap::client. */
         ssize_t read(char *buffer, ssize_t buffer_size);

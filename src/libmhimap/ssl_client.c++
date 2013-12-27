@@ -103,6 +103,10 @@ ssl_client::ssl_client(const std::string hostname,
     }
 }
 
+ssl_client::~ssl_client(void) {
+    logout();
+}
+
 ssize_t ssl_client::read(char *buffer, ssize_t buffer_size)
 {
     return session.recv(buffer, buffer_size);

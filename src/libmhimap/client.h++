@@ -47,6 +47,9 @@ namespace mhimap {
          * the buffered input used by gets()/puts(). */
         line_buffer linebuf;
 
+        /* FALSE until logout() has been called, TRUE after that. */
+        bool logged_out;
+
     public:
         /* Creates a new connection to an IMAP server, given the
          * connection object that will be used to create it.  You
@@ -82,6 +85,13 @@ namespace mhimap {
          * _directly_ after eat_helly() (for instance, there may be
          * some TLS negotiation in the middle). */
         int authenticate(const std::string user, const std::string pass);
+
+        /* This should be called directly before an instance of this
+         * class is destroyed, and only from direct children of this
+         * class.  This handles a depedency issue: I'd really like to
+         * have this log out in a destructor, but by that time the TLS
+         * state will have been torn down so I can't. */
+        void logout(void);
 
     private:
         /* These deal with buffered (but not necessairially
