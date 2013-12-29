@@ -20,3 +20,11 @@
  */
 
 #include "mhdir.h++"
+
+using namespace mh;
+
+mhdir::mhdir(const options_ptr o)
+    : _o(o),
+      _db(db::connection::create( (*o).dbfile() ))
+{
+}

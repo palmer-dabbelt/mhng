@@ -22,11 +22,34 @@
 #ifndef LIBMH__MHDIR_HXX
 #define LIBMH__MHDIR_HXX
 
-namespace libmh {
+namespace mh {
+    class mhdir;
+}
+
+#include "folder.h++"
+#include "options.h++"
+#include "db/connection.h++"
+#include <string>
+
+namespace mh {
     /* Represents the state of this system's .mhdir, which contains
      * the entire configuration state as well as all the
      * locally-cached files and such.  */
     class mhdir {
+    private:
+        const options_ptr _o;
+        db::connection_ptr _db;
+
+    public:
+        /* Opens up the MHng directory specified by the given set of
+         * options. */
+        mhdir(const options_ptr o);
+
+        /* Opens a folder by name.  There's also a function to check
+         * if the given folder exists, which you should call to make
+         * sure the requested folder exists. */
+        bool folder_exists(const std::string folder_name);
+        folder open_folder(const std::string folder_name);
     };
 }
 

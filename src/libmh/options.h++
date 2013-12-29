@@ -23,6 +23,15 @@
 #define LIBMH__OPTIONS_HXX
 
 namespace mh {
+    class options;
+}
+
+#include <memory>
+#include <string>
+
+namespace mh {
+    typedef std::shared_ptr<options> options_ptr;
+
     /* Handles the myriad of options that may be passed to MHng.
      * Options can be passed in many ways (commandline, enviornment
      * variables, config files), this deals with merging them all
@@ -38,7 +47,25 @@ namespace mh {
         const char **_argv;
 
     public:
+        /* Calls the cooresponding constructor but returns a shared
+         * pointer. */
+        static options_ptr create(int argc, const char **argv);
+
+        /* Prints the full path to the MH directory.  You probably
+         * want to use one of the helpers below... */
+        const std::string mhdir(void) const;
+
+        /* Prints the database file, usually within the MH
+         * directory. */
+        const std::string dbfile(void) const;
+
+    private:
+        /* Parses a set of options, given the commandline arguments
+         * that should be used.  Note that this will implicitly look
+         * at all the other sources of options, you don't have to list
+         * those anywhere. */
         options(int argc, const char **argv);
+
     };
 }
 

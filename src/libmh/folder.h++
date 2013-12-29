@@ -19,41 +19,34 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef LIBMH__FOLDER_HXX
+#define LIBMH__FOLDER_HXX
+
+namespace mh {
+    class folder;
+}
+
+#include "mhdir.h++"
 #include "options.h++"
-#include <stdio.h>
+#include "db/connection.h++"
+#include <string>
 
-using namespace mh;
+namespace mh {
+    /* Represents a single MH folder. */
+    class folder {
+    public:
+        friend class mhdir;
 
-#ifndef BUFFER_SIZE
-#define BUFFER_SIZE 1024
+    private:
+
+    protected:
+        /* Creates a new folder, given the name of that folder and a
+         * database connection to use in order to query that folder's
+         * contents. */
+
+    public:
+        
+    };
+}
+
 #endif
-
-options_ptr options::create(int argc, const char **argv)
-{
-    return options_ptr(new options(argc, argv));
-}
-
-const std::string options::mhdir(void) const
-{
-    if (getenv("HOME") == NULL) {
-        fprintf(stderr, "No HOME env defined\n");
-        abort();
-    }
-
-    char buffer[BUFFER_SIZE];
-    snprintf(buffer, BUFFER_SIZE, "%s/.mhng", getenv("HOME"));
-    return buffer;
-}
-
-const std::string options::dbfile(void) const
-{
-    char buffer[BUFFER_SIZE];
-    snprintf(buffer, BUFFER_SIZE, "%s/metadata.sqlite3", mhdir().c_str());
-    return buffer;
-}
-
-options::options(int argc, const char **argv)
-    : _argc(argc),
-      _argv(argv)
-{
-}

@@ -19,41 +19,17 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "options.h++"
-#include <stdio.h>
+#ifndef LIBMH__DB__RESULT_ITER_HXX
+#define LIBMH__DB__RESULT_ITER_HXX
 
-using namespace mh;
+#include <string>
+#include <sqlite3.h>
 
-#ifndef BUFFER_SIZE
-#define BUFFER_SIZE 1024
-#endif
-
-options_ptr options::create(int argc, const char **argv)
-{
-    return options_ptr(new options(argc, argv));
-}
-
-const std::string options::mhdir(void) const
-{
-    if (getenv("HOME") == NULL) {
-        fprintf(stderr, "No HOME env defined\n");
-        abort();
+namespace mh {
+    namespace db {
+        class result_iter {
+        };
     }
-
-    char buffer[BUFFER_SIZE];
-    snprintf(buffer, BUFFER_SIZE, "%s/.mhng", getenv("HOME"));
-    return buffer;
 }
 
-const std::string options::dbfile(void) const
-{
-    char buffer[BUFFER_SIZE];
-    snprintf(buffer, BUFFER_SIZE, "%s/metadata.sqlite3", mhdir().c_str());
-    return buffer;
-}
-
-options::options(int argc, const char **argv)
-    : _argc(argc),
-      _argv(argv)
-{
-}
+#endif

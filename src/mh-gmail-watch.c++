@@ -21,10 +21,13 @@
 
 #include <libmhimap/gmail_client.h++>
 #include <libmh/options.h++>
+#include <libmh/mhdir.h++>
 
 int main(int argc, const char **argv)
 {
-    mh::options o(argc, argv);
+    auto o = mh::options::create(argc, argv);
+
+    mh::mhdir mhdir(o);
 
     mhimap::gmail_client c(GMAIL_USERNAME, GMAIL_PASSWORD);
 
