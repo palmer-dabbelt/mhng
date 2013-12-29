@@ -20,6 +20,7 @@
  */
 
 #include "client.h++"
+#include "done_command.h++"
 #include "logger.h++"
 #include <string.h>
 
@@ -58,6 +59,49 @@ string_iter client::folder_iter(void)
     }
 
     return string_iter(folders);
+}
+
+void client::send_idle(const std::string folder_name)
+{
+    logger l("client::send_idle('%s')", folder_name.c_str());
+    char buffer[BUFFER_SIZE];
+
+    l.printf("select(...)");
+    command select(this, "SELECT %s", folder_name.c_str());
+    do {
+        l.printf("gets(...)");
+        gets(buffer, BUFFER_SIZE);
+
+        l.printf("is_end(...)");
+    } while (!select.is_end(buffer));
+
+    l.printf("idle(...)");
+    command idle(this, "IDLE");
+    gets(buffer, BUFFER_SIZE);
+    /* FIXME: I should probably check if the IDLE is OK or not... */
+}
+
+idle_response client::wait_idle(void)
+{
+    logger l("client::wait_idle()");
+    char buffer[BUFFER_SIZE];
+
+    /* Here we just wait for _anything_ to come back, at which point
+     * we're safe to return. */
+    gets(buffer, BUFFER_SIZE);
+
+    /* Now we issue a DONE response to the server, which indicates
+     * that we don't want to IDLE any more -- note that this isn't
+     * _quite_ a regular command yet because it doesn't get tagged
+     * with a number.  */
+    done_command done(this);
+
+    /* At this point we need to drain the server's event queue and
+     * check that everything was OK with our return. */
+    while (!done.is_end(buffer))
+        gets(buffer, BUFFER_SIZE);
+
+    return idle_response::DATA;
 }
 
 int client::eat_hello(void)
@@ -118,7 +162,7 @@ void client::logout(void)
     }
 }
 
-ssize_t client::puts(char *buffer)
+ssize_t client::puts(const char *buffer)
 {
     logger l("client::puts('%s')", buffer);
 
@@ -129,6 +173,10 @@ ssize_t client::puts(char *buffer)
 
     l.printf("write(...)");
     write(nbuffer, strlen(nbuffer));
+
+#ifdef IMAP_NETLOG
+    fprintf(stderr, "%p >> %s\n", (void*)this, buffer);
+#endif
 
     return strlen(nbuffer);
 }
@@ -156,6 +204,11 @@ ssize_t client::gets(char *buffer, ssize_t buffer_size)
 
     ssize_t out = linebuf.get(buffer, buffer_size);
     l.printf("==> '%s'", buffer);
+
+#ifdef IMAP_NETLOG
+    fprintf(stderr, "%p << %s\n", (void*)this, buffer);
+#endif
+
     return out;
 }
 

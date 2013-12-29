@@ -140,3 +140,10 @@ char *command::list_get_folder(char *line)
 
     return line;
 }
+
+command::command(const std::string buffer, uint32_t seq, client *cl)
+    : c(cl),
+      sequence(seq)
+{
+    c->puts(buffer.c_str());
+}

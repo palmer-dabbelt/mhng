@@ -19,32 +19,30 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBMH__FOLDER_HXX
-#define LIBMH__FOLDER_HXX
+#ifndef LIBMH__MESSAGE_ITER_HXX
+#define LIBMH__MESSAGE_ITER_HXX
 
 namespace mh {
-    class folder;
+    class message_iter;
 }
 
-#include "mhdir.h++"
-#include "options.h++"
-#include "db/connection.h++"
+#include "folder.h++"
+#include "message.h++"
 #include <string>
+#include <vector>
 
 namespace mh {
-    /* Represents a single MH folder. */
-    class folder {
-    private:
-        const std::string _name;
-        const options_ptr _o;
-        db::connection_ptr _db;
+    /* This deals with iterating through messages.  You're almost
+     * certainly not going to want to create one of these yourself,
+     * but instead are going to want get one from a folder. */
+    class message_iter {
+        friend class folder;
 
-    public:
-        /* Creates a new folder, given the name of that folder and a
-         * database connection to use in order to query that folder's
-         * contents.  You almost certainly don't want to use this but
-         * instead want to open the folder from an mhdir. */
-        folder(const std::string n, options_ptr o, db::connection_ptr db);
+    private:
+        std::vector<message> _messages;
+
+    protected:
+        message_iter(std::vector<message> messages);
     };
 }
 

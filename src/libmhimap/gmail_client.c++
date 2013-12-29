@@ -78,6 +78,16 @@ string_iter gmail_client::folder_iter(void)
     return string_iter(folders);
 }
 
+void gmail_client::send_idle(const std::string fn)
+{
+    if (_m2g.find(fn) == _m2g.end()) {
+        fprintf(stderr, "IDLE on unmapped folder: '%s'\n", fn.c_str());
+        abort();
+    }
+
+    return ssl_client::send_idle(_m2g.find(fn)->second);
+}
+
 void gmail_client::add_folder_map(const std::string m, const std::string g)
 {
     _g2m[g] = m;

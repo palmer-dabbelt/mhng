@@ -19,32 +19,33 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBMH__FOLDER_HXX
-#define LIBMH__FOLDER_HXX
+#ifndef LIBMH__UID_HXX
+#define LIBMH__UID_HXX
 
 namespace mh {
-    class folder;
+    class uid;
 }
 
-#include "mhdir.h++"
-#include "options.h++"
-#include "db/connection.h++"
+#include <stdint.h>
 #include <string>
 
 namespace mh {
-    /* Represents a single MH folder. */
-    class folder {
+    /* Stores a unique ID for a message that's unique among all
+     * mailboxes in the system.  This is how information is looked up
+     * in the database. */
+    class uid {
     private:
-        const std::string _name;
-        const options_ptr _o;
-        db::connection_ptr _db;
+        /* At least for now I'm going to represent IDs as integers.  I
+         * figure 64 bits is good enough for a single machine...  Note
+         * that these are actually going to end up being allocated by
+         * the SQL database as some primary key, so I think this is
+         * somewhat reasonable... */
+        const uint64_t _id;
 
     public:
-        /* Creates a new folder, given the name of that folder and a
-         * database connection to use in order to query that folder's
-         * contents.  You almost certainly don't want to use this but
-         * instead want to open the folder from an mhdir. */
-        folder(const std::string n, options_ptr o, db::connection_ptr db);
+        /* Creates a new UID by parsing a string, such as one that may
+         * have come from a database. */
+        uid(const std::string id);
     };
 }
 

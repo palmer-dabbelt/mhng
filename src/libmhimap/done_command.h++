@@ -19,32 +19,23 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBMH__FOLDER_HXX
-#define LIBMH__FOLDER_HXX
+#ifndef LIBMHIMAP__DONE_COMMAND_HXX
+#define LIBMHIMAP__DONE_COMMAND_HXX
 
-namespace mh {
-    class folder;
+namespace mhimap {
+    class done_command;
 }
 
-#include "mhdir.h++"
-#include "options.h++"
-#include "db/connection.h++"
-#include <string>
+#include "command.h++"
 
-namespace mh {
-    /* Represents a single MH folder. */
-    class folder {
-    private:
-        const std::string _name;
-        const options_ptr _o;
-        db::connection_ptr _db;
-
+namespace mhimap {
+    /* The DONE half of the IDLE command is special because it doesn't
+     * get tagged with a number (and therefor doesn't increment the
+     * number. */
+    class done_command: public command {
     public:
-        /* Creates a new folder, given the name of that folder and a
-         * database connection to use in order to query that folder's
-         * contents.  You almost certainly don't want to use this but
-         * instead want to open the folder from an mhdir. */
-        folder(const std::string n, options_ptr o, db::connection_ptr db);
+        /* The DONE command doesn't take any arguments. */
+        done_command(client *c);
     };
 }
 

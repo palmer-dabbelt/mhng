@@ -24,6 +24,7 @@
 
 #include "client.h++"
 #include <stdint.h>
+#include <string>
 
 namespace mhimap {
     /* This holds an IMAP command and deals with parsing when the
@@ -68,6 +69,14 @@ namespace mhimap {
          * will be inside of "line", so there's nothing additional to
          * free. */
         char *list_get_folder(char *line);
+
+    protected:
+        /* This is a special constructor for use by commands that
+         * don't quite follow the regular syntax.  Note that in this
+         * preperation, "buffer" is _exactly_ what is sent along -- in
+         * other words, it's expected that the subclass manually sets
+         * the sequence number. */
+        command(const std::string buffer, uint32_t seq, client *cl);
     };
 }
 

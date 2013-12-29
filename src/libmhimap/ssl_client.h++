@@ -54,8 +54,10 @@ namespace mhimap {
 
         ~ssl_client(void);
 
-    protected:
         /* vtable methods from libmhimap::client. */
+    public:
+        bool is_connected(void) const;
+    protected:
         ssize_t read(char *buffer, ssize_t buffer_size);
         ssize_t write(char *buffer, ssize_t buffer_size);
     };

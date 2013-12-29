@@ -19,32 +19,18 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBMH__FOLDER_HXX
-#define LIBMH__FOLDER_HXX
+#ifndef LIBMHIMAP__IDLE_RESPONSE_HXX
+#define LIBMHIMAP__IDLE_RESPONSE_HXX
 
-namespace mh {
-    class folder;
-}
-
-#include "mhdir.h++"
-#include "options.h++"
-#include "db/connection.h++"
-#include <string>
-
-namespace mh {
-    /* Represents a single MH folder. */
-    class folder {
-    private:
-        const std::string _name;
-        const options_ptr _o;
-        db::connection_ptr _db;
-
-    public:
-        /* Creates a new folder, given the name of that folder and a
-         * database connection to use in order to query that folder's
-         * contents.  You almost certainly don't want to use this but
-         * instead want to open the folder from an mhdir. */
-        folder(const std::string n, options_ptr o, db::connection_ptr db);
+namespace mhimap {
+    /* Holds the different sort of responses that can come back from
+     * an IDLE command. */
+    enum class idle_response {
+        /* FIXME: emacs doesn't know how to indent C++ enum
+         * classes... :( */
+        TIMEOUT,
+        DISCONNECT,
+        DATA,    
     };
 }
 

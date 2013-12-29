@@ -107,6 +107,12 @@ ssl_client::~ssl_client(void) {
     logout();
 }
 
+bool ssl_client::is_connected(void) const
+{
+    /* FIXME: How should we detect a disconnected GNUTLS socket? */
+    return true;
+}
+
 ssize_t ssl_client::read(char *buffer, ssize_t buffer_size)
 {
     return session.recv(buffer, buffer_size);

@@ -56,6 +56,10 @@ namespace mhimap {
          * with MH's hard-coded folder expectations. */
         string_iter folder_iter(void);
 
+        /* Again, anything that has to do with folders needs to be
+         * overridden when it comes to GMail. */
+        void send_idle(const std::string folder_name);
+
     private:
         /* Installs a folder map entry in both directions -- this
          * should really be used instead of directly touching the two

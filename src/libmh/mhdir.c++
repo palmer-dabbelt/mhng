@@ -19,7 +19,17 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define _BSD_SOURCE
+
 #include "mhdir.h++"
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#ifndef BUFFER_SIZE
+#define BUFFER_SIZE 1024
+#endif
 
 using namespace mh;
 
@@ -27,4 +37,30 @@ mhdir::mhdir(const options_ptr o)
     : _o(o),
       _db(db::connection::create( (*o).dbfile() ))
 {
+}
+
+bool mhdir::folder_exists(const std::string folder_name)
+{
+    char buffer[BUFFER_SIZE];
+    snprintf(buffer, BUFFER_SIZE, "%s/%s",
+             (*_o).mhdir().c_str(), folder_name.c_str());
+
+    struct stat sbuf;
+    if (lstat(buffer, &sbuf) != 0)
+        return false;
+
+    if (!S_ISDIR(sbuf.st_mode))
+        return false;
+
+    return true;
+}
+
+folder mhdir::open_folder(const std::string folder_name)
+{
+    if (!folder_exists(folder_name)) {
+        fprintf(stderr, "Opened a folder that doesn't exist!");
+        abort();
+    }
+
+    return folder(folder_name, _o, _db);
 }

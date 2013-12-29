@@ -21,6 +21,7 @@
 
 #include "line_buffer.h++"
 #include "logger.h++"
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -36,6 +37,9 @@ line_buffer::line_buffer(ssize_t starting_size)
 
 bool line_buffer::has_line(void) const
 {
+    assert(used >= 0);
+    assert(used < count);
+
     for (ssize_t i = 0; i < used; i++)
         if (data[i] == '\r' || data[i] == '\n')
             return true;
@@ -45,6 +49,9 @@ bool line_buffer::has_line(void) const
 
 ssize_t line_buffer::recharge_size(void) const
 {
+    assert(used >= 0);
+    assert(used < count);
+
     logger l("line_buffer::rechange_size()");
 
     ssize_t out = count - used;
@@ -54,6 +61,9 @@ ssize_t line_buffer::recharge_size(void) const
 
 char *line_buffer::recharge_buffer(void) const
 {
+    assert(used >= 0);
+    assert(used < count);
+
     logger l("line_buffer::rechange_buffer()");
 
     return &data[used];
@@ -61,6 +71,9 @@ char *line_buffer::recharge_buffer(void) const
 
 void line_buffer::recharge_commit(ssize_t n_read)
 {
+    assert(used >= 0);
+    assert(used < count);
+
     used += n_read;
 
     if (used > count) {
@@ -86,20 +99,22 @@ ssize_t line_buffer::get(char *buffer, ssize_t buffer_size)
             /* Seek again until we end up with no more line feed
              * characters. */
             while (data[i] == '\r' || data[i] == '\n') {
-                if (i >= buffer_size)
+                if (i >= used)
                     break;
                 i++;
             }
 
             /* Remove the returned characters from the buffer. */
+            assert(used >= 0);
+            assert(used < count);
+            assert(used >= i);
             used -= i;
+            assert(used >= 0);
+            assert(used < count);
 
             /* FIXME: This is a poorly implemented buffer because this
              * copy shouldn't be necessary. */
             memmove(data, data + i, used);
-
-            l.printf("got '%s'", buffer);
-            l.printf("remaining %ld", used);
             return i;
         }
     }

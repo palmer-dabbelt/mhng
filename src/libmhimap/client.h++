@@ -24,9 +24,12 @@
 
 namespace mhimap {
     class client;
+    class command;
+    class done_command;
 }
 
 #include "command.h++"
+#include "idle_response.h++"
 #include "line_buffer.h++"
 #include "string_iter.h++"
 #include <string>
@@ -38,6 +41,7 @@ namespace mhimap {
     public:
         /* Command needs access to read/write. */
         friend class command;
+        friend class done_command;
 
     private:
         /* The current command sequence number.  This is simply
@@ -64,6 +68,22 @@ namespace mhimap {
          * useful because IMAP has some names that differ from what MH
          * expects. */
         virtual string_iter folder_iter(void);
+
+        /* Returns TRUE when */
+        virtual bool is_connected(void) const = 0;
+
+        /* Sends an IDLE command and DOES NOT wait for any response
+         * from the server.  The given folder will be SELECTed before
+         * issuing the IDLE, and the first + response that comes back
+         * from the server will be eaten before returning, which
+         * ensures that the IDLE has already made it to the server. */
+        void send_idle(const std::string folder_name);
+
+        /* Waits for a response from the server.  As far as I know
+         * this really only makes sense to issue right after a
+         * send_idle(), but I don't think that's actually required by
+         * IMAP. */
+        virtual idle_response wait_idle(void);
 
     protected:
         /* A pair of functions that do raw readinig and writing
@@ -104,7 +124,7 @@ namespace mhimap {
         /* These deal with buffered (but not necessairially
          * IMAP-complient) lines being shipped to and from the
          * server. */
-        ssize_t puts(char *buffer);
+        ssize_t puts(const char *buffer);
         ssize_t gets(char *buffer, ssize_t buffer_size);
         ssize_t printf(const char *format, ...)
             __attribute__(( format(printf, 2, 3) ));

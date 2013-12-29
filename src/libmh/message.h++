@@ -19,32 +19,42 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBMH__FOLDER_HXX
-#define LIBMH__FOLDER_HXX
+#ifndef LIBMH__MESSAGE_HXX
+#define LIBMH__MESSAGE_HXX
 
 namespace mh {
-    class folder;
+    class message;
 }
 
+#include "message_iter.h++"
 #include "mhdir.h++"
 #include "options.h++"
+#include "uid.h++"
 #include "db/connection.h++"
 #include <string>
 
 namespace mh {
-    /* Represents a single MH folder. */
-    class folder {
+    /* Represents a single MH message. */
+    class message {
     private:
-        const std::string _name;
+        const uid _id;
         const options_ptr _o;
         db::connection_ptr _db;
 
     public:
-        /* Creates a new folder, given the name of that folder and a
-         * database connection to use in order to query that folder's
-         * contents.  You almost certainly don't want to use this but
-         * instead want to open the folder from an mhdir. */
-        folder(const std::string n, options_ptr o, db::connection_ptr db);
+        /* Creates a link to a message that's already in the database,
+         * which just consists of obtaining the unique ID of the
+         * message inside the database so we can refer to it later. */
+        static message link(const uid id, options_ptr o, connection_ptr db);
+
+        /* Parses the relevant information from the given message
+         * file, inserts a record into the database cooresponding to
+         * that message, reads back the newly-created UID, and then
+         * returns link(new_uid, ...). */
+        static message insert(const uid id,
+                              options_ptr o,
+                              connection_ptr db,
+                              const std::string filename);
     };
 }
 
