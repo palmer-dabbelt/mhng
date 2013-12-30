@@ -69,6 +69,10 @@ namespace mhimap {
          * expects. */
         virtual string_iter folder_iter(void);
 
+        /* Returns an iterator that loops through all the messages in
+         * the given folder. */
+        string_iter message_iter(const std::string folder_name);
+
         /* Returns TRUE when */
         virtual bool is_connected(void) const = 0;
 

@@ -61,6 +61,35 @@ string_iter client::folder_iter(void)
     return string_iter(folders);
 }
 
+string_iter client::message_iter(const std::string folder_name)
+{
+    logger l("client::message_iter('%s')", folder_name.c_str());
+    char buffer[BUFFER_SIZE];
+
+    /* FIXME: I at least need to look at UIDVALIDITY here...  I think
+     * I should probably not be returning folders and messages as
+     * strings but should instead have wrapper classes. */
+    command select(this, "SELECT %s", folder_name.c_str());
+    while (gets(buffer, BUFFER_SIZE) > 0) {
+        if (select.is_end(buffer))
+            break;
+    }
+
+    /* This just selects every message in the inbox and passes that
+     * exact string along to the iterator we're passing out. */
+    std::vector<std::string> messages;
+
+    command fetch(this, "UID FETCH 1:* (UID)");
+    while (gets(buffer, BUFFER_SIZE) > 0) {
+        if (fetch.is_end(buffer))
+            break;
+
+        messages.push_back(buffer);
+    }
+
+    return string_iter(messages);
+}
+
 void client::send_idle(const std::string folder_name)
 {
     logger l("client::send_idle('%s')", folder_name.c_str());

@@ -49,17 +49,24 @@ int main(int argc, const char **argv)
          * message. */
         mhimap::gmail_client c(GMAIL_USERNAME, GMAIL_PASSWORD);
 
-        /* Check for new messages in every folder.  I think this is
-         * probably safest -- this way we  */
+        /* Check for new messages in every folder.  This way we'll be
+         * sure to fetch all new messages before removing any, which
+         * means that nothing should get lost even if things
+         * disconnect in the middle. */
         for (auto fit = c.folder_iter(); !fit.done(); ++fit) {
             /* Folders that don't already exist in our MH directory
              * just get ignored silently. */
             if (dir.folder_exists(*fit) == false)
                 continue;
 
-            /* For now just print out the folders that we would
-             * synchronize. */
+            /* Here we just print out the map of messages, I don't
+             * quite have a story set as to how to synchronize them
+             * yet... */
             fprintf(stderr, "folder to sync: '%s'\n", (*fit).c_str());
+            for (auto mit = c.message_iter(*fit); !mit.done(); ++mit) {
+                fprintf(stderr, "  message: '%s'\n", (*mit).c_str());
+            }
+
         }
 
         /* Waits for the server to say anything back to us. */
