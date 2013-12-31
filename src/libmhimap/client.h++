@@ -76,6 +76,9 @@ namespace mhimap {
          * the given folder. */
         virtual typename mhimap::message_iter message_iter(const folder f);
 
+        /* Returns a vector of all the messages in the system. */
+        std::vector<message> messages(const folder f);
+
         /* Returns TRUE when */
         virtual bool is_connected(void) const = 0;
 

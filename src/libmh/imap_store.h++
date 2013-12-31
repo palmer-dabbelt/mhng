@@ -57,6 +57,15 @@ namespace mh {
 
         /* Checks the UIDVALIDITY of a given folder, by name. */
         uint32_t get_uidvalidity(const std::string folder_name);
+
+        /* Checks to see if the given message (which is really a
+         * (message, folder) pair) is known to this IMAP store.  TRUE
+         * means the message exists, and FALSE means it doesn't. */
+        bool has(const std::string folder, uint32_t uid);
+
+        /* Lists the messages that this store knows about that match a
+         * given folder. */
+        std::vector<uint32_t> uids(const std::string folder);
     };
 }
 

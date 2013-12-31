@@ -31,6 +31,7 @@ using namespace mh::db;
 #endif
 
 #define FOLDERS_TBL "IMAP__folders"
+#define MSG_TBL "IMAP__messages"
 
 imap_store::imap_store(const options_ptr o, db::connection_ptr db)
     : _o(o),
@@ -92,5 +93,54 @@ uint32_t imap_store::get_uidvalidity(const std::string folder_name)
         std::string uidvstr = (*it).get("uidv");
         out = atol(uidvstr.c_str());
     }
+    return out;
+}
+
+bool imap_store::has(const std::string folder, uint32_t uid)
+{
+    /* Checks if the correct table exists, if it doesn't then we'll
+     * have to create it. */
+    {
+        if (_db->table_exists(MSG_TBL) == false) {
+            fprintf(stderr, "Table '%s' doesn't exist\n", MSG_TBL);
+
+            create_table create(_db, MSG_TBL,
+                                table_col("folder", col_type::STRING, true),
+                                table_col("uid", col_type::INTEGER, true));
+            
+            if (create.successful() == false) {
+                fprintf(stderr, "Error creating table '%s'\n", MSG_TBL);
+                fprintf(stderr, "  %d: '%s'\n",
+                        create.error_code(), create.error_string());
+                abort();
+            }
+        }
+    }
+
+    /* Here's where we actually search for the message. */
+    query select(_db, "SELECT * from %s where folder='%s' AND uid='%u';",
+                 MSG_TBL, folder.c_str(), uid);
+
+    if (select.result_count() > 1) {
+        fprintf(stderr, "UNIQUE not respected on %s.(folder&uid)\n", MSG_TBL);
+        abort();
+    }
+
+    return (select.result_count() == 1);
+}
+
+std::vector<uint32_t> imap_store::uids(const std::string folder)
+{
+    query select(_db, "SELECT (uid) from %s where folder='%s';",
+                 MSG_TBL, folder.c_str());
+
+    std::vector<uint32_t> out;
+
+    for (auto it = select.results(); !it.done(); ++it) {
+        std::string uidstr = (*it).get("uid");
+        uint32_t uid = atol(uidstr.c_str());
+        out.push_back(uid);
+    }
+
     return out;
 }

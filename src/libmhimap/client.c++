@@ -80,6 +80,11 @@ typename mhimap::folder_iter client::folder_iter(void)
 
 typename mhimap::message_iter client::message_iter(const folder f)
 {
+    return mhimap::message_iter(messages(f));
+}
+
+std::vector<message> client::messages(const folder f)
+{
     const std::string folder_name(f.name());
 
     logger l("client::message_iter('%s')", folder_name.c_str());
@@ -122,7 +127,7 @@ typename mhimap::message_iter client::message_iter(const folder f)
         messages.push_back(message(f, uid));
     }
 
-    return mhimap::message_iter(messages);
+    return messages;
 }
 
 void client::send_idle(const std::string folder_name)

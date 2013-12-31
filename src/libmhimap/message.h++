@@ -38,6 +38,12 @@ namespace mhimap {
         const uint32_t _uid;
 
     public:
+        /* Copy constructor... */
+        message(const message &that)
+            : _folder(that._folder), _uid(that._uid)
+            {
+            }
+
         /* Creates a new message given the two options that define it
          * -- essentially a message is just a container for this
          * pair. */

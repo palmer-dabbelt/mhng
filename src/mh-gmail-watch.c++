@@ -26,7 +26,6 @@
 int main(int argc, const char **argv)
 {
     auto o = mh::options::create(argc, argv);
-
     mh::mhdir dir(o);
 
     /* We maintain this connection solely for issueing an IDLE on it,
@@ -55,6 +54,14 @@ int main(int argc, const char **argv)
          * message. */
         mhimap::gmail_client c(GMAIL_USERNAME, GMAIL_PASSWORD);
 
+        /* Here we build up th set of messages that still exist on the
+         * local machine but no longer exist on the server. */
+        std::vector<mhimap::message> client_only;
+
+        /* Here we build up the set of messages that now exist on the
+         * server but haven't yet been fetched to the client. */
+        std::vector<mhimap::message> server_only;
+
         /* Check for new messages in every folder.  This way we'll be
          * sure to fetch all new messages before removing any, which
          * means that nothing should get lost even if things
@@ -75,7 +82,9 @@ int main(int argc, const char **argv)
             imap_store.try_insert_folder((*fit).name(),
                                          (*fit).uidvalidity());
 
-            /* Check to see that UIDVALIDITY hasn't changed. */
+            /* Check to see that UIDVALIDITY hasn't changed -- note
+             * that there's a whole bunch more checks in here, but
+             * they are all in memory and not against the database. */
             if (imap_store.get_uidvalidity(fname) != (*fit).uidvalidity()) {
                 /* FIXME: Do something other than bail here. */
                 fprintf(stderr, "UIDVALIDITY changed for '%s'\n",
@@ -83,13 +92,34 @@ int main(int argc, const char **argv)
                 abort();
             }
 
-            /* Here we just print out the map of messages, I don't
-             * quite have a story set as to how to synchronize them
-             * yet... */
-            fprintf(stderr, "folder to sync: '%s'\n", fname.c_str());
+            /* Contains a [UID -> message] map that lets us easily
+             * look up messages on the IMAP server.  This way we can
+             * determine which messages still exist on the client that
+             * no longer exist on the server. */
+            std::map<uint32_t, const mhimap::message> uidmap;
+
+            /* Walk every message that exists on the server both
+             * building up a quick reference of UIDs on the server,
+             * and a list of messages that exist on the server but not
+             * on our machine. */
             for (auto mit = c.message_iter(*fit); !mit.done(); ++mit) {
-                fprintf(stderr, "  message: '%u'\n", (*mit).uid());
+                /* FIXME: Is this really the best way to insert
+                 * something into a map?  That can't possibly be
+                 * true... */
+                uidmap.insert(
+                    std::pair<uint32_t, const mhimap::message> (
+                        (*mit).uid(), *mit
+                        )
+                    );
+
+                /* If the message doesn't exist on the client then we
+                 * want to add it to the list of messages to fetch. */
+                if (imap_store.has((*fit).name(), (*mit).uid()) == false)
+                    server_only.push_back(*mit);
             }
+
+
+
         }
 
         /* Waits for the server to say anything back to us. */
