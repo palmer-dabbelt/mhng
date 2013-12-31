@@ -31,6 +31,7 @@ namespace mh {
         enum class col_type {
             STRING,
             INTEGER,
+            UNIQ_STRING,
         };
 
         /* Converts a col_type to a constant string. */
@@ -41,6 +42,8 @@ namespace mh {
                 return "STRING";
             case col_type::INTEGER:
                 return "INTEGER";
+            case col_type::UNIQ_STRING:
+                return "UNIQUE STRING";
             }
 
             return NULL;

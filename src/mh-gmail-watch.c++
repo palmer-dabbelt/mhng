@@ -75,6 +75,14 @@ int main(int argc, const char **argv)
             imap_store.try_insert_folder((*fit).name(),
                                          (*fit).uidvalidity());
 
+            /* Check to see that UIDVALIDITY hasn't changed. */
+            if (imap_store.get_uidvalidity(fname) != (*fit).uidvalidity()) {
+                /* FIXME: Do something other than bail here. */
+                fprintf(stderr, "UIDVALIDITY changed for '%s'\n",
+                        (*fit).name().c_str());
+                abort();
+            }
+
             /* Here we just print out the map of messages, I don't
              * quite have a story set as to how to synchronize them
              * yet... */

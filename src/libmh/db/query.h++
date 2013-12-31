@@ -29,6 +29,7 @@ namespace mh {
 }
 
 #include "connection.h++"
+#include "result_iter.h++"
 #include <string>
 #include <sqlite3.h>
 #include <vector>
@@ -77,6 +78,9 @@ namespace mh {
             /* Returns the exact error code suggested by SQLite, in
              * case anyone wants to actually examine it exactly. */
             int error_code(void) const { return _err; }
+
+            /* Produces an iterator that walks the list of results. */
+            result_iter results(void) const { return result_iter(_results); }
 
         protected:
             /* Creates a new query but doesn't actually run the query

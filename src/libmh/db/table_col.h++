@@ -33,9 +33,15 @@ namespace mh {
         public:
             const std::string name;
             const col_type type;
+            const bool unique;
 
-            table_col(const std::string _name, const col_type _type)
-                : name(_name), type(_type)
+            table_col(const std::string _name, col_type _type)
+                : name(_name), type(_type), unique(false)
+                {
+                }
+
+            table_col(const std::string _n, col_type _t, bool _u)
+                : name(_n), type(_t), unique(_u)
                 {
                 }
         };

@@ -30,6 +30,8 @@ using namespace mh::db;
 #define BUFFER_SIZE 1024
 #endif
 
+#define FOLDERS_TBL "IMAP__folders"
+
 imap_store::imap_store(const options_ptr o, db::connection_ptr db)
     : _o(o),
       _db(db)
@@ -42,18 +44,15 @@ bool imap_store::try_insert_folder(const std::string name,
     /* Checks if the correct table exists, if it doesn't then we'll
      * have to create it. */
     {
-        char buffer[BUFFER_SIZE];
-        snprintf(buffer, BUFFER_SIZE, "IMAP__%s", name.c_str());
+        if (_db->table_exists(FOLDERS_TBL) == false) {
+            fprintf(stderr, "Table '%s' doesn't exist\n", FOLDERS_TBL);
 
-        if (_db->table_exists(buffer) == false) {
-            fprintf(stderr, "Table '%s' doesn't exist, creating\n", buffer);
-
-            create_table create(_db, buffer,
-                                table_col("name", col_type::STRING),
-                                table_col("uidvalidity", col_type::INTEGER));
+            create_table create(_db, FOLDERS_TBL,
+                                table_col("name", col_type::STRING, true),
+                                table_col("uidv", col_type::INTEGER));
             
             if (create.successful() == false) {
-                fprintf(stderr, "Error creating table\n");
+                fprintf(stderr, "Error creating table '%s'\n", FOLDERS_TBL);
                 fprintf(stderr, "  %d: '%s'\n",
                         create.error_code(), create.error_string());
                 abort();
@@ -61,9 +60,37 @@ bool imap_store::try_insert_folder(const std::string name,
         }
     }
 
-    uidvalidity++;
-    uidvalidity++;
+    /* Attempts to insert a new pair into the table.  Note that
+     * because the "name" field is specified as unique this WILL fail
+     * whenever a duplicate is specified.  That's correct because we
+     * don't want to overwrite any UIDVALIDITY values in the table,
+     * just store new ones. */
+    query insert(_db, "INSERT into %s (name, uidv) VALUES ('%s', %d);",
+                 FOLDERS_TBL, name.c_str(), uidvalidity);
 
-    abort();
-    return false;
+    return !insert.successful();
+}
+
+uint32_t imap_store::get_uidvalidity(const std::string folder_name)
+{
+    query select(_db, "SELECT * from %s where name='%s';",
+                 FOLDERS_TBL, folder_name.c_str());
+
+    if (select.result_count() > 1) {
+        fprintf(stderr, "UNIQUE not respected on %s.name\n", FOLDERS_TBL);
+        abort();
+    }
+
+    if (select.result_count() == 0) {
+        fprintf(stderr, "No folder named '%s'\n", folder_name.c_str());
+        fprintf(stderr, "Call try_insert_folder() first\n");
+        abort();
+    }
+
+    uint32_t out;
+    for (auto it = select.results(); !it.done(); ++it) {
+        std::string uidvstr = (*it).get("uidv");
+        out = atol(uidvstr.c_str());
+    }
+    return out;
 }

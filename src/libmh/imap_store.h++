@@ -56,7 +56,7 @@ namespace mh {
                                uint32_t uidvalidity);
 
         /* Checks the UIDVALIDITY of a given folder, by name. */
-        uint32_t check_uidvalidity(const std::string folder_name);
+        uint32_t get_uidvalidity(const std::string folder_name);
     };
 }
 

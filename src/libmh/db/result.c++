@@ -30,3 +30,14 @@ result::result(int count, char **data, char **name)
     for (int i = 0; i < count; i++)
         _cols[name[i]] = data[i];
 }
+
+const std::string result::get(const std::string name)
+{
+    auto s = _cols.find(name);
+    if (s == _cols.end()) {
+        abort();
+        return "";
+    }
+
+    return s->second;
+}

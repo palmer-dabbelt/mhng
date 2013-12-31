@@ -35,6 +35,20 @@ namespace mh {
 namespace mh {
     namespace db {
         class result_iter {
+        private:
+            std::vector<result> _results;
+            std::vector<result>::const_iterator _it;
+
+        public:
+            result_iter(const std::vector<result> results)
+                : _results(results),
+                  _it(_results.begin())
+                {
+                }
+
+            bool done(void) const { return _it == _results.end(); }
+            void operator++(void) { _it++; }
+            result operator*(void) { return *_it; }
         };
     }
 }

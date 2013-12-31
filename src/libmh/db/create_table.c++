@@ -35,11 +35,17 @@ create_table::create_table(connection_ptr db, const std::string name,
 {
     char buffer[BUFFER_SIZE];
 
-    snprintf(buffer, BUFFER_SIZE,
-             "CREATE TABLE %s(%s %s, %s %s);", name.c_str(),
-             c0.name.c_str(), to_string(c0.type),
-             c1.name.c_str(), to_string(c1.type)
-        );
+    if (c0.unique && !c1.unique) {
+        snprintf(buffer, BUFFER_SIZE,
+                 "CREATE TABLE %s(%s %s, %s %s, UNIQUE(%s));", name.c_str(),
+                 c0.name.c_str(), to_string(c0.type),
+                 c1.name.c_str(), to_string(c1.type),
+                 c0.name.c_str()
+            );
+    } else {
+        fprintf(stderr, "Fix unique handling\n");
+        abort();
+    }
 
     run(buffer);
 }

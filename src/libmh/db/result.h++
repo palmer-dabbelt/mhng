@@ -37,6 +37,8 @@ namespace mh {
 
         public:
             result(int count, char **data, char **name);
+
+            const std::string get(const std::string name);
         };
     }
 }
