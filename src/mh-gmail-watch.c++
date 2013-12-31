@@ -58,9 +58,11 @@ int main(int argc, const char **argv)
             const std::string fname((*fit).name());
 
             /* Folders that don't already exist in our MH directory
-             * just get ignored silently. */
-            if (dir.folder_exists(fname.c_str()) == false)
+             * just get ignored, but not silently anymore! */
+            if (dir.folder_exists(fname.c_str()) == false) {
+                printf("skipping '%s', not in mhdir\n", fname.c_str());
                 continue;
+            }
 
             /* Here we just print out the map of messages, I don't
              * quite have a story set as to how to synchronize them
@@ -69,7 +71,6 @@ int main(int argc, const char **argv)
             for (auto mit = c.message_iter(*fit); !mit.done(); ++mit) {
                 fprintf(stderr, "  message: '%s'\n", (*mit).c_str());
             }
-
         }
 
         /* Waits for the server to say anything back to us. */
