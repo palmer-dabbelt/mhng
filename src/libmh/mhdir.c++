@@ -69,3 +69,11 @@ imap_store mhdir::get_imap_store(void)
 {
     return imap_store(_o, _db);
 }
+
+temp_file mhdir::get_tmp(void)
+{
+    char buffer[BUFFER_SIZE];
+    snprintf(buffer, BUFFER_SIZE, "%s/tmp", (*_o).mhdir().c_str());
+    return temp_file::open(buffer);
+}
+

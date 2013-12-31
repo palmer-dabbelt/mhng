@@ -56,11 +56,11 @@ int main(int argc, const char **argv)
 
         /* Here we build up th set of messages that still exist on the
          * local machine but no longer exist on the server. */
-        std::vector<mhimap::message> client_only;
+        std::vector<mhimap::message> conly;
 
         /* Here we build up the set of messages that now exist on the
          * server but haven't yet been fetched to the client. */
-        std::vector<mhimap::message> server_only;
+        std::vector<mhimap::message> sonly;
 
         /* Check for new messages in every folder.  This way we'll be
          * sure to fetch all new messages before removing any, which
@@ -115,7 +115,7 @@ int main(int argc, const char **argv)
                 /* If the message doesn't exist on the client then we
                  * want to add it to the list of messages to fetch. */
                 if (imap_store.has((*fit).name(), (*mit).uid()) == false)
-                    server_only.push_back(*mit);
+                    sonly.push_back(*mit);
             }
 
             /* Walk the list of messages that exist on the local
@@ -127,8 +127,17 @@ int main(int argc, const char **argv)
                 for (auto it = uids.begin(); it != uids.end(); ++it) {
                     auto s = uidmap.find(*it);
                     if (s == uidmap.end())
-                        client_only.push_back(mhimap::message(*fit, *it));
+                        conly.push_back(mhimap::message(*fit, *it));
                 }
+            }
+
+            /* Fetches every message from the server down to the local
+             * machine.  I do this first in order to avoid losing any
+             * messages in a move (in other words, duplicate messages
+             * are better than lost messages). */
+            for (auto it = sonly.begin(); it != sonly.end(); ++it) {
+                auto tmp = dir.get_tmp();
+                c.fetch_to_file(*it, tmp.fp());
             }
         }
 

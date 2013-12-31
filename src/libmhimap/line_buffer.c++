@@ -54,7 +54,7 @@ ssize_t line_buffer::recharge_size(void) const
 
     logger l("line_buffer::rechange_size()");
 
-    ssize_t out = count - used;
+    ssize_t out = (count - used) - 1;
     l.printf("==> %ld", out);
     return out;
 }

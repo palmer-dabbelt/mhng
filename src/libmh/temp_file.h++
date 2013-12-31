@@ -19,35 +19,32 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBMH__FOLDER_HXX
-#define LIBMH__FOLDER_HXX
+#ifndef LIBMH__TEMP_FILE_HXX
+#define LIBMH__TEMP_FILE_HXX
 
-namespace mh {
-    class folder;
-}
-
-#include "mhdir.h++"
-#include "options.h++"
-#include "db/connection.h++"
+#include <stdio.h>
 #include <string>
 
 namespace mh {
-    /* Represents a single MH folder. */
-    class folder {
+    /* Holds a temporary file that points somewhere within the MH
+     * directory . */
+    class temp_file {
     private:
-        const std::string _name;
-        const options_ptr _o;
-        db::connection_ptr _db;
+        FILE *_fp;
+        const std::string _path;
 
     public:
-        /* Creates a new folder, given the name of that folder and a
-         * database connection to use in order to query that folder's
-         * contents.  You almost certainly don't want to use this but
-         * instead want to open the folder from an mhdir. */
-        folder(const std::string n, options_ptr o, db::connection_ptr db);
+        /* Creates a new temporary file inside the given folder. */
+        static temp_file open(const std::string folder);
 
-        /* Accessor functions. */
-        const std::string name(void) const { return _name; }
+        ~temp_file(void);
+
+        /* Returns the FILE* cooresponding to this temprary file. */
+        FILE *fp(void) const { return _fp; }
+
+    private:
+        /* Don't use this, it's just to work around const. */
+        temp_file(FILE *fp, const std::string path);
     };
 }
 

@@ -173,6 +173,57 @@ idle_response client::wait_idle(void)
     return idle_response::DATA;
 }
 
+void client::fetch_to_file(const message m, FILE *f)
+{
+    char buffer[BUFFER_SIZE];
+
+    command select(this, "SELECT \"%s\"", m.folder_name().c_str());
+    while (gets(buffer, BUFFER_SIZE) > 0) {
+        if (select.is_end(buffer))
+            break;
+    }
+
+    command fetch(this, "UID FETCH %u RFC822", m.uid());
+    if (gets(buffer, BUFFER_SIZE) <= 0) {
+        fprintf(stderr, "Some sort of disconnect on FETCH\n");
+        abort();
+    }
+    uint32_t seq, uid;
+    ssize_t size;
+    int r = sscanf(buffer, "* %u FETCH (UID %u RFC822 {%ld}",
+                   &seq, &uid, &size);
+    if (r != 3) {
+        fprintf(stderr, "Unable to parse RFC882 FETCH header\n");
+        fprintf(stderr, "%s\n", buffer);
+        abort();
+    }
+
+    while (size > 0) {
+        ssize_t n_read = gets(buffer, BUFFER_SIZE);
+
+        if (n_read <= 0) {
+            fprintf(stderr, "Invalid read\n");
+            abort();
+        }
+
+        fprintf(f, "%s\n", buffer);
+
+        /* Remember, gets() returns the size BEFORE stripping
+         * newlines. */
+        size -= n_read;
+    }
+
+    while (gets(buffer, BUFFER_SIZE) > 0) {
+        /* Apparently there's a ')' at the end, after the
+         * message... */
+        if (strcmp(buffer, ")") == 0)
+            continue;
+
+        if (fetch.is_end(buffer))
+            break;
+    }
+}
+
 int client::eat_hello(void)
 {
     logger("client::eat_hello()");

@@ -95,6 +95,9 @@ namespace mhimap {
          * IMAP. */
         virtual idle_response wait_idle(void);
 
+        /* Fetches a message, storing it in the given file. */
+        virtual void fetch_to_file(const message m, FILE *f);
+
     protected:
         /* A pair of functions that do raw readinig and writing
          * from/to the IMAP socket.  These need to be implemented by

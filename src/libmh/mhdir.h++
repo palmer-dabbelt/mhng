@@ -29,6 +29,7 @@ namespace mh {
 #include "folder.h++"
 #include "imap_store.h++"
 #include "options.h++"
+#include "temp_file.h++"
 #include "db/connection.h++"
 #include <string>
 
@@ -58,6 +59,9 @@ namespace mh {
          * queries to some IMAP-related tables.  This should probably
          * only be used by the code that  */
         imap_store get_imap_store(void);
+
+        /* Opens a temporary file somewhere inside the MH directory. */
+        temp_file get_tmp(void);
     };
 }
 

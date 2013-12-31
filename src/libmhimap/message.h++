@@ -51,5 +51,6 @@ namespace mhimap {
 
         /* Accessor functions. */
         uint32_t uid(void) const { return _uid; }
+        const std::string folder_name(void) const { return _folder.name(); }
     };
 }
