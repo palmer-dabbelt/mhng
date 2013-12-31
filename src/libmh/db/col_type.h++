@@ -19,23 +19,32 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBMH__DB__RESULT_ITER_HXX
-#define LIBMH__DB__RESULT_ITER_HXX
+#ifndef LIBMH__DB__COL_TYPE_HXX
+#define LIBMH__DB__COL_TYPE_HXX
+
+#include <stdlib.h>
 
 namespace mh {
     namespace db {
-        class result_iter;
-    }
-}
-
-#include "result.h++"
-#include <string>
-#include <sqlite3.h>
-
-namespace mh {
-    namespace db {
-        class result_iter {
+        /* This contains a list of the types that a column can
+         * contain. */
+        enum class col_type {
+            STRING,
+            INTEGER,
         };
+
+        /* Converts a col_type to a constant string. */
+        static inline const char *to_string(col_type type)
+        {
+            switch (type) {
+            case col_type::STRING:
+                return "STRING";
+            case col_type::INTEGER:
+                return "INTEGER";
+            }
+
+            return NULL;
+        }
     }
 }
 

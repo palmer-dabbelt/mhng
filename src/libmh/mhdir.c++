@@ -64,3 +64,8 @@ folder mhdir::open_folder(const std::string folder_name)
 
     return folder(folder_name, _o, _db);
 }
+
+imap_store mhdir::get_imap_store(void)
+{
+    return imap_store(_o, _db);
+}

@@ -45,8 +45,6 @@ folder::folder(const std::string name, client *c)
 
         if (sscanf(buffer, "* OK [UIDVALIDITY %u] ", &_uidvalidity) == 1)
             uidvalidity_valid = true;
-
-        fprintf(stderr, "buffer: '%s'\n", buffer);
     }
 
     if (uidvalidity_valid == false) {

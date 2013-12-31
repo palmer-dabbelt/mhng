@@ -19,22 +19,25 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBMH__DB__RESULT_ITER_HXX
-#define LIBMH__DB__RESULT_ITER_HXX
+#ifndef LIBMH__DB__TABLE_COL_HXX
+#define LIBMH__DB__TABLE_COL_HXX
 
-namespace mh {
-    namespace db {
-        class result_iter;
-    }
-}
-
-#include "result.h++"
+#include "col_type.h++"
 #include <string>
-#include <sqlite3.h>
 
 namespace mh {
     namespace db {
-        class result_iter {
+        /* This is really just a pair that represent the type that a
+         * table's column can take on. */
+        class table_col {
+        public:
+            const std::string name;
+            const col_type type;
+
+            table_col(const std::string _name, const col_type _type)
+                : name(_name), type(_type)
+                {
+                }
         };
     }
 }

@@ -19,24 +19,27 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBMH__DB__RESULT_ITER_HXX
-#define LIBMH__DB__RESULT_ITER_HXX
+#include "create_table.h++"
+#include <stdlib.h>
 
-namespace mh {
-    namespace db {
-        class result_iter;
-    }
-}
+using namespace mh;
+using namespace mh::db;
 
-#include "result.h++"
-#include <string>
-#include <sqlite3.h>
-
-namespace mh {
-    namespace db {
-        class result_iter {
-        };
-    }
-}
-
+#ifndef BUFFER_SIZE
+#define BUFFER_SIZE 1024
 #endif
+
+create_table::create_table(connection_ptr db, const std::string name,
+                           table_col c0, table_col c1)
+    : query(db)
+{
+    char buffer[BUFFER_SIZE];
+
+    snprintf(buffer, BUFFER_SIZE,
+             "CREATE TABLE %s(%s %s, %s %s);", name.c_str(),
+             c0.name.c_str(), to_string(c0.type),
+             c1.name.c_str(), to_string(c1.type)
+        );
+
+    run(buffer);
+}

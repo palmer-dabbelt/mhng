@@ -27,11 +27,18 @@ using namespace mh::db;
 
 connection_ptr connection::create(const std::string path)
 {
-    return connection_ptr(new connection(path));
+    connection_ptr c(new connection(path));
+
+    c->self_ref = c;
+    return c;
 }
 
 connection::~connection(void)
 {
+#ifdef SQLITE_DEBUG
+    fprintf(stderr, "Closing SQLite Connection: %p\n", (void *)this);
+#endif
+
     /* sqlite3_close(NULL) is a no-op, according to the manual. */
     int err = sqlite3_close(_s);
     if (err != SQLITE_OK) {
@@ -39,6 +46,20 @@ connection::~connection(void)
         fprintf(stderr, "  error %d: '%s'\n", err, sqlite3_errstr(err));
         abort();
     }
+
+    _s = NULL;
+}
+
+bool connection::table_exists(const std::string table_name)
+{
+    static const char *query_format = 
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='%s';";
+    query check(connection_ptr(self_ref), query_format, table_name.c_str());
+
+    if (check.result_count() == 0)
+        return false;
+    else
+        return true;
 }
 
 connection::connection(const std::string path)

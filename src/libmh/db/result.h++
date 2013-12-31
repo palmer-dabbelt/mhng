@@ -19,22 +19,24 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBMH__DB__RESULT_ITER_HXX
-#define LIBMH__DB__RESULT_ITER_HXX
+#ifndef LIBMH__DB__RESULT_HXX
+#define LIBMH__DB__RESULT_HXX
 
-namespace mh {
-    namespace db {
-        class result_iter;
-    }
-}
-
-#include "result.h++"
 #include <string>
-#include <sqlite3.h>
+#include <map>
 
 namespace mh {
     namespace db {
-        class result_iter {
+        /* Holds a single result that came back from running a SQL
+         * query. */
+        class result {
+        private:
+            /* FIXME: These should probbaly be const, but once again
+             * it doesn't appear to want to work for me... */
+            std::map<std::string, std::string> _cols;
+
+        public:
+            result(int count, char **data, char **name);
         };
     }
 }

@@ -19,22 +19,30 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBMH__DB__RESULT_ITER_HXX
-#define LIBMH__DB__RESULT_ITER_HXX
+#ifndef LIBMH__DB__RESULT_LIST_HXX
+#define LIBMH__DB__RESULT_LIST_HXX
 
 namespace mh {
     namespace db {
-        class result_iter;
+        class result_list;
     }
 }
 
 #include "result.h++"
 #include <string>
-#include <sqlite3.h>
+#include <vector>
 
 namespace mh {
     namespace db {
-        class result_iter {
+        /* Holds the list of results returned by a query along with
+         * the return code from that query. */
+        class result_list {
+        private:
+            std::vector<result> _results;
+            int return_code;
+
+        public:
+            result_list(int return_code, std::vector<result> results);
         };
     }
 }

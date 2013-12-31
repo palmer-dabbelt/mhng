@@ -33,6 +33,11 @@ int main(int argc, const char **argv)
      * as otherwise IMAP has race conditions. */
     mhimap::gmail_client idle_c(GMAIL_USERNAME, GMAIL_PASSWORD);
 
+    /* IMAP synchronization requires a special table to store the map
+     * of of known UIDs for each folder along with their mapping to MH
+     * UIDs. */
+    mh::imap_store imap_store = dir.get_imap_store();
+
     /* Keep polling for new messages until we end up disconnected from
      * the server, at which point we just die. */
     while (idle_c.is_connected() == true) {
@@ -63,6 +68,12 @@ int main(int argc, const char **argv)
                 printf("skipping '%s', not in mhdir\n", fname.c_str());
                 continue;
             }
+
+            /* Checks to see if this is a new folder, which means that
+             * we've never seen anything about it before and we need
+             * to update the cache. */
+            imap_store.try_insert_folder((*fit).name(),
+                                         (*fit).uidvalidity());
 
             /* Here we just print out the map of messages, I don't
              * quite have a story set as to how to synchronize them

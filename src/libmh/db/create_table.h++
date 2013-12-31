@@ -19,22 +19,20 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBMH__DB__RESULT_ITER_HXX
-#define LIBMH__DB__RESULT_ITER_HXX
+#ifndef LIBMH__DB__CREATE_TABLE_HXX
+#define LIBMH__DB__CREATE_TABLE_HXX
+
+#include "col_type.h++"
+#include "table_col.h++"
+#include "query.h++"
 
 namespace mh {
     namespace db {
-        class result_iter;
-    }
-}
-
-#include "result.h++"
-#include <string>
-#include <sqlite3.h>
-
-namespace mh {
-    namespace db {
-        class result_iter {
+        /* This handles a CREATE TABLE request from a user. */
+        class create_table: public query {
+        public:
+            create_table(connection_ptr db, const std::string name,
+                         table_col c0, table_col c1);
         };
     }
 }

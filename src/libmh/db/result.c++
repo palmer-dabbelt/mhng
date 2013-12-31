@@ -19,24 +19,14 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBMH__DB__RESULT_ITER_HXX
-#define LIBMH__DB__RESULT_ITER_HXX
-
-namespace mh {
-    namespace db {
-        class result_iter;
-    }
-}
-
 #include "result.h++"
-#include <string>
-#include <sqlite3.h>
 
-namespace mh {
-    namespace db {
-        class result_iter {
-        };
-    }
+using namespace mh;
+using namespace mh::db;
+
+result::result(int count, char **data, char **name)
+    : _cols()
+{
+    for (int i = 0; i < count; i++)
+        _cols[name[i]] = data[i];
 }
-
-#endif

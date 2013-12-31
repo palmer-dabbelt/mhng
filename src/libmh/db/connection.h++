@@ -22,38 +22,50 @@
 #ifndef LIBMH__DB__CONNECTION_HXX
 #define LIBMH__DB__CONNECTION_HXX
 
+#include <memory>
+
 namespace mh {
     namespace db {
         class connection;
-    }
-}
+        class query;
 
-#include "result_iter.h++"
-#include "query.h++"
-#include <memory>
-#include <string>
-#include <sqlite3.h>
-
-namespace mh {
-    namespace db {
         /* This is almost certainly how you want to connect to a
          * database, by accessing it through a shared pointer so we
          * don't end up opening two connections to the same
          * database. */
         typedef std::shared_ptr<connection> connection_ptr;
+    }
+}
 
+
+#include "result_list.h++"
+#include "query.h++"
+#include <memory>
+#include <string>
+#include <sqlite3.h>
+#include <vector>
+
+namespace mh {
+    namespace db {
         /* Stores a single connection to the database that's used to
          * store all small bits of information.  You probably don't
          * want to open more than a single one of these to a single
          * database inside a single process, which is what the shared
          * pointer is for. */
         class connection {
+        public:
+            friend class query;
+
         private:
             /* The SQLite3 pointer. */
             struct sqlite3 *_s;
 
             /* The number of references that remain to this */
             int references;
+
+            /* Here we have a weak pointer to ourself, used to pass a
+             * shared pointer to some subclasses. */
+            std::weak_ptr<connection> self_ref;
 
         public:
             /* Calls the constructor below, wrapping it in a shared
@@ -64,9 +76,9 @@ namespace mh {
              * SQLite state. */
             ~connection(void);
 
-            /* Submits a query to the database over this connection,
-             * returning an iterator that lists the results. */
-            result_iter run(const query &q);
+            /* Returns TRUE if the given table exists, and FALSE
+             * otherwise. */
+            bool table_exists(const std::string table_name);
 
         private:
             /* Opens a new connection to a SQLite database, given the

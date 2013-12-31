@@ -27,6 +27,7 @@ namespace mh {
 }
 
 #include "folder.h++"
+#include "imap_store.h++"
 #include "options.h++"
 #include "db/connection.h++"
 #include <string>
@@ -47,9 +48,16 @@ namespace mh {
 
         /* Opens a folder by name.  There's also a function to check
          * if the given folder exists, which you should call to make
-         * sure the requested folder exists. */
+         * sure the requested folder exists before attempting to open
+         * it. */
         bool folder_exists(const std::string folder_name);
         folder open_folder(const std::string folder_name);
+
+        /* Obtains an IMAP store, which is kind of like a gated
+         * connection to the database that allows particular sorts of
+         * queries to some IMAP-related tables.  This should probably
+         * only be used by the code that  */
+        imap_store get_imap_store(void);
     };
 }
 
