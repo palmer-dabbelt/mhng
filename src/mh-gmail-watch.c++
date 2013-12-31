@@ -38,7 +38,8 @@ int main(int argc, const char **argv)
     while (idle_c.is_connected() == true) {
         /* This needs to come before we start polling for messages,
          * see the race condition below. */
-        /* FIXME: We should probably let the user select which*/
+        /* FIXME: We should probably let the user select which mailbox
+         * to IDLE on. */
         idle_c.send_idle("inbox");
 
         /* Create a new connection.  This deals with actually
@@ -54,15 +55,17 @@ int main(int argc, const char **argv)
          * means that nothing should get lost even if things
          * disconnect in the middle. */
         for (auto fit = c.folder_iter(); !fit.done(); ++fit) {
+            const std::string fname((*fit).name());
+
             /* Folders that don't already exist in our MH directory
              * just get ignored silently. */
-            if (dir.folder_exists(*fit) == false)
+            if (dir.folder_exists(fname.c_str()) == false)
                 continue;
 
             /* Here we just print out the map of messages, I don't
              * quite have a story set as to how to synchronize them
              * yet... */
-            fprintf(stderr, "folder to sync: '%s'\n", (*fit).c_str());
+            fprintf(stderr, "folder to sync: '%s'\n", fname.c_str());
             for (auto mit = c.message_iter(*fit); !mit.done(); ++mit) {
                 fprintf(stderr, "  message: '%s'\n", (*mit).c_str());
             }

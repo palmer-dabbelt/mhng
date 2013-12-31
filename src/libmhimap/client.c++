@@ -36,11 +36,11 @@ client::client(void)
 {
 }
 
-string_iter client::folder_iter(void)
+typename mhimap::folder_iter client::folder_iter(void)
 {
     logger l("client::folder_iter()");
 
-    std::vector<std::string> folders;
+    std::vector<folder> folders;
 
     l.printf("list(...)");
     command list(this, "LIST / *");
@@ -55,14 +55,18 @@ string_iter client::folder_iter(void)
             continue;
         }
 
-        folders.push_back(list.list_get_folder(buffer));
+        std::string folder_name(list.list_get_folder(buffer));
+        folder f(folder_name);
+        folders.push_back(f);
     }
 
-    return string_iter(folders);
+    return mhimap::folder_iter(folders);
 }
 
-string_iter client::message_iter(const std::string folder_name)
+string_iter client::message_iter(const folder f)
 {
+    const std::string folder_name(f.name());
+
     logger l("client::message_iter('%s')", folder_name.c_str());
     char buffer[BUFFER_SIZE];
 

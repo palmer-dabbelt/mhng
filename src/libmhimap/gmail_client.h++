@@ -54,7 +54,7 @@ namespace mhimap {
         /* This overrides the default IMAP folder listing with one
          * that closely matches GMail's hard-coded folder expectations
          * with MH's hard-coded folder expectations. */
-        string_iter folder_iter(void);
+        typename mhimap::folder_iter folder_iter(void);
 
         /* Again, anything that has to do with folders needs to be
          * overridden when it comes to GMail. */

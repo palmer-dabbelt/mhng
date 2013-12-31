@@ -29,6 +29,7 @@ namespace mhimap {
 }
 
 #include "command.h++"
+#include "folder_iter.h++"
 #include "idle_response.h++"
 #include "line_buffer.h++"
 #include "string_iter.h++"
@@ -67,11 +68,11 @@ namespace mhimap {
          * this IMAP account.  Note that this probably isn't very
          * useful because IMAP has some names that differ from what MH
          * expects. */
-        virtual string_iter folder_iter(void);
+        virtual typename mhimap::folder_iter folder_iter(void);
 
         /* Returns an iterator that loops through all the messages in
          * the given folder. */
-        string_iter message_iter(const std::string folder_name);
+        string_iter message_iter(const folder f);
 
         /* Returns TRUE when */
         virtual bool is_connected(void) const = 0;

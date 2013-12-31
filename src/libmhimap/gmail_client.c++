@@ -64,18 +64,20 @@ gmail_client::gmail_client(const std::string username,
     add_folder_map("trash", "[Gmail]/Trash");
 }
 
-string_iter gmail_client::folder_iter(void)
+typename mhimap::folder_iter gmail_client::folder_iter(void)
 {
-    std::vector<std::string> folders;
+    std::vector<folder> folders;
 
     for (auto it = ssl_client::folder_iter(); !it.done(); ++it) {
-        if (_g2m.find(*it) == _g2m.end())
+        std::string folder_name = (*it).name();
+
+        if (_g2m.find(folder_name) == _g2m.end())
             continue;
 
-        folders.push_back(_g2m.find(*it)->second);
+        folders.push_back(folder(_g2m.find(folder_name)->second));
     }
 
-    return string_iter(folders);
+    return mhimap::folder_iter(folders);
 }
 
 void gmail_client::send_idle(const std::string fn)
