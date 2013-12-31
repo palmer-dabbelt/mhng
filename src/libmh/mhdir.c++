@@ -42,7 +42,7 @@ mhdir::mhdir(const options_ptr o)
 bool mhdir::folder_exists(const std::string folder_name)
 {
     char buffer[BUFFER_SIZE];
-    snprintf(buffer, BUFFER_SIZE, "%s/%s",
+    snprintf(buffer, BUFFER_SIZE, "%s/mail/%s",
              (*_o).mhdir().c_str(), folder_name.c_str());
 
     struct stat sbuf;
