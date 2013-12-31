@@ -44,6 +44,7 @@ namespace mhimap {
         /* Command needs access to read/write. */
         friend class command;
         friend class done_command;
+        friend class folder;
 
     private:
         /* The current command sequence number.  This is simply

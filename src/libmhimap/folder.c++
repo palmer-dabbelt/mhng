@@ -19,12 +19,51 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "command.h++"
 #include "folder.h++"
+#include "logger.h++"
 
 using namespace mhimap;
 
-folder::folder(const std::string name)
+#ifndef BUFFER_SIZE
+#define BUFFER_SIZE 1024
+#endif
+
+folder::folder(const std::string name, client *c)
     : _name(name)
 {
+    char buffer[BUFFER_SIZE];
+    bool uidvalidity_valid = false;
+
+    logger l("folder::folder('%s', ...)", name.c_str());
+
+    command select(c, "SELECT \"%s\"", name.c_str());
+
+    while (c->gets(buffer, BUFFER_SIZE) > 0) {
+        if (select.is_end(buffer))
+            break;
+
+        if (sscanf(buffer, "* OK [UIDVALIDITY %u] ", &_uidvalidity) == 1)
+            uidvalidity_valid = true;
+
+        fprintf(stderr, "buffer: '%s'\n", buffer);
+    }
+
+    if (uidvalidity_valid == false) {
+        fprintf(stderr, "No UIDVALIDITY response obtained\n");
+        abort();
+    }
 }
 
+folder folder::rename(const std::string new_name) const
+{
+    return folder(new_name,
+                  _uidvalidity);
+}
+
+folder::folder(const std::string name,
+               uint32_t uidvalidity)
+    : _name(name),
+      _uidvalidity(uidvalidity)
+{
+}

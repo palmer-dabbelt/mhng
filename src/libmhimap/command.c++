@@ -141,6 +141,36 @@ char *command::list_get_folder(char *line)
     return line;
 }
 
+bool command::list_is_noselect(const char *line)
+{
+    if (!is_list(line))
+        return false;
+
+    line += strlen("* LIST");
+
+    while (*line != '(' && *line != '\0')
+        line++;
+    if (*line == '\0')
+        abort();
+    line++;
+
+    while (*line != ')' && *line != '\0') {
+        while (*line == ' ')
+            line++;
+
+        if (*line == ')' || *line == '\0')
+            return false;
+
+        if (strncmp(line, "\\Noselect", strlen("\\Noselect")) == 0)
+            return true;
+
+        while (*line != ' ' && *line != '\0')
+            line++;
+    }
+
+    return false;
+}
+
 command::command(const std::string buffer, uint32_t seq, client *cl)
     : c(cl),
       sequence(seq)

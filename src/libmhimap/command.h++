@@ -70,6 +70,11 @@ namespace mhimap {
          * free. */
         char *list_get_folder(char *line);
 
+        /* Returns TRUE if this is a LIST response that contains the
+         * "\Noselect" flag, which means we can't SELECT this
+         * mailbox. */
+        bool list_is_noselect(const char *line);
+
     protected:
         /* This is a special constructor for use by commands that
          * don't quite follow the regular syntax.  Note that in this

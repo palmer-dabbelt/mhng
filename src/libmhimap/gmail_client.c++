@@ -74,7 +74,7 @@ typename mhimap::folder_iter gmail_client::folder_iter(void)
         if (_g2m.find(folder_name) == _g2m.end())
             continue;
 
-        folders.push_back(folder(_g2m.find(folder_name)->second));
+        folders.push_back((*it).rename(_g2m.find(folder_name)->second));
     }
 
     return mhimap::folder_iter(folders);

@@ -40,8 +40,11 @@ typename mhimap::folder_iter client::folder_iter(void)
 {
     logger l("client::folder_iter()");
 
-    std::vector<folder> folders;
+    /* Go out to the server and obtain a list of every folder. */
+    std::vector<std::string> folder_names;
 
+    /* FIXME: The spec says you're not supposed to iterate though
+     * mailboxes this way, but I'm lazy... :) */
     l.printf("list(...)");
     command list(this, "LIST / *");
 
@@ -55,10 +58,22 @@ typename mhimap::folder_iter client::folder_iter(void)
             continue;
         }
 
-        std::string folder_name(list.list_get_folder(buffer));
-        folder f(folder_name);
-        folders.push_back(f);
+        /* Check if this is a "Noselect" mailbox, which as far as I
+         * can tell means it's just an empty folder?  Regardless, I
+         * just skip these because I can't SELECT them. */
+        if (list.list_is_noselect(buffer))
+            continue;
+
+        folder_names.push_back(list.list_get_folder(buffer));
     }
+
+    /* Convert each folder name into a proper folder class.  Note that
+     * we have to do this in two steps because creating a folder will
+     * send a SELECT, which we can't send during the LIST above. */
+    std::vector<folder> folders;
+
+    for (auto it = folder_names.begin(); it != folder_names.end(); it++)
+        folders.push_back(folder(*it, this));
 
     return mhimap::folder_iter(folders);
 }
@@ -70,9 +85,18 @@ typename mhimap::message_iter client::message_iter(const folder f)
     logger l("client::message_iter('%s')", folder_name.c_str());
     char buffer[BUFFER_SIZE];
 
-    /* FIXME: I at least need to look at UIDVALIDITY here...  I think
-     * I should probably not be returning folders and messages as
-     * strings but should instead have wrapper classes. */
+    /* We need to create a new folder here because I need to have the
+     * passed folder SELECTed before I can FETCH in it, but IMAP only
+     * gaurntees that UIDVALIDITY is constant until we DESELECT --
+     * thus I have to poll UIDVALIDITY again to make sure it hasn't
+     * changed. */
+    folder ff(f.name(), this);
+    if (ff.uidvalidity() != f.uidvalidity()) {
+        fprintf(stderr, "UIDVALIDITY changed!\n");
+        abort();
+    }
+
+    /* SELECTs the server. */
     command select(this, "SELECT %s", folder_name.c_str());
     while (gets(buffer, BUFFER_SIZE) > 0) {
         if (select.is_end(buffer))
