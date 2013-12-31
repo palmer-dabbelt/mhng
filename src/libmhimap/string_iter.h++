@@ -22,6 +22,7 @@
 #ifndef LIBMHIMAP__STRING_ITER_HXX
 #define LIBMHIMAP__STRING_ITER_HXX
 
+#include "vector_iter.h++"
 #include <string>
 #include <vector>
 
@@ -31,28 +32,12 @@ namespace mhimap {
      * gets thanks to IMAP.  Note that this is a const_iterator
      * because we can'tt change anything about what's on the IMAP
      * server this way. */
-    class string_iter {
-    private:
-        /* Quite simply a list of the items that we're going to
-         * iterate through. */
-        const std::vector<std::string> _items;
-
-        /* This is the iterator that we'll be mirroring. */
-        std::vector<std::string>::const_iterator _it;
-        
+    class string_iter : public vector_iter<std::string> {
     public:
-        /* Creates a new string iterator, given the list of strings
-         * that it will be iterating over.  Note that this is
-         * essentially the simplest version, but it requires a whole
-         * bunch of copying so it may not be ideal -- it's probably OK
-         * for now, though, as all we're really doing is iterating
-         * through folder names. */
-        string_iter(const std::vector<std::string> items);
-
-        /* These just make this look like an iterator. */
-        const std::string operator*(void) const { return *_it; }
-        void operator++(void) { ++_it; }
-        bool done(void) const { return _it == _items.end(); }
+        string_iter(const std::vector<std::string> items)
+            : vector_iter<std::string>(items)
+            {
+            }
     };
 }
 
