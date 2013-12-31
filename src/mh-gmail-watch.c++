@@ -69,7 +69,7 @@ int main(int argc, const char **argv)
              * yet... */
             fprintf(stderr, "folder to sync: '%s'\n", fname.c_str());
             for (auto mit = c.message_iter(*fit); !mit.done(); ++mit) {
-                fprintf(stderr, "  message: '%s'\n", (*mit).c_str());
+                fprintf(stderr, "  message: '%u'\n", (*mit).uid());
             }
         }
 

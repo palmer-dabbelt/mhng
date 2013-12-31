@@ -63,7 +63,7 @@ typename mhimap::folder_iter client::folder_iter(void)
     return mhimap::folder_iter(folders);
 }
 
-string_iter client::message_iter(const folder f)
+typename mhimap::message_iter client::message_iter(const folder f)
 {
     const std::string folder_name(f.name());
 
@@ -81,17 +81,24 @@ string_iter client::message_iter(const folder f)
 
     /* This just selects every message in the inbox and passes that
      * exact string along to the iterator we're passing out. */
-    std::vector<std::string> messages;
+    std::vector<message> messages;
 
     command fetch(this, "UID FETCH 1:* (UID)");
     while (gets(buffer, BUFFER_SIZE) > 0) {
         if (fetch.is_end(buffer))
             break;
 
-        messages.push_back(buffer);
+        int seq;
+        uint32_t uid;
+        if (sscanf(buffer, "* %d FETCH (UID %u)", &seq, &uid) != 2) {
+            fprintf(stderr, "Unable to parse message '%s'\n", buffer);
+            abort();
+        }
+
+        messages.push_back(message(f, uid));
     }
 
-    return string_iter(messages);
+    return mhimap::message_iter(messages);
 }
 
 void client::send_idle(const std::string folder_name)

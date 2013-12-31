@@ -32,6 +32,7 @@ namespace mhimap {
 #include "folder_iter.h++"
 #include "idle_response.h++"
 #include "line_buffer.h++"
+#include "message_iter.h++"
 #include "string_iter.h++"
 #include <string>
 
@@ -72,7 +73,7 @@ namespace mhimap {
 
         /* Returns an iterator that loops through all the messages in
          * the given folder. */
-        string_iter message_iter(const folder f);
+        virtual typename mhimap::message_iter message_iter(const folder f);
 
         /* Returns TRUE when */
         virtual bool is_connected(void) const = 0;
