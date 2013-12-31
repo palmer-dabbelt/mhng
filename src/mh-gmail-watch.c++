@@ -118,8 +118,18 @@ int main(int argc, const char **argv)
                     server_only.push_back(*mit);
             }
 
+            /* Walk the list of messages that exist on the local
+             * machine, trying to figure out which are no longer on
+             * the server. */
+            {
+                auto uids = imap_store.uids((*fit).name());
 
-
+                for (auto it = uids.begin(); it != uids.end(); ++it) {
+                    auto s = uidmap.find(*it);
+                    if (s == uidmap.end())
+                        client_only.push_back(mhimap::message(*fit, *it));
+                }
+            }
         }
 
         /* Waits for the server to say anything back to us. */
