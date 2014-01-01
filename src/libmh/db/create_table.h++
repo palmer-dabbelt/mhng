@@ -33,6 +33,12 @@ namespace mh {
         public:
             create_table(connection_ptr db, const std::string name,
                          table_col c0, table_col c1);
+
+            create_table(connection_ptr db, const std::string name,
+                         table_col c0, table_col c1, table_col c2,
+                         table_col c3, table_col c4, table_col c5,
+                         table_col c6, table_col c7);
+
         };
     }
 }

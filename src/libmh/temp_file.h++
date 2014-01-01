@@ -22,6 +22,11 @@
 #ifndef LIBMH__TEMP_FILE_HXX
 #define LIBMH__TEMP_FILE_HXX
 
+namespace mh {
+    class temp_file;
+    class message;
+}
+
 #include <stdio.h>
 #include <string>
 
@@ -29,6 +34,9 @@ namespace mh {
     /* Holds a temporary file that points somewhere within the MH
      * directory . */
     class temp_file {
+    public:
+        friend class message;
+
     private:
         FILE *_fp;
         const std::string _path;
@@ -39,8 +47,21 @@ namespace mh {
 
         ~temp_file(void);
 
-        /* Returns the FILE* cooresponding to this temprary file. */
+        /* Returns the FILE* cooresponding to this temprary file.
+         * Note you have to be a bit careful here because it's a raw
+         * pointer that can be invalidated by the sync() method. */
         FILE *fp(void) const { return _fp; }
+
+        /* fclose()s and fsync()s this temporary file, setting _fp to
+         * NULL.  At this point essentially the one thing that remains
+         * is the filename. */
+        void finish(void);
+
+    protected:
+        /* You really shouldn't be accessing the filename of this
+         * exactly, but should instead be passing this to a message in
+         * order to insert it into the database. */
+        const std::string path(void) const { return _path; }
 
     private:
         /* Don't use this, it's just to work around const. */

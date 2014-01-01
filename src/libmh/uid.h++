@@ -45,7 +45,18 @@ namespace mh {
     public:
         /* Creates a new UID by parsing a string, such as one that may
          * have come from a database. */
-        uid(const std::string id);
+        uid(const std::string id)
+            : _id(atol(id.c_str()))
+            {
+            }
+
+        /* Returns this UID as a string. */
+        const std::string string(void) const
+            {
+                char buffer[64];
+                snprintf(buffer, 64, "%lu", _id);
+                return buffer;
+            }
     };
 }
 

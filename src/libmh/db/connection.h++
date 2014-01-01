@@ -60,12 +60,20 @@ namespace mh {
             /* The SQLite3 pointer. */
             struct sqlite3 *_s;
 
+            /* FIXME: Is this used now that we have shared pointers? */
             /* The number of references that remain to this */
             int references;
 
             /* Here we have a weak pointer to ourself, used to pass a
              * shared pointer to some subclasses. */
             std::weak_ptr<connection> self_ref;
+
+            /* The transaction counter, which counts the number of
+             * tras_up()s that have been done.  When this is
+             * trans_up()ed and is 0 then a transaction is started,
+             * and when it is trans_down()ed to 0 then the transaction
+             * will be terminated. */
+            int trans_cnt;
 
         public:
             /* Calls the constructor below, wrapping it in a shared
@@ -79,6 +87,19 @@ namespace mh {
             /* Returns TRUE if the given table exists, and FALSE
              * otherwise. */
             bool table_exists(const std::string table_name);
+
+            /* Transaction support, see the comment in mhdir for more
+             * information.  */
+            void trans_up(void);
+            void trans_down(void);
+
+            /* Returns the _ROWID_ of the last row that was inserted
+             * into this database.  Note that this implicitly
+             * references the last TABLE that was inserted to, but
+             * it's probably not an issue because you need to put this
+             * in a transaction either way to be even remotely
+             * useful. */
+            uint64_t last_insert_rowid(void);
 
         private:
             /* Opens a new connection to a SQLite database, given the

@@ -28,6 +28,7 @@ namespace mh {
 
 #include "folder.h++"
 #include "imap_store.h++"
+#include "message.h++"
 #include "options.h++"
 #include "temp_file.h++"
 #include "db/connection.h++"
@@ -62,6 +63,20 @@ namespace mh {
 
         /* Opens a temporary file somewhere inside the MH directory. */
         temp_file get_tmp(void);
+
+        /* This is how we handle transaction support.  The idea is
+         * that we want to have higher layers of the stack be able to
+         * specify that two operations need to either both pass or
+         * both fail -- for example, we need to have IMAP updates
+         * joined together with MH updates. */
+        void trans_up(void);
+        void trans_down(void);
+
+        /* Inserts a message into the mhdir at the given folder.  Note
+         * that this is a somewhat expensive operation, as it requires
+         * computing a whole bunch of metadata about the message and
+         * does a few fsync()s. */
+        message insert(const std::string folder_name, temp_file &file);
     };
 }
 

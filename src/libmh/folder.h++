@@ -48,6 +48,9 @@ namespace mh {
 
         /* Accessor functions. */
         const std::string name(void) const { return _name; }
+
+        /* Prints the full path to this folder. */
+        const std::string full_path(void) const;
     };
 }
 

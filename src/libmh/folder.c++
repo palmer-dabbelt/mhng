@@ -23,9 +23,21 @@
 
 using namespace mh;
 
+#ifndef BUFFER_SIZE
+#define BUFFER_SIZE 1024
+#endif
+
 folder::folder(const std::string n, options_ptr o, db::connection_ptr db)
     : _name(n),
       _o(o),
       _db(db)
 {
+}
+
+const std::string folder::full_path(void) const
+{
+    char buffer[BUFFER_SIZE];
+    snprintf(buffer, BUFFER_SIZE, "%s/mail/%s",
+             _o->mhdir().c_str(), _name.c_str());
+    return buffer;
 }

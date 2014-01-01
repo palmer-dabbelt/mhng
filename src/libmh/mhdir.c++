@@ -77,3 +77,17 @@ temp_file mhdir::get_tmp(void)
     return temp_file::open(buffer);
 }
 
+void mhdir::trans_up(void)
+{
+    _db->trans_up();
+}
+
+void mhdir::trans_down(void)
+{
+    _db->trans_down();
+}
+
+message mhdir::insert(const std::string folder_name, temp_file &file)
+{
+    return message::insert(open_folder(folder_name), _o, _db, file);
+}

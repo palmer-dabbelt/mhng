@@ -138,6 +138,11 @@ int main(int argc, const char **argv)
             for (auto it = sonly.begin(); it != sonly.end(); ++it) {
                 auto tmp = dir.get_tmp();
                 c.fetch_to_file(*it, tmp.fp());
+
+                dir.trans_up();
+                auto m = dir.insert((*it).folder_name(), tmp);
+                imap_store.insert(*it);
+                dir.trans_down();
             }
         }
 

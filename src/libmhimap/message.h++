@@ -19,6 +19,9 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef LIBMHIMAP__MESSAGE_HXX
+#define LIBMHIMAP__MESSAGE_HXX
+
 namespace mhimap {
     class message;
 }
@@ -54,3 +57,5 @@ namespace mhimap {
         const std::string folder_name(void) const { return _folder.name(); }
     };
 }
+
+#endif

@@ -56,3 +56,33 @@ create_table::create_table(connection_ptr db, const std::string name,
 
     run(buffer);
 }
+
+create_table::create_table(connection_ptr db, const std::string name,
+                           table_col c0, table_col c1, table_col c2,
+                           table_col c3, table_col c4, table_col c5,
+                           table_col c6, table_col c7)
+    : query(db)
+{
+    char buffer[BUFFER_SIZE];
+
+    if (c1.unique == true && c2.unique == true) {
+        snprintf(buffer, BUFFER_SIZE,
+                 "CREATE TABLE %s(%s %s, %s %s, %s %s, %s %s, %s %s, %s %s, %s %s, %s %s, UNIQUE(%s, %s));",
+                 name.c_str(),
+                 c0.name.c_str(), to_string(c0.type),
+                 c1.name.c_str(), to_string(c1.type),
+                 c2.name.c_str(), to_string(c2.type),
+                 c3.name.c_str(), to_string(c3.type),
+                 c4.name.c_str(), to_string(c4.type),
+                 c5.name.c_str(), to_string(c5.type),
+                 c6.name.c_str(), to_string(c6.type),
+                 c7.name.c_str(), to_string(c7.type),
+                 c1.name.c_str(), c2.name.c_str()
+            );
+    } else {
+        fprintf(stderr, "Fix unique handling\n");
+        abort();
+    }
+
+    run(buffer);
+}

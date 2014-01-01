@@ -38,7 +38,19 @@ temp_file temp_file::open(const std::string folder)
 
 temp_file::~temp_file(void)
 {
+    if (_fp == NULL)
+        return;
+
     fclose(_fp);
+}
+
+void temp_file::finish(void)
+{
+    if (_fp == NULL)
+        return;
+
+    fclose(_fp);
+    _fp = NULL;
 }
 
 temp_file::temp_file(FILE *fp, const std::string path)

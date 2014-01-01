@@ -20,6 +20,7 @@
  */
 
 #include "connection.h++"
+#include <assert.h>
 #include <sqlite3.h>
 
 using namespace mh;
@@ -38,6 +39,17 @@ connection::~connection(void)
 #ifdef SQLITE_DEBUG
     fprintf(stderr, "Closing SQLite Connection: %p\n", (void *)this);
 #endif
+
+    /* If there's an outstanding transaction then there must have been
+     * an error somewhere, just report it.  I think it's best to abort
+     * here because soething is almost certainly wrong and I don't
+     * want to commit anything -- note that if we just close the
+     * connection nothing would have been committed anyway, so I think
+     * it's best. */
+    if (trans_cnt != 0) {
+        fprintf(stderr, "Connection closed with trans_cnt != 0\n");
+        abort();
+    }
 
     /* sqlite3_close(NULL) is a no-op, according to the manual. */
     int err = sqlite3_close(_s);
@@ -62,7 +74,44 @@ bool connection::table_exists(const std::string table_name)
         return true;
 }
 
+void connection::trans_up(void)
+{
+    assert(trans_cnt >= 0);
+
+    /* Increment the counter, if it was 0 then start a transaction. */
+    if (trans_cnt++ == 0) {
+        query bt(connection_ptr(self_ref), "BEGIN TRANSACTION;");
+
+        if (bt.successful() == false) {
+            fprintf(stderr, "BEGIN TRANSACTION failed\n");
+            abort();
+        }
+    }
+}
+
+void connection::trans_down(void)
+{
+    assert(trans_cnt >= 0);
+
+    /* Decrements the counter, if it ends up as 0 then end a
+     * transaction. */
+    if (--trans_cnt == 0) {
+        query et(connection_ptr(self_ref), "END TRANSACTION");
+
+        if (et.successful() == false) {
+            fprintf(stderr, "END TRANSACTION failed\n");
+            abort();
+        }
+    }
+}
+
+uint64_t connection::last_insert_rowid(void)
+{
+    return sqlite3_last_insert_rowid(_s);
+}
+
 connection::connection(const std::string path)
+    : trans_cnt(0)
 {
     /* Attempt to open a connection to SQLite, bailing out if it can't
      * be opened. */

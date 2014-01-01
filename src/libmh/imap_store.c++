@@ -144,3 +144,16 @@ std::vector<uint32_t> imap_store::uids(const std::string folder)
 
     return out;
 }
+
+void imap_store::insert(const mhimap::message &m)
+{
+    query ins(_db, "INSERT into %s (folder, uid) VALUES ('%s', %d);",
+              MSG_TBL, m.folder_name().c_str(), m.uid());
+
+    if (ins.successful() == false) {
+        fprintf(stderr, "Unable to insert message\n");
+        fprintf(stderr, "  (%d): %s\n", ins.error_code(),
+                ins.error_string());
+        abort();
+    }
+}

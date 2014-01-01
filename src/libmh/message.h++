@@ -29,6 +29,7 @@ namespace mh {
 #include "message_iter.h++"
 #include "mhdir.h++"
 #include "options.h++"
+#include "temp_file.h++"
 #include "uid.h++"
 #include "db/connection.h++"
 #include <string>
@@ -45,16 +46,21 @@ namespace mh {
         /* Creates a link to a message that's already in the database,
          * which just consists of obtaining the unique ID of the
          * message inside the database so we can refer to it later. */
-        static message link(const uid id, options_ptr o, connection_ptr db);
+        static message link(uid id, options_ptr o, db::connection_ptr db);
 
         /* Parses the relevant information from the given message
          * file, inserts a record into the database cooresponding to
          * that message, reads back the newly-created UID, and then
          * returns link(new_uid, ...). */
-        static message insert(const uid id,
+        static message insert(folder folder,
                               options_ptr o,
-                              connection_ptr db,
-                              const std::string filename);
+                              db::connection_ptr db,
+                              temp_file &infile);
+
+    private:
+        /* Constructs a new message.  Use one of the operations above
+         * to actually ensure that these are properly managed. */
+        message(uid id, const options_ptr o, db::connection_ptr db);
     };
 }
 

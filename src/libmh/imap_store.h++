@@ -26,8 +26,10 @@ namespace mh {
     class imap_store;
 }
 
+#include "message.h++"
 #include "options.h++"
 #include "db/connection.h++"
+#include <libmhimap/message.h++>
 
 namespace mh {
     /* This deals with the extra information that we need to store in
@@ -66,6 +68,12 @@ namespace mh {
         /* Lists the messages that this store knows about that match a
          * given folder. */
         std::vector<uint32_t> uids(const std::string folder);
+
+        /* Inserts a message into this IMAP store -- you'll want to be
+         * sure to keep this in the same transaction as when you
+         * insert the message into the MH store so there's no
+         * inconsistencies. */
+        void insert(const mhimap::message &m);
     };
 }
 
