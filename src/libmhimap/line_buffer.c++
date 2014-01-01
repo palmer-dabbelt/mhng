@@ -96,12 +96,18 @@ ssize_t line_buffer::get(char *buffer, ssize_t buffer_size)
             memcpy(buffer, data, to_copy);
             buffer[to_copy] = '\0';
 
-            /* Seek again until we end up with no more line feed
-             * characters. */
-            while (data[i] == '\r' || data[i] == '\n') {
-                if (i >= used)
-                    break;
+            /* Skip _exactly_ one newline, attempting to auto-detect
+             * what the server sent us.  The general idea is that we
+             * skip at most 2 characters, and that they must be
+             * diferent characters. */
+            if (i < used && data[i] == '\r') {
                 i++;
+                if (i < used && data[i] == '\n')
+                    i++;
+            } else if (i < used && data[i] == '\n') {
+                i++;
+                if (i < used && data[i] == '\r')
+                    i++;
             }
 
             /* Remove the returned characters from the buffer. */
