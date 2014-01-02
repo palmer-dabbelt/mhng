@@ -19,30 +19,26 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "folder.h++"
+#ifndef LIBMH__STRING_ITER_HXX
+#define LIBMH__STRING_ITER_HXX
 
-using namespace mh;
+#include "vector_iter.h++"
+#include <string>
+#include <vector>
 
-#ifndef BUFFER_SIZE
-#define BUFFER_SIZE 1024
+namespace mh {
+    /* Iterates through an arbitrary list of strings.  This isn't
+     * really type-safe, but I think it's going to be as good as it
+     * gets thanks to IMAP.  Note that this is a const_iterator
+     * because we can'tt change anything about what's on the IMAP
+     * server this way. */
+    class string_iter : public vector_iter<std::string> {
+    public:
+        string_iter(const std::vector<std::string> items)
+            : vector_iter<std::string>(items)
+            {
+            }
+    };
+}
+
 #endif
-
-folder::folder(const std::string n, options_ptr o, db::connection_ptr db)
-    : _name(n),
-      _o(o),
-      _db(db)
-{
-}
-
-const std::string folder::full_path(void) const
-{
-    char buffer[BUFFER_SIZE];
-    snprintf(buffer, BUFFER_SIZE, "%s/mail/%s",
-             _o->mhdir().c_str(), _name.c_str());
-    return buffer;
-}
-
-message folder::open_seq(int seq)
-{
-    return message::folder_search(_name, _o, _db, seq);
-}

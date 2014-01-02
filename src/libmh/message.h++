@@ -26,6 +26,7 @@ namespace mh {
     class message;
 }
 
+#include "message_file.h++"
 #include "message_iter.h++"
 #include "mhdir.h++"
 #include "options.h++"
@@ -56,6 +57,16 @@ namespace mh {
                               options_ptr o,
                               db::connection_ptr db,
                               temp_file &infile);
+
+        /* Searches for a given (foldername, seq) pair, returning the
+         * matching message. */
+        static message folder_search(const std::string folder_name,
+                                     options_ptr o,
+                                     db::connection_ptr db,
+                                     int seq);
+
+        /* Reads the whole file associated with a message. */
+        message_file read(void);
 
     private:
         /* Constructs a new message.  Use one of the operations above

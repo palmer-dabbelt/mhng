@@ -53,6 +53,10 @@ CONFIG      += libmh_headers
 BINARIES    += scan
 SOURCES     += scan.c++
 
+# Shows a single message to the console.
+BINARIES    += show
+SOURCES     += show.c++
+
 ##############################################################################
 # Remote-Access Binaries                                                     #
 ##############################################################################

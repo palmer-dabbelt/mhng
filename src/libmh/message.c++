@@ -20,6 +20,7 @@
  */
 
 #include "message.h++"
+#include "message_file.h++"
 #include "db/create_table.h++"
 #include "db/query.h++"
 
@@ -39,23 +40,20 @@ message message::insert(folder folder,
                         db::connection_ptr db,
                         temp_file &infile)
 {
+    /* This (at least attempts to) prevent anyone else from writing to
+     * the file that was passed in. */
+    infile.finish();
+
+    /* Parses the message from the raw file on disk. */
+    message_file mf(infile.path());
+
+    /* Peeks inside the parsed file to find some information. */
     uint64_t seq;
     bool unread = true;
     std::string subject;
     uint64_t date = 0;
     std::string from;
     std::string to;
-
-    /* Read the temporary file passed in to fill out the variables
-     * required by . */
-    {
-        infile.finish();
-        FILE *f = fopen(infile.path().c_str(), "r");
-
-        
-
-        fclose(f);
-    }
 
     /* We need to start a transaction here because the SELECT we use
      * to determine the new sequence number needs to be atomic WRT the
@@ -143,6 +141,44 @@ message message::insert(folder folder,
     db->trans_down();
     abort();
     return message(uid(""), o, db);
+}
+
+message message::folder_search(const std::string folder_name,
+                               options_ptr o,
+                               db::connection_ptr db,
+                               int seq)
+{
+    query uidq(db, "SELECT (uid) from %s WHERE folder='%s' AND seq=%d;",
+               TABLE, folder_name.c_str(), seq);
+
+    for (auto it = uidq.results(); !it.done(); ++it) {
+        return message(uid((*it).get("uid")), o, db);
+    }
+
+    fprintf(stderr, "Unable to find matching SEQ: %s/%d\n",
+            folder_name.c_str(), seq);
+    abort();
+    return message(uid(""), o, db);
+}
+
+message_file message::read(void)
+{
+    query qf(_db, "SELECT (folder) from %s WHERE uid=%s;",
+             TABLE, _id.string().c_str());
+
+    for (auto it = qf.results(); !it.done(); ++it) {
+        const std::string fn = (*it).get("folder");
+
+        char target_fn[BUFFER_SIZE];
+        snprintf(target_fn, BUFFER_SIZE, "%s/mail/%s/%s",
+                 _o->mhdir().c_str(), fn.c_str(), _id.string().c_str());
+
+        return message_file(target_fn);
+    }
+
+    fprintf(stderr, "No UID found for message\n");
+    abort();
+    return message_file("");
 }
 
 message::message(uid id, const options_ptr o, db::connection_ptr db)

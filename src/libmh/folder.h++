@@ -26,6 +26,7 @@ namespace mh {
     class folder;
 }
 
+#include "message.h++"
 #include "mhdir.h++"
 #include "options.h++"
 #include "db/connection.h++"
@@ -49,8 +50,17 @@ namespace mh {
         /* Accessor functions. */
         const std::string name(void) const { return _name; }
 
-        /* Prints the full path to this folder. */
+        /* Prints the full path to this folder.  You probably don't
+         * want to use this directly, but should instead just open
+         * messages using other functions here (or move them using
+         * mhdir), which will have built-in protection against
+         * races. */
         const std::string full_path(void) const;
+
+        /* Opens a message based on the sequence number associated
+         * with a message.  This is a short, integer name that's
+         * designed to be easily used by the commandline. */
+        message open_seq(int seq);
     };
 }
 
