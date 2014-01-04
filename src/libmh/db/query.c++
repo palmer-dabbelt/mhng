@@ -22,6 +22,7 @@
 #include "query.h++"
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 #include <sqlite3.h>
 
 using namespace mh;
@@ -44,9 +45,15 @@ query::query(connection_ptr db, const char *format, ...)
 {
     char buffer[BUFFER_SIZE];
 
+    char sformat[BUFFER_SIZE];
+    strncpy(sformat, format, BUFFER_SIZE);
+    for (size_t i = 0; i < strlen(sformat); i++)
+        if (strncmp(sformat + i, "%s", 2) == 0)
+            sformat[i+1] = 'q';
+
     va_list args;
     va_start(args, format);
-    vsnprintf(buffer, BUFFER_SIZE, format, args);
+    sqlite3_vsnprintf(BUFFER_SIZE, buffer, sformat, args);
     va_end(args);
 
     run(buffer);
