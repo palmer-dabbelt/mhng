@@ -38,7 +38,8 @@ enum state {
 };
 
 message_file::message_file(const std::string full_path)
-    : _plain_text(true)
+    : _plain_text(true),
+      _mime(new mime())
 {
     FILE *file = fopen(full_path.c_str(), "r");
 
@@ -49,6 +50,8 @@ message_file::message_file(const std::string full_path)
     std::string hname = "";
     std::string hcont = "";
 
+    auto mstack = _mime;
+
     while (fgets(buffer, BUFFER_SIZE, file) != NULL) {
         /* Strip newlines from the buffer in question. */
         while (isspace(buffer[strlen(buffer) - 1]))
@@ -58,13 +61,18 @@ message_file::message_file(const std::string full_path)
         case STATE_HCONT:
             /* An empty line means the headers are over. */
             if (strlen(buffer) == 0) {
+                add_header(hname, hcont);
                 state = _plain_text ? STATE_PLAIN : STATE_MIME;
+                for (auto it = headers("content-type"); !it.done(); ++it) {
+                    _mime->set_root_content_type(*it);
+                }
+
                 continue;
             }
 
             /* If the first character isn't a space then the header
              * continuation is over. */
-            if (buffer[0] != ' ') {
+            if (!isspace(buffer[0])) {
                 state = STATE_HEADERS;
                 add_header(hname, hcont);
 
@@ -72,6 +80,12 @@ message_file::message_file(const std::string full_path)
                  * -- effectively we want to take the state transition
                  * _now_, not later. */
             } else {
+                char *cbuf = buffer;
+                while (isspace(*cbuf))
+                    cbuf++;
+
+                hcont = hcont + " " + cbuf;
+
                 /* This continue exists so we don't fall through and
                  * end up in the HEADERS section. */
                 continue;
@@ -80,7 +94,12 @@ message_file::message_file(const std::string full_path)
         case STATE_HEADERS:
             /* An empty line means the headers are over. */
             if (strlen(buffer) == 0) {
+                add_header(hname, hcont);
                 state = _plain_text ? STATE_PLAIN : STATE_MIME;
+                for (auto it = headers("content-type"); !it.done(); ++it) {
+                    _mime->set_root_content_type(*it);
+                }
+
                 continue;
             }
 
@@ -109,8 +128,29 @@ message_file::message_file(const std::string full_path)
             break;
 
         case STATE_PLAIN:
-        case STATE_MIME:
             _body.push_back(buffer);
+            break;
+
+        case STATE_MIME:
+            auto sibling = mstack->is_sibling(buffer);
+            if (sibling != NULL) {
+                mstack = sibling;
+                continue;
+            }
+
+            auto child = mstack->is_child(buffer);
+            if (child != NULL) {
+                mstack = child;
+                continue;
+            }
+
+            auto parent = mstack->is_parent(buffer);
+            if (parent != NULL) {
+                mstack = parent;
+                continue;
+            }
+
+            mstack->parse(buffer);
             break;
         }
 
@@ -119,6 +159,11 @@ message_file::message_file(const std::string full_path)
     }
 
     fclose(file);
+}
+
+message_file::~message_file(void)
+{
+    delete _mime;
 }
 
 string_iter message_file::headers(const std::string header_name) const
@@ -135,7 +180,18 @@ string_iter message_file::headers(const std::string header_name) const
 
 string_iter message_file::body(void) const
 {
-    return string_iter(_body);
+    if (_plain_text == true)
+        return string_iter(_body);
+
+    auto text = _mime->search("text/plain");
+    if (text != NULL)
+        return text->body_utf8();
+
+    auto html = _mime->search("text/html");
+    if (html != NULL)
+        return html->body_utf8();
+
+    return string_iter(std::vector<std::string>());
 }
 
 void message_file::add_header(std::string h, std::string v)

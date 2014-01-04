@@ -22,6 +22,7 @@
 #ifndef LIBMH__MESSAGE_FILE_HXX
 #define LIBMH__MESSAGE_FILE_HXX
 
+#include "mime.h++"
 #include "string_iter.h++"
 #include <map>
 #include <string>
@@ -46,6 +47,11 @@ namespace mh {
          * MIME messages, this is just empty. */
         std::vector<std::string> _body;
 
+        /* For MIME messages, this holds the root of the MIME tree of
+         * this message.  For plain-text messages, this is just
+         * empty. */
+        mime *_mime;
+
     public:
         /* Opens up the given file and parses it into a message
          * structure.  You probably don't want to call this directly
@@ -53,6 +59,8 @@ namespace mh {
          * these, which allows the directory naming to be handled
          * automatically. */
         message_file(const std::string full_path);
+
+        ~message_file(void);
 
         /* Iterates over all the headers whole name matches the given
          * string.  Matches are case-insensitive, and comma-seperated
