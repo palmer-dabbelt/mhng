@@ -60,7 +60,7 @@ int main(int argc, const char **argv)
         fprintf(less, "Subject: %s\n", (*it).c_str());
     }
     for (auto it = mf.headers_date("Date"); !it.done(); ++it) {
-        fprintf(less, "Date:    %s\n", (*it).c_str());
+        fprintf(less, "Date:    %s\n", (*it).local().c_str());
     }
 
     /* Mail messages have a blank line between the headers and the

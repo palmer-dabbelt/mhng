@@ -224,18 +224,15 @@ string_iter message_file::headers_address(const std::string hn) const
     return string_iter(values);
 }
 
-string_iter message_file::headers_date(const std::string hn) const
+date_iter message_file::headers_date(const std::string hn) const
 {
-    std::vector<std::string> values;
+    std::vector<date> values;
 
     for (auto it = headers(hn); !it.done(); ++it) {
-        char buffer[BUFFER_SIZE];
-        snprintf(buffer, BUFFER_SIZE, "%s", (*it).c_str());
-
-        values.push_back(buffer);
+        values.push_back(date(*it));
     }
 
-    return string_iter(values);
+    return date_iter(values);
 }
 
 string_iter message_file::body(void) const

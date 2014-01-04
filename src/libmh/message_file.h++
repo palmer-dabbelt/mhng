@@ -22,6 +22,7 @@
 #ifndef LIBMH__MESSAGE_FILE_HXX
 #define LIBMH__MESSAGE_FILE_HXX
 
+#include "date_iter.h++"
 #include "mime.h++"
 #include "string_iter.h++"
 #include <map>
@@ -71,7 +72,7 @@ namespace mh {
         /* These are just like headers(), but they attempt to parse
          * the headers into more user-friendly sorts of formats. */
         string_iter headers_address(const std::string header_name) const;
-        string_iter headers_date(const std::string header_name) const;
+        date_iter headers_date(const std::string header_name) const;
 
         /* Returns at iterator that lists all the files in the body of
          * this message. */

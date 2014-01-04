@@ -29,6 +29,8 @@ LINKOPTS    += `ppkg-config sqlite3 --libs`
 COMPILEOPTS += `ppkg-config gnutls --cflags`
 LINKOPTS    += `ppkg-config gnutls --libs`
 LINKOPTS    += -lgnutlsxx
+COMPILEOPTS += `ppkg-config gitdate++ --cflags`
+LINKOPTS    += `ppkg-config gitdate++ --libs`
 
 ##############################################################################
 # Libraries                                                                  #
