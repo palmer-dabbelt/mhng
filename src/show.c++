@@ -40,25 +40,30 @@ int main(int argc, const char **argv)
     /* Reads the full message contents from disk. */
     mh::message_file mf = message.read();
 
+    /* Passes everything through a pager. */
+    FILE *less = popen("less", "w");
+
     /* Format the headers. */
     for (auto it = mf.headers("From"); !it.done(); ++it) {
-        printf("From:    %s\n", (*it).c_str());
+        fprintf(less, "From:    %s\n", (*it).c_str());
     }
     for (auto it = mf.headers("To"); !it.done(); ++it) {
-        printf("To:      %s\n", (*it).c_str());
+        fprintf(less, "To:      %s\n", (*it).c_str());
     }
     for (auto it = mf.headers("CC"); !it.done(); ++it) {
-        printf("CC:      %s\n", (*it).c_str());
+        fprintf(less, "CC:      %s\n", (*it).c_str());
     }
     for (auto it = mf.headers("BCC"); !it.done(); ++it) {
-        printf("BCC:     %s\n", (*it).c_str());
+        fprintf(less, "BCC:     %s\n", (*it).c_str());
     }
     for (auto it = mf.headers("Subject"); !it.done(); ++it) {
-        printf("Subject: %s\n", (*it).c_str());
+        fprintf(less, "Subject: %s\n", (*it).c_str());
     }
     for (auto it = mf.headers("Date"); !it.done(); ++it) {
-        printf("Date:    %s\n", (*it).c_str());
+        fprintf(less, "Date:    %s\n", (*it).c_str());
     }
+
+    pclose(less);
 
     return 0;
 }
