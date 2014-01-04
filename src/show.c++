@@ -44,22 +44,22 @@ int main(int argc, const char **argv)
     FILE *less = popen("less", "w");
 
     /* Format the headers. */
-    for (auto it = mf.headers("From"); !it.done(); ++it) {
+    for (auto it = mf.headers_address("From"); !it.done(); ++it) {
         fprintf(less, "From:    %s\n", (*it).c_str());
     }
-    for (auto it = mf.headers("To"); !it.done(); ++it) {
+    for (auto it = mf.headers_address("To"); !it.done(); ++it) {
         fprintf(less, "To:      %s\n", (*it).c_str());
     }
-    for (auto it = mf.headers("CC"); !it.done(); ++it) {
+    for (auto it = mf.headers_address("CC"); !it.done(); ++it) {
         fprintf(less, "CC:      %s\n", (*it).c_str());
     }
-    for (auto it = mf.headers("BCC"); !it.done(); ++it) {
+    for (auto it = mf.headers_address("BCC"); !it.done(); ++it) {
         fprintf(less, "BCC:     %s\n", (*it).c_str());
     }
     for (auto it = mf.headers("Subject"); !it.done(); ++it) {
         fprintf(less, "Subject: %s\n", (*it).c_str());
     }
-    for (auto it = mf.headers("Date"); !it.done(); ++it) {
+    for (auto it = mf.headers_date("Date"); !it.done(); ++it) {
         fprintf(less, "Date:    %s\n", (*it).c_str());
     }
 

@@ -68,6 +68,11 @@ namespace mh {
          * single item per entry. */
         string_iter headers(const std::string header_name) const;
 
+        /* These are just like headers(), but they attempt to parse
+         * the headers into more user-friendly sorts of formats. */
+        string_iter headers_address(const std::string header_name) const;
+        string_iter headers_date(const std::string header_name) const;
+
         /* Returns at iterator that lists all the files in the body of
          * this message. */
         string_iter body(void) const;

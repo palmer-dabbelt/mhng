@@ -37,6 +37,9 @@ enum state {
     STATE_MIME,
 };
 
+/* Strips everything but the email address from a mail header. */
+static void strip_address(std::vector<std::string> &vec, std::string buf);
+
 message_file::message_file(const std::string full_path)
     : _plain_text(true),
       _mime(new mime())
@@ -178,6 +181,63 @@ string_iter message_file::headers(const std::string header_name) const
     return string_iter(lookup->second);
 }
 
+string_iter message_file::headers_address(const std::string hn) const
+{
+    std::vector<std::string> values;
+
+    for (auto it = headers(hn); !it.done(); ++it) {
+        char buffer[BUFFER_SIZE];
+        snprintf(buffer, BUFFER_SIZE, "%s", (*it).c_str());
+
+        char *start, *end, *cur;
+        start = cur = buffer;
+        end = start + strlen(start);
+        bool in_quotes = false;
+        while (*cur != '\0') {
+            if (*cur == '"')
+                in_quotes = !in_quotes;
+
+            if (in_quotes)
+                goto is_in_quotes;
+
+            if (*cur == ',') {
+                end = cur;
+
+                char addr[BUFFER_SIZE];
+                snprintf(addr, BUFFER_SIZE, "%s", start);
+                addr[(size_t)(end - start)] = '\0';
+                strip_address(values, addr);
+
+                start = end + 1;
+
+                while (isspace(*start))
+                    start++;
+            }
+
+        is_in_quotes:
+            cur++;
+        }
+
+        strip_address(values, start);
+    }
+
+    return string_iter(values);
+}
+
+string_iter message_file::headers_date(const std::string hn) const
+{
+    std::vector<std::string> values;
+
+    for (auto it = headers(hn); !it.done(); ++it) {
+        char buffer[BUFFER_SIZE];
+        snprintf(buffer, BUFFER_SIZE, "%s", (*it).c_str());
+
+        values.push_back(buffer);
+    }
+
+    return string_iter(values);
+}
+
 string_iter message_file::body(void) const
 {
     if (_plain_text == true)
@@ -209,4 +269,34 @@ void message_file::add_header(std::string h, std::string v)
     }
 
     found->second.push_back(v);
+}
+
+void strip_address(std::vector<std::string> &vec, std::string buf)
+{
+    char buffer[BUFFER_SIZE];
+    snprintf(buffer, BUFFER_SIZE, "%s", buf.c_str());
+
+    bool in_quote = false;
+
+    char *start, *end, *cur;
+    cur = start = buffer;
+    end = buffer + strlen(buffer);
+    while (*cur != '\0') {
+        if (*cur == '"')
+            in_quote = !in_quote;
+
+        if (!in_quote) {
+            if (*cur == '<')
+                start = cur + 1;
+            if (*cur == '>')
+                end = cur;
+        }
+
+        cur++;
+    }
+
+    char addr[BUFFER_SIZE];
+    snprintf(addr, BUFFER_SIZE, "%s", start);
+    addr[(size_t)(end - start)] = '\0';
+    vec.push_back(addr);
 }
