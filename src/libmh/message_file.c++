@@ -38,11 +38,11 @@ enum state {
 };
 
 message_file::message_file(const std::string full_path)
+    : _plain_text(true)
 {
     FILE *file = fopen(full_path.c_str(), "r");
 
     enum state state = STATE_HEADERS;
-    enum state bstate = STATE_PLAIN;
 
     char buffer[BUFFER_SIZE];
 
@@ -58,7 +58,7 @@ message_file::message_file(const std::string full_path)
         case STATE_HCONT:
             /* An empty line means the headers are over. */
             if (strlen(buffer) == 0) {
-                state = bstate;
+                state = _plain_text ? STATE_PLAIN : STATE_MIME;
                 continue;
             }
 
@@ -80,7 +80,7 @@ message_file::message_file(const std::string full_path)
         case STATE_HEADERS:
             /* An empty line means the headers are over. */
             if (strlen(buffer) == 0) {
-                state = bstate;
+                state = _plain_text ? STATE_PLAIN : STATE_MIME;
                 continue;
             }
 
@@ -110,7 +110,7 @@ message_file::message_file(const std::string full_path)
 
         case STATE_PLAIN:
         case STATE_MIME:
-            /* FIXME: Do something here... :). */
+            _body.push_back(buffer);
             break;
         }
 
@@ -133,11 +133,18 @@ string_iter message_file::headers(const std::string header_name) const
     return string_iter(lookup->second);
 }
 
+string_iter message_file::body(void) const
+{
+    return string_iter(_body);
+}
 
 void message_file::add_header(std::string h, std::string v)
 {
     if (strcmp(h.c_str(), "") == 0)
         return;
+
+    if (strcmp(h.c_str(), "mime-version"))
+        _plain_text = false;
 
     auto found = _headers.find(h);
     if (found == _headers.end()) {

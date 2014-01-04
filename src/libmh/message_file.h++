@@ -38,6 +38,14 @@ namespace mh {
          * the contents of that header. */
         std::map<std::string, std::vector<std::string> > _headers;
 
+        /* For plain-text messages this is set to TRUE, and for MIME
+         * messages this is set to FALSE. */
+        bool _plain_text;
+
+        /* For plain-text messages, this contains the body text.  For
+         * MIME messages, this is just empty. */
+        std::vector<std::string> _body;
+
     public:
         /* Opens up the given file and parses it into a message
          * structure.  You probably don't want to call this directly
@@ -51,6 +59,10 @@ namespace mh {
          * address lists show up as just the email address with a
          * single item per entry. */
         string_iter headers(const std::string header_name) const;
+
+        /* Returns at iterator that lists all the files in the body of
+         * this message. */
+        string_iter body(void) const;
 
     private:
         /* Adds a header to the big list of headers. */

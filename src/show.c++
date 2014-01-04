@@ -63,6 +63,17 @@ int main(int argc, const char **argv)
         fprintf(less, "Date:    %s\n", (*it).c_str());
     }
 
+    /* Mail messages have a blank line between the headers and the
+     * body.  Here we attempt to more-or-less keep things that way
+     * inside the output of show.  In other words, "show" should print
+     * something parsable as a regular mail message. */
+    fprintf(less, "\n");
+
+    /* Print the body text of the message. */
+    for (auto it = mf.body(); !it.done(); ++it) {
+        fprintf(less, "%s\n", (*it).c_str());
+    }
+
     pclose(less);
 
     return 0;
