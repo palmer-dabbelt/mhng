@@ -78,6 +78,30 @@ namespace mh {
          * this message. */
         string_iter body(void) const;
 
+        /* These are quick access mechanisms that just return the
+         * first header of a given type. */
+        const std::string header(const std::string header_name) const
+            {
+                for (auto it = headers(header_name); !it.done(); ++it)
+                    return *it;
+                abort();
+                return "";
+            }
+        const std::string header_address(const std::string header_name) const
+            {
+                for (auto it = headers_address(header_name); !it.done(); ++it)
+                    return *it;
+                abort();
+                return "";
+            }
+        const date header_date(const std::string header_name) const
+            {
+                for (auto it = headers_date(header_name); !it.done(); ++it)
+                    return *it;
+                abort();
+                return date("");
+            }
+
     private:
         /* Adds a header to the big list of headers. */
         void add_header(const std::string h, const std::string v);

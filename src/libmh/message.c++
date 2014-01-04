@@ -48,12 +48,10 @@ message message::insert(folder folder,
     message_file mf(infile.path());
 
     /* Peeks inside the parsed file to find some information. */
-    uint64_t seq;
-    bool unread = true;
-    std::string subject;
-    uint64_t date = 0;
-    std::string from;
-    std::string to;
+    const std::string subject = mf.header("subject");
+    const date date = mf.header_date("date");
+    const std::string from = mf.header_address("from");
+    const std::string to = mf.header_address("to");
 
     /* We need to start a transaction here because the SELECT we use
      * to determine the new sequence number needs to be atomic WRT the
@@ -89,7 +87,7 @@ message message::insert(folder folder,
     query sns(db, "SELECT (seq) FROM %s WHERE folder='%s';",
               TABLE, folder.name().c_str());
 
-    seq = 1;
+    uint64_t seq = 1;
     for (auto it = sns.results(); !it.done(); ++it) {
         uint64_t nseq = atol((*it).get("seq").c_str());
 
@@ -98,11 +96,12 @@ message message::insert(folder folder,
     }
 
     /* Insert a new row, needed for the primary key. */
+    bool unread = true;
     query insert(db, "INSERT into %s "
                  "(seq, folder, unread, subject, date, fadr, tadr)"
                  " VALUES (%lu, '%s', %d, '%s', %lu, '%s', '%s');",
                  TABLE, seq, folder.name().c_str(), unread,
-                 subject.c_str(), date, from.c_str(), to.c_str());
+                 subject.c_str(), date.unix(), from.c_str(), to.c_str());
 
     /* I believe this can't fail because everything is wrapped in a
      * transaction. */
