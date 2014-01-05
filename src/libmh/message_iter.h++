@@ -35,14 +35,12 @@ namespace mh {
     /* This deals with iterating through messages.  You're almost
      * certainly not going to want to create one of these yourself,
      * but instead are going to want get one from a folder. */
-    class message_iter {
-        friend class folder;
-
-    private:
-        std::vector<message> _messages;
-
-    protected:
-        message_iter(std::vector<message> messages);
+    class message_iter : public vector_iter<message> {
+    public:
+        message_iter(const std::vector<message> items)
+            : vector_iter<message>(items)
+            {
+            }
     };
 }
 

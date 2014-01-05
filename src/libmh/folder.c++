@@ -42,7 +42,22 @@ const std::string folder::full_path(void) const
     return buffer;
 }
 
-message folder::open_seq(int seq)
+message folder::open_seq(int seq) const
 {
     return message::folder_search(_name, _o, _db, seq);
+}
+
+message_iter folder::messages(void) const
+{
+    std::vector<message> messages;
+
+    db::query select(_db, "SELECT (uid) FROM %s WHERE folder='%s';",
+                     "MH__messages", _name.c_str());
+
+    for (auto it = select.results(); !it.done(); ++it) {
+        uid id((*it).get("uid"));
+        messages.push_back(message::link(id, _o, _db));
+    }
+
+    return message_iter(messages);
 }

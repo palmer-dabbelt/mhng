@@ -60,7 +60,10 @@ namespace mh {
         /* Opens a message based on the sequence number associated
          * with a message.  This is a short, integer name that's
          * designed to be easily used by the commandline. */
-        message open_seq(int seq);
+        message open_seq(int seq) const;
+
+        /* Lists all the messages in this folder. */
+        message_iter messages(void) const;
     };
 }
 

@@ -35,6 +35,12 @@ using namespace mh::db;
 #define BUFFER_SIZE 1024
 #endif
 
+message message::link(uid id, options_ptr o, db::connection_ptr db)
+{
+    /* FIMXE: What else needs to be done here? */
+    return message(id, o, db);
+}
+
 message message::insert(folder folder,
                         options_ptr o,
                         db::connection_ptr db,
@@ -49,7 +55,7 @@ message message::insert(folder folder,
 
     /* Peeks inside the parsed file to find some information. */
     const std::string subject = mf.header("subject");
-    const date date = mf.header_date("date");
+    const mh::date date = mf.header_date("date");
     const std::string from = mf.header_address("from");
     const std::string to = mf.header_address("to");
 
@@ -179,6 +185,62 @@ message_file message::read(void)
     abort();
     return message_file("");
 }
+
+int message::seq(void) const
+{
+    query select(_db, "SELECT (seq) from %s WHERE uid='%s';",
+                 TABLE, _id.string().c_str());
+    for (auto it = select.results(); !it.done(); ++it) {
+        return atoi((*it).get("seq").c_str());
+    }
+
+    return -1;
+}
+
+const std::string message::from(void) const
+{
+    query select(_db, "SELECT (fadr) from %s WHERE uid='%s';",
+                 TABLE, _id.string().c_str());
+    for (auto it = select.results(); !it.done(); ++it) {
+        return (*it).get("fadr");
+    }
+
+    return "";
+}
+
+const std::string message::to(void) const
+{
+    query select(_db, "SELECT (tadr) from %s WHERE uid='%s';",
+                 TABLE, _id.string().c_str());
+    for (auto it = select.results(); !it.done(); ++it) {
+        return (*it).get("tadr");
+    }
+
+    return "";
+}
+
+const std::string message::subject(void) const
+{
+    query select(_db, "SELECT (subject) from %s WHERE uid='%s';",
+                 TABLE, _id.string().c_str());
+    for (auto it = select.results(); !it.done(); ++it) {
+        return (*it).get("subject");
+    }
+
+    return "";
+}
+
+const typename mh::date message::date(void) const
+{
+    query select(_db, "SELECT (date) from %s WHERE uid='%s';",
+                 TABLE, _id.string().c_str());
+    for (auto it = select.results(); !it.done(); ++it) {
+        return mh::date((*it).get("date"));
+    }
+
+    return mh::date("");
+}
+
 
 message::message(uid id, const options_ptr o, db::connection_ptr db)
     : _id(id),

@@ -72,3 +72,16 @@ const std::string date::unix_str(void) const
     snprintf(buffer, BUFFER_SIZE, "%lu", _unix);
     return buffer;
 }
+
+const std::string date::ddmm(void) const
+{
+    time_t time = _unix;
+
+    struct tm tm;
+    localtime_r(&time, &tm);
+
+    char buffer[BUFFER_SIZE];
+    strftime(buffer, BUFFER_SIZE, "%m/%d", &tm);
+
+    return buffer;
+}

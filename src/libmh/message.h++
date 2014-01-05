@@ -26,6 +26,7 @@ namespace mh {
     class message;
 }
 
+#include "date.h++"
 #include "message_file.h++"
 #include "message_iter.h++"
 #include "mhdir.h++"
@@ -67,6 +68,13 @@ namespace mh {
 
         /* Reads the whole file associated with a message. */
         message_file read(void);
+
+        /* Obtains a few headers that represent this message. */
+        int seq(void) const;
+        const std::string from(void) const;
+        const std::string to(void) const;
+        const std::string subject(void) const;
+        const typename mh::date date(void) const;
 
     private:
         /* Constructs a new message.  Use one of the operations above

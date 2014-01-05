@@ -19,10 +19,29 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <libmhimap/client.h++>
+#include <libmh/message.h++>
+#include <libmh/mhdir.h++>
+#include <libmh/options.h++>
 
-int main(int argc __attribute__((unused)),
-         char **argv __attribute__((unused)))
+int main(const int argc, const char **argv)
 {
+    auto o = mh::options::create(argc, argv);
+    mh::mhdir dir(o);
+
+    /* FIXME: The current folder name should be read from some sort of
+     * internal table, but I haven't actually set that up yet. */
+    mh::folder folder = dir.open_folder("inbox");
+
+    /* Loops through every message in the folder, printing out
+     * information about it. */
+    for (auto mit = folder.messages(); !mit.done(); ++mit) {
+        printf("%3d %s %-25.25s %-40.40s\n",
+               (*mit).seq(),
+               (*mit).date().ddmm().c_str(),
+               (*mit).from().c_str(),
+               (*mit).subject().c_str()
+            );
+    }
+
     return 0;
 }
