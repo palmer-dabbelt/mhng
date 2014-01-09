@@ -46,7 +46,7 @@ bool line_buffer::has_line(void) const
     assert(used < count);
 
     for (ssize_t i = 0; i < used; i++)
-        if (data[i] == '\r' || data[i] == '\n')
+        if (data[i] == '\n')
             return true;
 
     return false;
@@ -92,7 +92,12 @@ ssize_t line_buffer::get(char *buffer, ssize_t buffer_size)
     logger l("line_buffer::get(..., %ld)", buffer_size);
 
     for (ssize_t i = 0; i < used; i++) {
-        if (data[i] == '\r' || data[i] == '\n') {
+        if (data[i] == '\n') {
+            /* Check if we should back up to eat the additional '\r'
+             * before this. */
+            if (i > 0 && data[i-1] == '\r')
+                i--;
+
             /* Figure out how much data to stick into the buffer,
              * ensuring that it doesn't overflow anything.  Note that
              * this means we will DROP data when lines are too long --
