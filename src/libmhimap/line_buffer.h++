@@ -38,6 +38,8 @@ namespace mhimap {
          * argument is optional: it's the default buffer size. */
         line_buffer(ssize_t starting_size = 1024);
 
+        ~line_buffer(void);
+
         /* Returns TRUE whenever this buffer has a line left in it,
          * and FALSE otherwise. */
         bool has_line(void) const;

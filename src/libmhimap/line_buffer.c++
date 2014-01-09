@@ -35,6 +35,11 @@ line_buffer::line_buffer(ssize_t starting_size)
 {
 }
 
+line_buffer::~line_buffer(void)
+{
+    delete data;
+}
+
 bool line_buffer::has_line(void) const
 {
     assert(used >= 0);
