@@ -35,7 +35,7 @@ int main(int argc, const char **argv)
 
     /* FIXME: The current message name should be read from some sort
      * of internal table, but I haven't actually set that up yet. */
-    mh::message message = folder.open_seq(1);
+    mh::message message = folder.open_seq(5);
 
     /* Reads the full message contents from disk. */
     mh::message_file mf = message.read();

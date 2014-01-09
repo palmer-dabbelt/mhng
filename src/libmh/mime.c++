@@ -72,13 +72,44 @@ string_iter mime::body_utf8(void) const
 
 void mime::set_root_content_type(const std::string value)
 {
-    char buffer[BUFFER_SIZE];
-    snprintf(buffer, BUFFER_SIZE, "%s", value.c_str());
+    _in_headers = false;
 
+    char buffer[BUFFER_SIZE];
+    
+    snprintf(buffer, BUFFER_SIZE, "%s", value.c_str());
+    char *type = buffer;
+    while (isspace(*type))
+        type++;
+
+    char *typeend = strstr(type, ";");
+    if (typeend == NULL)
+        typeend = type + strlen(type);
+
+    *typeend = '\0';
+    _type = type;
+
+    snprintf(buffer, BUFFER_SIZE, "%s", value.c_str());
+    char *encoding = strstr(buffer, "encoding=");
+    if (encoding != NULL) {
+        encoding += strlen("encoding=");
+
+        if (*encoding == '"')
+            encoding++;
+
+        char *e = encoding;
+        while (*e != '"' && *e != '\0' && !isspace(*e) && *e != ';')
+            e++;
+
+        *e = '\0';
+
+        _encoding = encoding;
+    }
+    
+    snprintf(buffer, BUFFER_SIZE, "%s", value.c_str());
     char *boundary = strstr(buffer, "boundary=");
     if (boundary == NULL) {
-        fprintf(stderr, "Content-Type without boundary\n");
-        abort();
+        _boundary_child = "";
+        return;
     }
 
     boundary += strlen("boundary=");
@@ -99,8 +130,6 @@ void mime::set_root_content_type(const std::string value)
 
     snprintf(bbuf, BUFFER_SIZE, "--%s", boundary);
     _boundary_child = bbuf;
-
-    _in_headers = false;
 }
 
 mime *mime::is_sibling(const std::string buffer)
