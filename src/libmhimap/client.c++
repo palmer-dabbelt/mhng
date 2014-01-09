@@ -213,10 +213,26 @@ void client::fetch_to_file(const message m, FILE *f)
         size -= n_read;
     }
 
+    /* There was a single leading paren at the start... */
+    int parens = 1;
     while (gets(buffer, BUFFER_SIZE) > 0) {
-        /* Apparently there's a ')' at the end, after the
-         * message... */
-        if (strcmp(buffer, ")") == 0)
+        /* The format isn't right until there's no parents left. */
+        bool has_paren = false;
+        if (parens > 0) {
+            for (size_t i = 0; i < strlen(buffer); i++) {
+                if (buffer[i] == '(') {
+                    parens++;
+                    has_paren = true;
+                }
+
+                if (buffer[i] == ')') {
+                    parens--;
+                    has_paren = true;
+                }
+            }
+        }
+
+        if (parens > 0 || has_paren == true)
             continue;
 
         if (fetch.is_end(buffer))
