@@ -70,6 +70,7 @@ namespace mh {
         message_file read(void);
 
         /* Obtains a few headers that represent this message. */
+        bool cur(void) const;
         int seq(void) const;
         const std::string from(void) const;
         const std::string to(void) const;

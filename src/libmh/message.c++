@@ -186,6 +186,26 @@ message_file message::read(void)
     return message_file("");
 }
 
+bool message::cur(void) const
+{
+    query fnameq(_db, "SELECT (folder) from %s WHERE uid='%s';",
+                 TABLE, _id.string().c_str());
+
+    for (auto nit = fnameq.results(); !nit.done(); ++nit) {
+        auto folder = (*nit).get("folder");
+
+        query fseqq(_db, "SELECT (seq) from MH__current where folder='%s';",
+                    folder.c_str());
+
+        for (auto sit = fseqq.results(); !sit.done(); ++sit) {
+            int s = atoi((*sit).get("seq").c_str());
+            return s == seq();
+        }
+    }
+
+    return 1 == seq();
+}
+
 int message::seq(void) const
 {
     query select(_db, "SELECT (seq) from %s WHERE uid='%s';",

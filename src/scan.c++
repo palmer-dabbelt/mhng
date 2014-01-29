@@ -22,6 +22,7 @@
 #include <libmh/message.h++>
 #include <libmh/mhdir.h++>
 #include <libmh/options.h++>
+#include <string.h>
 
 int main(const int argc, const char **argv)
 {
@@ -34,11 +35,13 @@ int main(const int argc, const char **argv)
     /* Loops through every message in the folder, printing out
      * information about it. */
     for (auto mit = folder.messages(); !mit.done(); ++mit) {
-        printf("%3d %s %-25.25s %-40.40s\n",
+        printf("%c %2d %s %-25.25s %-42.42s%c\n",
+               (*mit).cur() ? '*' : ' ',
                (*mit).seq(),
                (*mit).date().ddmm().c_str(),
                (*mit).from().c_str(),
-               (*mit).subject().c_str()
+               (*mit).subject().c_str(),
+               strlen((*mit).subject().c_str()) > 42 ? '\\' : ' '
             );
     }
 
