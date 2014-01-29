@@ -46,6 +46,11 @@ namespace mh {
         const int _argc;
         const char **_argv;
 
+        /* Holds the folder name if one was passed on the command
+         * line. */
+        bool _folder_valid;
+        const std::string _folder;
+
     public:
         /* Calls the cooresponding constructor but returns a shared
          * pointer. */
@@ -58,6 +63,11 @@ namespace mh {
         /* Prints the database file, usually within the MH
          * directory. */
         const std::string dbfile(void) const;
+
+        /* Returns the folder name if one was passed on the
+         * commandline. */
+        bool folder_valid(void) const { return _folder_valid; }
+        const std::string folder(void) const { return _folder; }
 
     private:
         /* Parses a set of options, given the commandline arguments

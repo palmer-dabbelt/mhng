@@ -30,27 +30,9 @@ using namespace mhimap;
 #endif
 
 folder::folder(const std::string name, client *c)
-    : _name(name)
+    : _name(name),
+      _uidvalidity(c->select(name))
 {
-    char buffer[BUFFER_SIZE];
-    bool uidvalidity_valid = false;
-
-    logger l("folder::folder('%s', ...)", name.c_str());
-
-    command select(c, "SELECT \"%s\"", name.c_str());
-
-    while (c->gets(buffer, BUFFER_SIZE) > 0) {
-        if (select.is_end(buffer))
-            break;
-
-        if (sscanf(buffer, "* OK [UIDVALIDITY %u] ", &_uidvalidity) == 1)
-            uidvalidity_valid = true;
-    }
-
-    if (uidvalidity_valid == false) {
-        fprintf(stderr, "No UIDVALIDITY response obtained\n");
-        abort();
-    }
 }
 
 folder folder::rename(const std::string new_name) const

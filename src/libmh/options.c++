@@ -54,6 +54,7 @@ const std::string options::dbfile(void) const
 
 options::options(int argc, const char **argv)
     : _argc(argc),
-      _argv(argv)
+      _argv(argv),
+      _folder_valid(false)
 {
 }

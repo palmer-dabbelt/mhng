@@ -51,14 +51,9 @@ namespace mhimap {
                      const std::string password
             );
 
-        /* This overrides the default IMAP folder listing with one
-         * that closely matches GMail's hard-coded folder expectations
-         * with MH's hard-coded folder expectations. */
+        /* mh::client overrides. */
         typename mhimap::folder_iter folder_iter(void);
-
-        /* Again, anything that has to do with folders needs to be
-         * overridden when it comes to GMail. */
-        void send_idle(const std::string folder_name);
+        virtual uint32_t select(const std::string name);
 
     private:
         /* Installs a folder map entry in both directions -- this

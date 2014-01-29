@@ -28,9 +28,8 @@ int main(const int argc, const char **argv)
     auto o = mh::options::create(argc, argv);
     mh::mhdir dir(o);
 
-    /* FIXME: The current folder name should be read from some sort of
-     * internal table, but I haven't actually set that up yet. */
-    mh::folder folder = dir.open_folder("inbox");
+    /* Opens the default folder. */
+    mh::folder folder = dir.open_folder();
 
     /* Loops through every message in the folder, printing out
      * information about it. */

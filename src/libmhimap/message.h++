@@ -55,6 +55,11 @@ namespace mhimap {
         /* Accessor functions. */
         uint32_t uid(void) const { return _uid; }
         const std::string folder_name(void) const { return _folder.name(); }
+
+        /* Creates a new message that is exactly the same as this
+         * message but in a different folder.  This is useful for IMAP
+         * servers that name their messages wrong. */
+        message to_folder(folder f) const { return message(f, _uid); }
     };
 }
 

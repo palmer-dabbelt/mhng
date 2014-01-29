@@ -55,6 +55,9 @@ namespace mh {
         bool folder_exists(const std::string folder_name);
         folder open_folder(const std::string folder_name);
 
+        /* Opens the default folder. */
+        folder open_folder(void);
+
         /* Obtains an IMAP store, which is kind of like a gated
          * connection to the database that allows particular sorts of
          * queries to some IMAP-related tables.  This should probably

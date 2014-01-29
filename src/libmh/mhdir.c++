@@ -21,6 +21,7 @@
 
 #define _BSD_SOURCE
 
+#include "db/query.h++"
 #include "mhdir.h++"
 #include <stdio.h>
 #include <unistd.h>
@@ -58,11 +59,25 @@ bool mhdir::folder_exists(const std::string folder_name)
 folder mhdir::open_folder(const std::string folder_name)
 {
     if (!folder_exists(folder_name)) {
-        fprintf(stderr, "Opened a folder that doesn't exist!");
+        fprintf(stderr, "folder '%s' doesn't exist\n", folder_name.c_str());
         abort();
     }
 
     return folder(folder_name, _o, _db);
+}
+
+folder mhdir::open_folder(void)
+{
+    if (_o->folder_valid())
+        return folder(_o->folder(), _o, _db);
+
+    db::query def(_db, "SELECT folder from MH__default;");
+    for (auto it = def.results(); !it.done(); ++it) {
+        auto fname = (*it).get("folder");
+        return folder(fname, _o, _db);
+    }
+
+    return folder("inbox", _o, _db);
 }
 
 imap_store mhdir::get_imap_store(void)

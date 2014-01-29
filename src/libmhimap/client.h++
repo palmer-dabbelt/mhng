@@ -77,7 +77,7 @@ namespace mhimap {
         virtual typename mhimap::message_iter message_iter(const folder f);
 
         /* Returns a vector of all the messages in the system. */
-        std::vector<message> messages(const folder f);
+        virtual std::vector<message> messages(const folder f);
 
         /* Returns TRUE when */
         virtual bool is_connected(void) const = 0;
@@ -97,6 +97,13 @@ namespace mhimap {
 
         /* Fetches a message, storing it in the given file. */
         virtual void fetch_to_file(const message m, FILE *f);
+
+        /* Selects a given folder on the IMAP server, returning the
+         * UIDVALIDITY value sent back.  Note that if no UIDVALIDITY
+         * is returned then this will abort(). */
+        uint32_t select(const folder &f);
+        uint32_t select(const message &m);
+        virtual uint32_t select(const std::string name);
 
     protected:
         /* A pair of functions that do raw readinig and writing

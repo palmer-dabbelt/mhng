@@ -101,12 +101,8 @@ std::vector<message> client::messages(const folder f)
         abort();
     }
 
-    /* SELECTs the server. */
-    command select(this, "SELECT %s", folder_name.c_str());
-    while (gets(buffer, BUFFER_SIZE) > 0) {
-        if (select.is_end(buffer))
-            break;
-    }
+    /* Enters this folder. */
+    select(f);
 
     /* This just selects every message in the inbox and passes that
      * exact string along to the iterator we're passing out. */
@@ -135,14 +131,9 @@ void client::send_idle(const std::string folder_name)
     logger l("client::send_idle('%s')", folder_name.c_str());
     char buffer[BUFFER_SIZE];
 
-    l.printf("select(...)");
-    command select(this, "SELECT %s", folder_name.c_str());
-    do {
-        l.printf("gets(...)");
-        gets(buffer, BUFFER_SIZE);
 
-        l.printf("is_end(...)");
-    } while (!select.is_end(buffer));
+    l.printf("select(...)");
+    select(folder_name);
 
     l.printf("idle(...)");
     command idle(this, "IDLE");
@@ -177,11 +168,7 @@ void client::fetch_to_file(const message m, FILE *f)
 {
     char buffer[BUFFER_SIZE];
 
-    command select(this, "SELECT \"%s\"", m.folder_name().c_str());
-    while (gets(buffer, BUFFER_SIZE) > 0) {
-        if (select.is_end(buffer))
-            break;
-    }
+    select(m);
 
     command fetch(this, "UID FETCH %u RFC822", m.uid());
     if (gets(buffer, BUFFER_SIZE) <= 0) {
@@ -296,6 +283,40 @@ void client::logout(void)
     if (logout.is_error_end(buffer)) {
         fprintf(stderr, "Error while logging out: '%s'\n", buffer);
     }
+}
+
+uint32_t client::select(const folder &f)
+{
+    return select(f.name());
+}
+
+uint32_t client::select(const message &m)
+{
+    return select(m.folder_name());
+}
+
+uint32_t client::select(const std::string name)
+{
+    char buffer[BUFFER_SIZE];
+    bool uidvalidity_valid = false;
+    uint32_t uidvalidity;
+
+    command select(this, "SELECT \"%s\"", name.c_str());
+
+    while (gets(buffer, BUFFER_SIZE) > 0) {
+        if (select.is_end(buffer))
+            break;
+
+        if (sscanf(buffer, "* OK [UIDVALIDITY %u] ", &uidvalidity) == 1)
+            uidvalidity_valid = true;
+    }
+
+    if (uidvalidity_valid == false) {
+        fprintf(stderr, "No UIDVALIDITY response obtained\n");
+        abort();
+    }
+
+    return uidvalidity;
 }
 
 ssize_t client::puts(const char *buffer)
