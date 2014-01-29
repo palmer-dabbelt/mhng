@@ -33,6 +33,11 @@ temp_file temp_file::open(const std::string folder)
     snprintf(buffer, BUFFER_SIZE, "%s/temp_file-XXXXXX", folder.c_str());
 
     int fd = mkstemp(buffer);
+    if (fd < 0) {
+        fprintf(stderr, "Unable to open temp file '%s'\n", buffer);
+        abort();
+    }
+
     return temp_file(fdopen(fd, "w"), buffer);
 }
 
