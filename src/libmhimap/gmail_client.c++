@@ -82,12 +82,20 @@ typename mhimap::folder_iter gmail_client::folder_iter(void)
 
 uint32_t gmail_client::select(const std::string fn)
 {
-    if (_m2g.find(fn) == _m2g.end()) {
+    /* Look and see if this is a GMail folder name that we know about
+     * -- in that case we can just select it directly. */
+    if (_g2m.find(fn) != _g2m.end())
+        return ssl_client::select(fn);
+
+    /* If this isn't a GMail name that we know about, then convert it
+     * into a GMail name so we can actually access the folder. */
+    auto found = _m2g.find(fn);
+    if (found == _m2g.end()) {
         fprintf(stderr, "SELECT on unmapped folder: '%s'\n", fn.c_str());
         abort();
     }
 
-    return ssl_client::select(fn);
+    return ssl_client::select(found->second);
 }
 
 void gmail_client::add_folder_map(const std::string m, const std::string g)
