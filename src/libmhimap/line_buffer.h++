@@ -47,7 +47,7 @@ namespace mhimap {
         /* Returns a buffer that can be used to recharge this buffer
          * with data.  The size of this buffer will never be 0, but it
          * could be exceedingly small (ie, 1).  */
-        ssize_t recharge_size(void) const;
+        ssize_t recharge_size(void);
         char *recharge_buffer(void) const;
 
         /* Commits a recharge request based upon the actual size that

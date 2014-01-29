@@ -52,7 +52,7 @@ bool line_buffer::has_line(void) const
     return false;
 }
 
-ssize_t line_buffer::recharge_size(void) const
+ssize_t line_buffer::recharge_size(void)
 {
     assert(used >= 0);
     assert(used < count);
@@ -61,6 +61,18 @@ ssize_t line_buffer::recharge_size(void) const
 
     ssize_t out = (count - used) - 1;
     l.printf("==> %ld", out);
+
+    if (out == 0) {
+        auto new_data = new char[count * 2];
+        memcpy(new_data, data, count);
+        auto old_data = data;
+        data = new_data;
+        count *= 2;
+        delete old_data;
+
+        return recharge_size();
+    }
+
     return out;
 }
 
