@@ -115,6 +115,11 @@ bool ssl_client::is_connected(void) const
 
 ssize_t ssl_client::read(char *buffer, ssize_t buffer_size)
 {
+    if (buffer_size == 0) {
+        fprintf(stderr, "ssl_client::read(): invalid buffer size of 0\n");
+        abort();
+    }
+
     return session.recv(buffer, buffer_size);
 }
 
