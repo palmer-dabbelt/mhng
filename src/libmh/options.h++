@@ -49,7 +49,7 @@ namespace mh {
         /* Holds the folder name if one was passed on the command
          * line. */
         bool _folder_valid;
-        const std::string _folder;
+        std::string _folder;
 
         /* Holds the sequence number if one was passed on the command
          * line. */

@@ -21,6 +21,7 @@
 
 #include "options.h++"
 #include <stdio.h>
+#include <string.h>
 
 using namespace mh;
 
@@ -58,4 +59,21 @@ options::options(int argc, const char **argv)
       _folder_valid(false),
       _seq_valid(false)
 {
+    for (int i = 1; i < argc; i++) {
+        if (argv[i][0] == '+') {
+            /* Any name that starts with "+" is always a folder. */
+            _folder_valid = true;
+            _folder = (argv[i] + 1);
+        } else if (atoi(argv[i]) > 0) {
+            /* Anything that can be parsed as an integer is a sequence
+             * number. */
+            _seq_valid = true;
+            _seq = atoi(argv[i]);
+        } else {
+            /* Anything else is assumed to be a folder name -- this
+             * will almost certainly need to be changed later! */
+            _folder_valid = true;
+            _folder = argv[i];
+        }
+    }
 }
