@@ -57,6 +57,11 @@ namespace mh {
          * races. */
         const std::string full_path(void) const;
 
+        /* Opens the current message in this folder -- note that this
+         * requires a database lookup in order to determine exactly
+         * which message should be opened. */
+        message open_current(void) const;
+
         /* Opens a message based on the sequence number associated
          * with a message.  This is a short, integer name that's
          * designed to be easily used by the commandline. */

@@ -32,9 +32,8 @@ int main(int argc, const char **argv)
     /* Opens the default folder. */
     mh::folder folder = dir.open_folder();
 
-    /* FIXME: The current message name should be read from some sort
-     * of internal table, but I haven't actually set that up yet. */
-    mh::message message = folder.open_seq(7);
+    /* Reads the current message from the given folder. */
+    mh::message message = folder.open_current();
 
     /* Reads the full message contents from disk. */
     mh::message_file mf = message.read();

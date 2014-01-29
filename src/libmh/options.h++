@@ -51,6 +51,11 @@ namespace mh {
         bool _folder_valid;
         const std::string _folder;
 
+        /* Holds the sequence number if one was passed on the command
+         * line. */
+        bool _seq_valid;
+        int _seq;
+
     public:
         /* Calls the cooresponding constructor but returns a shared
          * pointer. */
@@ -68,6 +73,11 @@ namespace mh {
          * commandline. */
         bool folder_valid(void) const { return _folder_valid; }
         const std::string folder(void) const { return _folder; }
+
+        /* Returns the message sequence if one was passed on the
+         * commandline. */
+        bool seq_valid(void) const { return _seq_valid; }
+        int seq(void) const { return _seq; }
 
     private:
         /* Parses a set of options, given the commandline arguments
