@@ -55,9 +55,19 @@ CONFIG      += libmh_headers
 BINARIES    += scan
 SOURCES     += scan.c++
 
-# Shows a single message to the console.
+# Shows a single message to the console, optionally moving to the next
+# or previous message in the list.
 BINARIES    += show
 SOURCES     += show.c++
+COMPILEOPTS += -DSHOW
+
+BINARIES    += next
+SOURCES     += show.c++
+COMPILEOPTS += -DNEXT
+
+BINARIES    += prev
+SOURCES     += show.c++
+COMPILEOPTS += -DPREV
 
 ##############################################################################
 # Remote-Access Binaries                                                     #

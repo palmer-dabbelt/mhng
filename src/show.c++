@@ -24,6 +24,15 @@
 #include <libmh/mhdir.h++>
 #include <libmh/options.h++>
 
+/* Ensure that we've set up at least one of these #defines, which
+ * determine exactly how this program will behave. */
+#if defined(SHOW)
+#elif defined(PREV)
+#elif defined(NEXT)
+#else
+#error "Define SHOW, PREV, or NEXT"
+#endif
+
 int main(int argc, const char **argv)
 {
     auto o = mh::options::create(argc, argv);
