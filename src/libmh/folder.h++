@@ -69,6 +69,10 @@ namespace mh {
 
         /* Lists all the messages in this folder. */
         message_iter messages(void) const;
+
+        /* Returns a count of the number of messages in this
+         * folder. */
+        size_t message_count(void) const;
     };
 }
 

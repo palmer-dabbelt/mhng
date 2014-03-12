@@ -120,3 +120,17 @@ message_iter folder::messages(void) const
 
     return message_iter(messages);
 }
+
+size_t folder::message_count(void) const
+{
+    size_t count = 0;
+
+    db::query select(_db, "SELECT (uid) FROM %s WHERE folder='%s';",
+                     "MH__messages", _name.c_str());
+
+    for (auto it = select.results(); !it.done(); ++it) {
+        count++;
+    }
+
+    return count;
+}
