@@ -39,7 +39,7 @@
 using namespace mhimap;
 
 #ifndef CAFILE
-#define CAFILE "/etc/ssl/certs/ca.pem"
+#define CAFILE "/usr/share/ca-certificates/mozilla/Equifax_Secure_CA.crt"
 #endif
 
 #ifndef CAFMT
