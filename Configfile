@@ -50,6 +50,12 @@ CONFIG      += libmh_headers
 ##############################################################################
 # Local-Access Binaries                                                      #
 ##############################################################################
+# Lists the folders that are currently known by this client.  Note
+# that this has nothing to do with the on-server folders that may be
+# being fetched by some IMAP client...
+BINARIES    += folders
+SOURCES     += folders.c++
+
 # Lists the messages in the given folder, defaulting to the currently
 # selected folder.
 BINARIES    += scan
