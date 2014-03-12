@@ -106,3 +106,16 @@ message mhdir::insert(const std::string folder_name, temp_file &file)
 {
     return message::insert(open_folder(folder_name), _o, _db, file);
 }
+
+folder_iter mhdir::folders(void) const
+{
+    std::vector<folder> f;
+
+    db::query select(_db, "SELECT DISTINCT (folder) from MH__messages;");
+    for (auto it = select.results(); !it.done(); ++it) {
+        auto fname = (*it).get("folder");
+        f.push_back(folder(fname, _o, _db));
+    }
+
+    return folder_iter(f);
+}

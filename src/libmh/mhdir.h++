@@ -27,6 +27,7 @@ namespace mh {
 }
 
 #include "folder.h++"
+#include "folder_iter.h++"
 #include "imap_store.h++"
 #include "message.h++"
 #include "options.h++"
@@ -80,6 +81,9 @@ namespace mh {
          * computing a whole bunch of metadata about the message and
          * does a few fsync()s. */
         message insert(const std::string folder_name, temp_file &file);
+
+        /* Lists all the folders this directory knows about. */
+        folder_iter folders(void) const;
     };
 }
 
