@@ -62,6 +62,8 @@ gmail_client::gmail_client(const std::string username,
     add_folder_map("sent", "[Gmail]/Sent Mail");
     add_folder_map("spam", "[Gmail]/Spam");
     add_folder_map("trash", "[Gmail]/All Mail");
+    add_folder_map("lists", "Lists");
+    add_folder_map("rss", "RSS");
 }
 
 typename mhimap::folder_iter gmail_client::folder_iter(void)
