@@ -64,6 +64,7 @@ gmail_client::gmail_client(const std::string username,
     add_folder_map("trash", "[Gmail]/All Mail");
     add_folder_map("lists", "Lists");
     add_folder_map("rss", "RSS");
+    add_folder_map("promo", "Promo");
 }
 
 typename mhimap::folder_iter gmail_client::folder_iter(void)
