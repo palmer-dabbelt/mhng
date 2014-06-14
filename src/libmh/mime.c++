@@ -40,7 +40,9 @@ mime::mime(void)
       _body(),
       _hname(""),
       _hcont(""),
-      _hfirst(true)
+      _hfirst(true),
+      _in_continue(false),
+      _continue("")
 {
 }
 
@@ -191,7 +193,34 @@ void mime::parse(const std::string buffer)
     }
 
     if (!_in_headers) {
-        _body.push_back(buffer);
+        /* We're going to look within the buffer right now, so it's
+         * best to make sure it's not empty first. */
+        if (strlen(buffer.c_str()) == 0) {
+            _body.push_back(buffer);
+            return;
+        }
+
+        /* MIME allows lines to be continued with '=' as the last
+         * character, so we need to strip and merge lines here. */
+        if (buffer.c_str()[strlen(buffer.c_str()) - 1] == '=') {
+            char newbuf[BUFFER_SIZE];
+            snprintf(newbuf, BUFFER_SIZE, "%s", buffer.c_str());
+            newbuf[strlen(newbuf) - 1] = '\0';
+
+            if (_in_continue)
+                _continue = _continue + newbuf;
+            else
+                _continue = newbuf;
+
+            _in_continue = true;
+        } else {
+            if (_in_continue) {
+                _body.push_back(_continue + buffer);
+                _in_continue = false;
+            } else
+                _body.push_back(buffer);
+        }
+
         return;
     }
 

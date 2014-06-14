@@ -68,6 +68,11 @@ namespace mh {
         std::string _hname, _hcont;
         bool _hfirst;
 
+        /* MIME messages can have their body parts continued when the
+         * line ends with an '=' character. */
+        bool _in_continue;
+        std::string _continue;
+
     public:
         /* Creates a new MIME message, which begins as initially
          * empty.  It's expected that you fill the message one at a
