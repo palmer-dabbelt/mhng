@@ -168,22 +168,7 @@ message message::folder_search(const std::string folder_name,
 
 message_file message::read(void)
 {
-    query qf(_db, "SELECT (folder) from %s WHERE uid=%s;",
-             TABLE, _id.string().c_str());
-
-    for (auto it = qf.results(); !it.done(); ++it) {
-        const std::string fn = (*it).get("folder");
-
-        char target_fn[BUFFER_SIZE];
-        snprintf(target_fn, BUFFER_SIZE, "%s/mail/%s/%s",
-                 _o->mhdir().c_str(), fn.c_str(), _id.string().c_str());
-
-        return message_file(target_fn);
-    }
-
-    fprintf(stderr, "No UID found for message\n");
-    abort();
-    return message_file("");
+    return message_file(this->on_disk_path());
 }
 
 bool message::cur(void) const
@@ -261,6 +246,24 @@ const typename mh::date message::date(void) const
     return mh::date("");
 }
 
+const std::string message::on_disk_path(void) const
+{
+    query qf(_db, "SELECT (folder) from %s WHERE uid=%s;",
+             TABLE, _id.string().c_str());
+
+    for (auto it = qf.results(); !it.done(); ++it) {
+        const std::string fn = (*it).get("folder");
+
+        char target_fn[BUFFER_SIZE];
+        snprintf(target_fn, BUFFER_SIZE, "%s/mail/%s/%s",
+                 _o->mhdir().c_str(), fn.c_str(), _id.string().c_str());
+
+        return target_fn;
+    }
+
+    fprintf(stderr, "No UID found for message '%s'\n", id().string().c_str());
+    abort();
+}
 
 message::message(uid id, const options_ptr o, db::connection_ptr db)
     : _id(id),

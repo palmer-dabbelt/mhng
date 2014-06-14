@@ -24,6 +24,7 @@
 
 namespace mh {
     class message;
+    class imap_store;
 }
 
 #include "date.h++"
@@ -39,6 +40,8 @@ namespace mh {
 namespace mh {
     /* Represents a single MH message. */
     class message {
+        friend class imap_store;
+
     private:
         const uid _id;
         const options_ptr _o;
@@ -76,6 +79,12 @@ namespace mh {
         const std::string to(void) const;
         const std::string subject(void) const;
         const typename mh::date date(void) const;
+        const uid id(void) const { return _id; }
+
+        /* Returns the full path to a message's storage on disk.  Note
+         * that you probably shouldn't be using this for
+         * anything... */
+        const std::string on_disk_path(void) const;
 
     private:
         /* Constructs a new message.  Use one of the operations above

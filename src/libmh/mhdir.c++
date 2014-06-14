@@ -119,3 +119,18 @@ folder_iter mhdir::folders(void) const
 
     return folder_iter(f);
 }
+
+void mhdir::remove(const message &m)
+{
+    auto path = m.on_disk_path();
+
+    db::query del(_db, "DELETE from MH__messages WHERE uid='%s';",
+                  m.id().string().c_str());
+
+    if (del.successful() == false) {
+        fprintf(stderr, "Unable to remove message\n");
+        abort();
+    }
+
+    unlink(path.c_str());
+}

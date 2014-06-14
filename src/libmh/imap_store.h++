@@ -24,10 +24,12 @@
 
 namespace mh {
     class imap_store;
+    class message;
 }
 
 #include "message.h++"
 #include "options.h++"
+#include "uid.h++"
 #include "db/connection.h++"
 #include <libmhimap/message.h++>
 
@@ -73,7 +75,15 @@ namespace mh {
          * sure to keep this in the same transaction as when you
          * insert the message into the MH store so there's no
          * inconsistencies. */
-        void insert(const mhimap::message &m);
+        void insert(const mhimap::message &m, uid mhid);
+
+        /* Looks up a message given the IMAP UID, returning a
+         * reference to that message if it does happen to exist. */
+        message lookup(const std::string folder, uint32_t uid);
+
+        /* Removes an IMAP messages from the store.  As usual, make
+         * sure this is within a transaction! */
+        void remove(const mhimap::message &m);
     };
 }
 

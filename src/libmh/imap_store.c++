@@ -106,7 +106,9 @@ bool imap_store::has(const std::string folder, uint32_t uid)
 
             create_table create(_db, MSG_TBL,
                                 table_col("folder", col_type::STRING, true),
-                                table_col("uid", col_type::INTEGER, true));
+                                table_col("uid", col_type::INTEGER, true),
+                                table_col("mhid", col_type::INTEGER, true)
+                );
             
             if (create.successful() == false) {
                 fprintf(stderr, "Error creating table '%s'\n", MSG_TBL);
@@ -145,15 +147,40 @@ std::vector<uint32_t> imap_store::uids(const std::string folder)
     return out;
 }
 
-void imap_store::insert(const mhimap::message &m)
+void imap_store::insert(const mhimap::message &m, uid mhid)
 {
-    query ins(_db, "INSERT into %s (folder, uid) VALUES ('%s', %d);",
-              MSG_TBL, m.folder_name().c_str(), m.uid());
+    query ins(_db, "INSERT into %s (folder, uid, mhid) VALUES ('%s', %d, %s);",
+              MSG_TBL, m.folder_name().c_str(), m.uid(), mhid.string().c_str());
 
     if (ins.successful() == false) {
         fprintf(stderr, "Unable to insert message\n");
         fprintf(stderr, "  (%d): %s\n", ins.error_code(),
                 ins.error_string());
+        abort();
+    }
+}
+
+message imap_store::lookup(const std::string folder, uint32_t imapid)
+{
+    query sel(_db, "SELECT (mhid) from %s WHERE folder='%s' AND uid=%d;",
+              MSG_TBL, folder.c_str(), imapid);
+
+    for (auto it = sel.results(); !it.done(); ++it) {
+        uid mhid((*it).get("mhid"));
+        return message(mhid, _o, _db);
+    }
+
+    fprintf(stderr, "Unable to find '%s':%d\n", folder.c_str(), imapid);
+    abort();
+}
+
+void imap_store::remove(const mhimap::message &m)
+{
+    query del(_db, "DELETE from %s WHERE folder='%s' AND uid=%d;",
+              MSG_TBL, m.folder_name().c_str(), m.uid());
+
+    if (del.successful() == false) {
+        fprintf(stderr, "Unable to remove message\n");
         abort();
     }
 }

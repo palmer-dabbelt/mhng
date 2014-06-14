@@ -84,6 +84,9 @@ namespace mh {
 
         /* Lists all the folders this directory knows about. */
         folder_iter folders(void) const;
+
+        /* Removes a message from the MH directory. */
+        void remove(const message &m);
     };
 }
 

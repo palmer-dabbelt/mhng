@@ -141,7 +141,21 @@ int main(int argc, const char **argv)
 
                 dir.trans_up();
                 auto m = dir.insert((*it).folder_name(), tmp);
-                imap_store.insert(*it);
+                imap_store.insert(*it, m.id());
+                dir.trans_down();
+            }
+
+            /* Remove messages that are only on the client. */
+            /* FIXME: There is a race condition here because the
+             * filesystem is not synchronized with respect to the SQL
+             * database.  I guess I should probably be storing blobs
+             * in SQL, but I'm not really ready to commit to that
+             * yet... */
+            for (const auto& im: conly) {
+                auto m = imap_store.lookup(im.folder_name(), im.uid());
+                dir.trans_up();
+                dir.remove(m);
+                imap_store.remove(im);
                 dir.trans_down();
             }
         }
