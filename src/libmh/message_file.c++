@@ -33,7 +33,9 @@ using namespace mh;
 enum state {
     STATE_HEADERS,
     STATE_HCONT,
-    STATE_PLAIN,
+    STATE_PLAIN_EAT,
+    STATE_PLAIN, /* Don't directly transition here, use
+                  * "STATE_PLAIN_EAT" instead. */
     STATE_MIME,
 };
 
@@ -65,7 +67,7 @@ message_file::message_file(const std::string full_path)
             /* An empty line means the headers are over. */
             if (strlen(buffer) == 0) {
                 add_header(hname, hcont);
-                state = _plain_text ? STATE_PLAIN : STATE_MIME;
+                state = _plain_text ? STATE_PLAIN_EAT : STATE_MIME;
                 for (auto it = headers("content-type"); !it.done(); ++it) {
                     _mime->set_root_content_type(*it);
                 }
@@ -98,7 +100,7 @@ message_file::message_file(const std::string full_path)
             /* An empty line means the headers are over. */
             if (strlen(buffer) == 0) {
                 add_header(hname, hcont);
-                state = _plain_text ? STATE_PLAIN : STATE_MIME;
+                state = _plain_text ? STATE_PLAIN_EAT : STATE_MIME;
                 for (auto it = headers("content-type"); !it.done(); ++it) {
                     _mime->set_root_content_type(*it);
                 }
@@ -129,6 +131,25 @@ message_file::message_file(const std::string full_path)
             }
 
             break;
+
+        case STATE_PLAIN_EAT:
+            /* Some people (I'm looking at you, Krste) start all their
+             * messages with a gratuitous newline.  This fixes the
+             * problem by eating blank lines until we end up with one
+             * that's not blank. */
+            if (strcmp(buffer, "") == 0)
+                continue;
+
+            /* As soon as we get a non-blank line then we should just
+             * move to parsing this like a regular plain-text mail.
+             * Note that this should be the only state transition to
+             * "STATE_PLAIN", the rest should come through
+             * "STATE_PLAIN_EAT". */
+            state = STATE_PLAIN;
+
+            /* There's an explicit fall-through to STATE_PLAIN here in
+             * order to actually add this line, as we don't want to
+             * drop the first non-empty line. */
 
         case STATE_PLAIN:
             _body.push_back(buffer);
