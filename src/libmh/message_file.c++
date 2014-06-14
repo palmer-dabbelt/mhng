@@ -256,7 +256,7 @@ void message_file::add_header(std::string h, std::string v)
     if (strcmp(h.c_str(), "") == 0)
         return;
 
-    if (strcmp(h.c_str(), "mime-version"))
+    if (strcmp(h.c_str(), "mime-version") == 0)
         _plain_text = false;
 
     auto found = _headers.find(h);
