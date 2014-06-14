@@ -19,6 +19,7 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <libmh/global_mailrc.h++>
 #include <libmh/message.h++>
 #include <libmh/message_file.h++>
 #include <libmh/mhdir.h++>
@@ -47,21 +48,24 @@ int main(int argc, const char **argv)
     /* Reads the full message contents from disk. */
     mh::message_file mf = message.read();
 
+    /* Opens up a mailrc. */
+    auto mailrc = mh::global_mailrc();
+
     /* Passes everything through a pager. */
     FILE *less = popen("less", "w");
 
     /* Format the headers. */
     for (auto it = mf.headers_address("From"); !it.done(); ++it) {
-        fprintf(less, "From:    %s\n", (*it).c_str());
+        fprintf(less, "From:    %s\n", mailrc->mail2long(*it).c_str());
     }
     for (auto it = mf.headers_address("To"); !it.done(); ++it) {
-        fprintf(less, "To:      %s\n", (*it).c_str());
+        fprintf(less, "To:      %s\n", mailrc->mail2long(*it).c_str());
     }
     for (auto it = mf.headers_address("CC"); !it.done(); ++it) {
-        fprintf(less, "CC:      %s\n", (*it).c_str());
+        fprintf(less, "CC:      %s\n", mailrc->mail2long(*it).c_str());
     }
     for (auto it = mf.headers_address("BCC"); !it.done(); ++it) {
-        fprintf(less, "BCC:     %s\n", (*it).c_str());
+        fprintf(less, "BCC:     %s\n", mailrc->mail2long(*it).c_str());
     }
     for (auto it = mf.headers("Subject"); !it.done(); ++it) {
         fprintf(less, "Subject: %s\n", (*it).c_str());
