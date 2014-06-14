@@ -73,6 +73,10 @@ namespace mh {
         /* Returns a count of the number of messages in this
          * folder. */
         size_t message_count(void) const;
+
+        /* Increments (or decrements) the sequence number by an
+         * amount. */
+        void seek_seq(int offset);
     };
 }
 

@@ -134,3 +134,26 @@ size_t folder::message_count(void) const
 
     return count;
 }
+
+void folder::seek_seq(int offset)
+{
+    if (_db->table_exists(TABLE) == false) {
+        abort();
+    }
+
+    query seq(_db, "SELECT (seq) FROM %s WHERE folder='%s';",
+              TABLE, _name.c_str());
+
+    for (auto it = seq.results(); !it.done(); ++it) {
+        int seq = atoi((*it).get("seq").c_str());
+        seq += offset;
+
+        query rseq(_db, "REPLACE INTO %s (folder, seq) VALUES ('%s', %d);",
+                   TABLE, _name.c_str(), seq);
+
+        if (rseq.successful() == false) {
+            fprintf(stderr, "Unable to seek\n");
+            abort();
+        }
+    }
+}

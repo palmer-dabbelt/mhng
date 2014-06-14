@@ -48,6 +48,13 @@ int main(int argc, const char **argv)
     /* Reads the full message contents from disk. */
     mh::message_file mf = message.read();
 
+#if defined(SHOW)
+#elif defined(PREV)
+    folder.seek_seq(-1);
+#elif defined(NEXT)
+    folder.seek_seq(1);
+#endif
+
     /* Opens up a mailrc. */
     auto mailrc = mh::global_mailrc();
 
