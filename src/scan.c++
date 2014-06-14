@@ -22,6 +22,7 @@
 #include <libmh/message.h++>
 #include <libmh/mhdir.h++>
 #include <libmh/options.h++>
+#include <libmh/global_mailrc.h++>
 #include <string.h>
 
 int main(const int argc, const char **argv)
@@ -32,6 +33,9 @@ int main(const int argc, const char **argv)
     /* Opens the default folder. */
     mh::folder folder = dir.open_folder();
 
+    /* Opens up a mailrc. */
+    auto mailrc = mh::global_mailrc();
+
     /* Loops through every message in the folder, printing out
      * information about it. */
     for (auto mit = folder.messages(); !mit.done(); ++mit) {
@@ -39,7 +43,7 @@ int main(const int argc, const char **argv)
                (*mit).cur() ? '*' : ' ',
                (*mit).seq(),
                (*mit).date().ddmm().c_str(),
-               (*mit).from().c_str(),
+               mailrc->mail2name((*mit).from()).c_str(),
                (*mit).subject().c_str(),
                strlen((*mit).subject().c_str()) > 42 ? '\\' : ' '
             );
