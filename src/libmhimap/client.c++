@@ -170,14 +170,14 @@ void client::fetch_to_file(const message m, FILE *f)
 
     select(m);
 
-    command fetch(this, "UID FETCH %u RFC822", m.uid());
+    command fetch(this, "UID FETCH %u BODY.PEEK[]", m.uid());
     if (gets(buffer, BUFFER_SIZE) <= 0) {
         fprintf(stderr, "Some sort of disconnect on FETCH\n");
         abort();
     }
     uint32_t seq, uid;
     ssize_t size;
-    int r = sscanf(buffer, "* %u FETCH (UID %u RFC822 {%ld}",
+    int r = sscanf(buffer, "* %u FETCH (UID %u BODY[] {%ld}",
                    &seq, &uid, &size);
     if (r != 3) {
         fprintf(stderr, "Unable to parse RFC882 FETCH header\n");
