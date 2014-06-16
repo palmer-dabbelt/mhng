@@ -107,7 +107,8 @@ bool imap_store::has(const std::string folder, uint32_t uid)
             create_table create(_db, MSG_TBL,
                                 table_col("folder", col_type::STRING, true),
                                 table_col("uid", col_type::INTEGER, true),
-                                table_col("mhid", col_type::INTEGER, true)
+                                table_col("mhid", col_type::INTEGER, true),
+                                table_col("purge", col_type::INTEGER, false)
                 );
             
             if (create.successful() == false) {
@@ -149,7 +150,7 @@ std::vector<uint32_t> imap_store::uids(const std::string folder)
 
 void imap_store::insert(const mhimap::message &m, uid mhid)
 {
-    query ins(_db, "INSERT into %s (folder, uid, mhid) VALUES ('%s', %d, %s);",
+    query ins(_db, "INSERT into %s (folder, uid, mhid, purge) VALUES ('%s', %d, %s, 0);",
               MSG_TBL, m.folder_name().c_str(), m.uid(), mhid.string().c_str());
 
     if (ins.successful() == false) {
@@ -181,6 +182,28 @@ void imap_store::remove(const mhimap::message &m)
 
     if (del.successful() == false) {
         fprintf(stderr, "Unable to remove message\n");
+        abort();
+    }
+}
+
+void imap_store::remove(const mh::message &m)
+{
+    query del(_db, "DELETE from %s WHERE mhid=%s;",
+              MSG_TBL, m.id().string().c_str());
+
+    if (del.successful() == false) {
+        fprintf(stderr, "Unable to remove message\n");
+        abort();
+    }
+}
+
+void imap_store::mark_for_removal(const mh::message &m)
+{
+    query mark(_db, "UPDATE %s SET purge = 1 WHERE mhid=%s;",
+               MSG_TBL, m.id().string().c_str());
+
+    if (mark.successful() == false) {
+        fprintf(stderr, "Unable to mark message for removal\n");
         abort();
     }
 }

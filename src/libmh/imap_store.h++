@@ -84,6 +84,11 @@ namespace mh {
         /* Removes an IMAP messages from the store.  As usual, make
          * sure this is within a transaction! */
         void remove(const mhimap::message &m);
+        void remove(const mh::message &m);
+
+        /* Marks a message for removal, which means the message will
+         * be removed next time IMAP ends up being synchronized. */
+        void mark_for_removal(const mh::message &m);
     };
 }
 
