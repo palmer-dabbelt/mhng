@@ -65,6 +65,8 @@ int main(int argc, const char **argv)
         for (auto fit = c.folder_iter(); !fit.done(); ++fit) {
             const std::string fname((*fit).name());
 
+            printf("folder '%s'\n", fname.c_str());
+
             /* Here we build up the set of messages that now exist on
              * the server but haven't yet been fetched to the
              * client. */
@@ -73,7 +75,7 @@ int main(int argc, const char **argv)
             /* Folders that don't already exist in our MH directory
              * just get ignored, but not silently anymore! */
             if (dir.folder_exists(fname.c_str()) == false) {
-                printf("skipping '%s', not in mhdir\n", fname.c_str());
+                printf("  skipping not in mhdir\n");
                 continue;
             }
 
@@ -103,6 +105,7 @@ int main(int argc, const char **argv)
              * building up a quick reference of UIDs on the server,
              * and a list of messages that exist on the server but not
              * on our machine. */
+            printf("  Lising New Messages\n");
             for (auto mit = c.message_iter(*fit); !mit.done(); ++mit) {
                 /* FIXME: Is this really the best way to insert
                  * something into a map?  That can't possibly be
@@ -115,9 +118,16 @@ int main(int argc, const char **argv)
 
                 /* If the message doesn't exist on the client then we
                  * want to add it to the list of messages to fetch. */
-                if (imap_store.has((*fit).name(), (*mit).uid()) == false)
+                if (imap_store.has((*fit).name(), (*mit).uid()) == false) {
+                    printf("    New Message '%s':%u\n",
+                           (*fit).name().c_str(),
+                           (*mit).uid()
+                        );
                     sonly.push_back(*mit);
+                }
             }
+
+            printf("  End of new messages\n");
 
             /* Walk the list of messages that exist on the local
              * machine, trying to figure out which are no longer on
@@ -136,7 +146,12 @@ int main(int argc, const char **argv)
              * machine.  I do this first in order to avoid losing any
              * messages in a move (in other words, duplicate messages
              * are better than lost messages). */
+            printf("  Fetching Messages\n");
             for (auto it = sonly.begin(); it != sonly.end(); ++it) {
+                printf("    Fetching Message: '%s':%u\n",
+                       (*it).folder_name().c_str(),
+                       (*it).uid()
+                    );
                 auto tmp = dir.get_tmp();
                 c.fetch_to_file(*it, tmp.fp());
 
@@ -145,6 +160,7 @@ int main(int argc, const char **argv)
                 imap_store.insert(*it, m.id());
                 dir.trans_down();
             }
+            printf("  Done fetching messages\n");
 
             /* Remove messages that are only on the client. */
             /* FIXME: There is a race condition here because the
