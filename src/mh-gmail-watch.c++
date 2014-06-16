@@ -58,16 +58,17 @@ int main(int argc, const char **argv)
          * local machine but no longer exist on the server. */
         std::vector<mhimap::message> conly;
 
-        /* Here we build up the set of messages that now exist on the
-         * server but haven't yet been fetched to the client. */
-        std::vector<mhimap::message> sonly;
-
         /* Check for new messages in every folder.  This way we'll be
          * sure to fetch all new messages before removing any, which
          * means that nothing should get lost even if things
          * disconnect in the middle. */
         for (auto fit = c.folder_iter(); !fit.done(); ++fit) {
             const std::string fname((*fit).name());
+
+            /* Here we build up the set of messages that now exist on
+             * the server but haven't yet been fetched to the
+             * client. */
+            std::vector<mhimap::message> sonly;
 
             /* Folders that don't already exist in our MH directory
              * just get ignored, but not silently anymore! */
