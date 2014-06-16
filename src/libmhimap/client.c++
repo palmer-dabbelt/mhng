@@ -332,7 +332,6 @@ void client::mark_as_deleted(const message &m)
     command store(this, "UID STORE %u +FLAGS (\\Deleted)", m.uid());
     do {
         gets(buffer, BUFFER_SIZE);
-        fprintf(stderr, "STORE read buffer: '%s'\n", buffer);
     } while (!store.is_end(buffer));
 }
 
