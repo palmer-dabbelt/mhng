@@ -22,7 +22,6 @@
 #include <libmh/message.h++>
 #include <libmh/mhdir.h++>
 #include <libmh/options.h++>
-#include <libmh/log.h++>
 #include <libmhimap/message.h++>
 
 int main(const int argc, const char **argv)
