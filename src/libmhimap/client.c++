@@ -319,6 +319,23 @@ uint32_t client::select(const std::string name)
     return uidvalidity;
 }
 
+void client::mark_as_deleted(const message &m)
+{
+    char buffer[BUFFER_SIZE];
+
+    auto uidv = select(m);
+    if (uidv != m.owning_folder().uidvalidity()) {
+        fprintf(stderr, "UIDVALIDITY Changed!\n");
+        abort();
+    }
+
+    command store(this, "UID STORE %u +FLAGS (\\Deleted)", m.uid());
+    do {
+        gets(buffer, BUFFER_SIZE);
+        fprintf(stderr, "STORE read buffer: '%s'\n", buffer);
+    } while (!store.is_end(buffer));
+}
+
 ssize_t client::puts(const char *buffer)
 {
     logger l("client::puts('%s')", buffer);

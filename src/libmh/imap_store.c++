@@ -207,3 +207,17 @@ void imap_store::mark_for_removal(const mh::message &m)
         abort();
     }
 }
+
+bool imap_store::needs_purge(const mhimap::message &m)
+{
+    query sel(_db, "SELECT (purge) from %s WHERE folder='%s' AND uid=%d;",
+              MSG_TBL, m.folder_name().c_str(), m.uid());
+
+    for (auto it = sel.results(); !it.done(); ++it) {
+        int purge = atoi((*it).get("purge").c_str());
+        return purge == 1;
+    }
+
+    fprintf(stderr, "Unable to find message\n");
+    abort();
+}

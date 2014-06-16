@@ -89,6 +89,10 @@ namespace mh {
         /* Marks a message for removal, which means the message will
          * be removed next time IMAP ends up being synchronized. */
         void mark_for_removal(const mh::message &m);
+
+        /* Returns TRUE if the given message has been marked for
+         * removal. */
+        bool needs_purge(const mhimap::message &m);
     };
 }
 

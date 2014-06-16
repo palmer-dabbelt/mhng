@@ -175,6 +175,23 @@ int main(int argc, const char **argv)
                 imap_store.remove(im);
                 dir.trans_down();
             }
+
+            /* Remove all the messages that have been marked as
+             * needing a purge. */
+            printf("  Purging Messages\n");
+            for (auto mit = c.message_iter(*fit); !mit.done(); ++mit) {
+                if (imap_store.needs_purge(*mit) == false)
+                    continue;
+
+                printf("    Purging Message: '%s':%u\n",
+                       (*mit).folder_name().c_str(),
+                       (*mit).uid()
+                    );
+
+                c.mark_as_deleted(*mit);
+                imap_store.remove(*mit);
+            }
+            printf("  End Purging Messages\n");
         }
 
         /* Waits for the server to say anything back to us. */

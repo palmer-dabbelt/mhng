@@ -105,6 +105,10 @@ namespace mhimap {
         uint32_t select(const message &m);
         virtual uint32_t select(const std::string name);
 
+        /* Sets the deleted flag on the server for the given
+         * message. */
+        void mark_as_deleted(const message &m);
+
     protected:
         /* A pair of functions that do raw readinig and writing
          * from/to the IMAP socket.  These need to be implemented by
