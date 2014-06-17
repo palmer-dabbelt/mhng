@@ -54,10 +54,10 @@ namespace mh {
          * sure the requested folder exists before attempting to open
          * it. */
         bool folder_exists(const std::string folder_name);
-        folder open_folder(const std::string folder_name);
+        folder open_folder(const std::string folder_name, bool commit = false);
 
         /* Opens the default folder. */
-        folder open_folder(void);
+        folder open_folder(bool commit = false);
 
         /* Obtains an IMAP store, which is kind of like a gated
          * connection to the database that allows particular sorts of

@@ -31,7 +31,7 @@ int main(const int argc, const char **argv)
     mh::mhdir dir(o);
 
     /* Opens the default folder. */
-    mh::folder folder = dir.open_folder();
+    mh::folder folder = dir.open_folder(true);
 
     /* Opens up a mailrc. */
     auto mailrc = mh::global_mailrc();

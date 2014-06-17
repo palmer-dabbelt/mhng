@@ -40,7 +40,7 @@ int main(int argc, const char **argv)
     mh::mhdir dir(o);
 
     /* Opens the default folder. */
-    mh::folder folder = dir.open_folder();
+    mh::folder folder = dir.open_folder(true);
 
     /* Reads the current message from the given folder. */
     mh::message message = folder.open_current();

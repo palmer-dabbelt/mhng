@@ -57,12 +57,15 @@ bool mhdir::folder_exists(const std::string folder_name)
     return true;
 }
 
-folder mhdir::open_folder(const std::string folder_name)
+folder mhdir::open_folder(const std::string folder_name, bool commit)
 {
     if (!folder_exists(folder_name)) {
         fprintf(stderr, "folder '%s' doesn't exist\n", folder_name.c_str());
         abort();
     }
+
+    if (commit == false)
+        return folder(folder_name, _o, _db);
 
     if (_db->table_exists("MH__default") == false) {
         fprintf(stderr, "Table 'MH__default' doesn't exist\n");
@@ -91,10 +94,10 @@ folder mhdir::open_folder(const std::string folder_name)
     return folder(folder_name, _o, _db);
 }
 
-folder mhdir::open_folder(void)
+folder mhdir::open_folder(bool commit)
 {
     if (_o->folder_valid())
-        return open_folder(_o->folder());
+        return open_folder(_o->folder(), commit);
 
     db::query def(_db, "SELECT (folder) from MH__default;");
     for (auto it = def.results(); !it.done(); ++it) {
