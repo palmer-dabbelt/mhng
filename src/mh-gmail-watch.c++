@@ -194,6 +194,7 @@ int main(int argc, const char **argv)
             printf("  End Purging Messages\n");
         }
 
+#if defined(WATCH)
         /* Waits for the server to say anything back to us. */
         mhimap::idle_response res = idle_c.wait_idle();
         switch (res) {
@@ -205,6 +206,11 @@ int main(int argc, const char **argv)
             abort();
             break;
         }
+#elif defined(FETCH)
+        exit(0);
+#else
+#error "Define an access mode"
+#endif
     }
 
     return 0;
