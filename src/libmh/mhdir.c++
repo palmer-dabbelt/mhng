@@ -22,6 +22,7 @@
 #define _BSD_SOURCE
 
 #include "db/query.h++"
+#include "db/create_table.h++"
 #include "mhdir.h++"
 #include <stdio.h>
 #include <unistd.h>
@@ -63,15 +64,39 @@ folder mhdir::open_folder(const std::string folder_name)
         abort();
     }
 
+    if (_db->table_exists("MH__default") == false) {
+        fprintf(stderr, "Table 'MH__default' doesn't exist\n");
+
+        db::create_table create(_db, "MH__default",
+                                db::table_col("folder", db::col_type::STRING)
+            );
+
+        if (create.successful() == false) {
+            fprintf(stderr, "Unable to create table 'MH__default'\n");
+            abort();
+        }
+
+        db::query insert(_db, "INSERT into %s (folder) VALUES ('%s');",
+                         "MH__default", folder_name.c_str());
+    }
+
+    db::query up(_db, "UPDATE MH__default SET folder='%s' WHERE folder != '';",
+                 folder_name.c_str());
+
+    if (up.successful() == false) {
+        fprintf(stderr, "Unable to update current folder\n");
+        abort();
+    }
+
     return folder(folder_name, _o, _db);
 }
 
 folder mhdir::open_folder(void)
 {
     if (_o->folder_valid())
-        return folder(_o->folder(), _o, _db);
+        return open_folder(_o->folder());
 
-    db::query def(_db, "SELECT folder from MH__default;");
+    db::query def(_db, "SELECT (folder) from MH__default;");
     for (auto it = def.results(); !it.done(); ++it) {
         auto fname = (*it).get("folder");
         return folder(fname, _o, _db);

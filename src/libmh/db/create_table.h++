@@ -32,6 +32,9 @@ namespace mh {
         class create_table: public query {
         public:
             create_table(connection_ptr db, const std::string name,
+                         table_col c0);
+
+            create_table(connection_ptr db, const std::string name,
                          table_col c0, table_col c1);
 
             create_table(connection_ptr db, const std::string name,

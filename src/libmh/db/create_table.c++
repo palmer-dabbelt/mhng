@@ -30,6 +30,28 @@ using namespace mh::db;
 #endif
 
 create_table::create_table(connection_ptr db, const std::string name,
+                           table_col c0)
+    : query(db)
+{
+    char buffer[BUFFER_SIZE];
+
+    if (c0.unique == true) {
+        snprintf(buffer, BUFFER_SIZE,
+                 "CREATE TABLE %s(%s %s, UNIQUE(%s));", name.c_str(),
+                 c0.name.c_str(), to_string(c0.type),
+                 c0.name.c_str()
+            );
+    } else {
+        snprintf(buffer, BUFFER_SIZE,
+                 "CREATE TABLE %s(%s %s);", name.c_str(),
+                 c0.name.c_str(), to_string(c0.type)
+            );
+    }
+
+    run(buffer);
+}
+
+create_table::create_table(connection_ptr db, const std::string name,
                            table_col c0, table_col c1)
     : query(db)
 {
