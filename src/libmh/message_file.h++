@@ -84,7 +84,7 @@ namespace mh {
             {
                 for (auto it = headers(header_name); !it.done(); ++it)
                     return *it;
-                abort();
+
                 return "";
             }
         const std::string header_address(const std::string header_name) const

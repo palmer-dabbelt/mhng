@@ -69,7 +69,35 @@ const mime *mime::search(const std::string type) const
 
 string_iter mime::body_utf8(void) const
 {
-    return string_iter(_body);
+    std::vector<std::string> filtered;
+
+    for (const auto& line: _body) {
+        char *buf = new char[strlen(line.c_str()) + 1];
+
+        size_t line_i = 0, buf_i = 0;
+        while (line_i < strlen(line.c_str())) {
+            if (line[line_i] != '=') {
+                buf[buf_i] = line[line_i];
+                buf_i++;
+                line_i++;
+            } else {
+                char hex[3];
+                hex[0] = line[line_i + 1];
+                hex[1] = line[line_i + 2];
+                hex[2] = '\0';
+
+                buf[buf_i] = strtol(hex, NULL, 16);
+                buf_i++;
+                line_i += 3;
+            }
+        }
+
+        buf[buf_i] = '\0';
+        filtered.push_back(buf);
+        delete[] buf;
+    }
+
+    return string_iter(filtered);
 }
 
 void mime::set_root_content_type(const std::string value)
