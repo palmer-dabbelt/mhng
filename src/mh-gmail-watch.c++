@@ -54,10 +54,6 @@ int main(int argc, const char **argv)
          * message. */
         mhimap::gmail_client c(GMAIL_USERNAME, GMAIL_PASSWORD);
 
-        /* Here we build up th set of messages that still exist on the
-         * local machine but no longer exist on the server. */
-        std::vector<mhimap::message> conly;
-
         /* Check for new messages in every folder.  This way we'll be
          * sure to fetch all new messages before removing any, which
          * means that nothing should get lost even if things
@@ -71,6 +67,10 @@ int main(int argc, const char **argv)
              * the server but haven't yet been fetched to the
              * client. */
             std::vector<mhimap::message> sonly;
+
+            /* Here we build up th set of messages that still exist on
+             * the local machine but no longer exist on the server. */
+            std::vector<mhimap::message> conly;
 
             /* Folders that don't already exist in our MH directory
              * just get ignored, but not silently anymore! */
