@@ -37,6 +37,9 @@ int main(const int argc, const char **argv)
 #if defined(SCAN)
     /* Opens the default folder. */
     mh::folder folder = dir.open_folder(true);
+#elif defined(INBOX)
+    /* Opens the inbox. */
+    mh::folder folder = dir.open_folder("inbox", true);
 #elif defined(POST)
     /* Opens the drafts folder, but doesn't commit it. */
     mh::folder folder = dir.open_folder("drafts", false);
@@ -52,7 +55,7 @@ int main(const int argc, const char **argv)
                (*mit).cur() ? '*' : ' ',
                (*mit).seq(),
                (*mit).date().ddmm().c_str(),
-#if defined(SCAN)
+#if defined(SCAN) || defined(INBOX)
                mailrc->mail2name((*mit).from()).c_str(),
 #elif defined(POST)
                mailrc->mail2name((*mit).to()).c_str(),
