@@ -47,5 +47,9 @@ int main(const int argc, const char **argv)
 
     dir.trans_down();
 
+    /* Move to the next message, as the current one doesn't make any
+     * sense. */
+    folder.seek_seq(1);
+
     return 0;
 }
