@@ -42,18 +42,20 @@ int main(int argc, const char **argv)
     /* Opens the default folder. */
     mh::folder folder = dir.open_folder(true);
 
-    /* Reads the current message from the given folder. */
-    mh::message message = folder.open_current();
-
-    /* Reads the full message contents from disk. */
-    mh::message_file mf = message.read();
-
+    /* Change messages BEFORE opening the message, which is what
+     * "next" is supposed to do. */
 #if defined(SHOW)
 #elif defined(PREV)
     folder.seek_seq(-1);
 #elif defined(NEXT)
     folder.seek_seq(1);
 #endif
+
+    /* Reads the current message from the given folder. */
+    mh::message message = folder.open_current();
+
+    /* Reads the full message contents from disk. */
+    mh::message_file mf = message.read();
 
     /* Opens up a mailrc. */
     auto mailrc = mh::global_mailrc();
