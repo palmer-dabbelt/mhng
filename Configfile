@@ -15,6 +15,9 @@ COMPILEOPTS += -pedantic
 # over.
 LANGUAGES   += h
 
+# Some commands are actually just scripts.
+LANGUAGES   += bash
+
 # The best way I've found for building internal C++ library
 # dependencies is to just let everything staticly link.
 LANGUAGES   += c++
@@ -78,6 +81,10 @@ COMPILEOPTS += -DPREV
 # Moves the current message to the trash
 BINARIES    += rmm
 SOURCES     += rmm.c++
+
+# Just "rmm && show"
+BINARIES    += mtn
+SOURCES     += mtn.bash
 
 ##############################################################################
 # Remote-Access Binaries                                                     #
