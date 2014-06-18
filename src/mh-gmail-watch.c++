@@ -171,7 +171,11 @@ int main(int argc, const char **argv)
             for (const auto& im: conly) {
                 auto m = imap_store.lookup(im.folder_name(), im.uid());
                 dir.trans_up();
-                dir.remove(m);
+                /* FIXME: How do we get into the state where a message
+                 * exists in the IMAP store but not within the actual
+                 * maildir? */
+                if (m.exists())
+                    dir.remove(m);
                 imap_store.remove(im);
                 dir.trans_down();
             }

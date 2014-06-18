@@ -81,6 +81,10 @@ namespace mh {
         const typename mh::date date(void) const;
         const uid id(void) const { return _id; }
 
+        /* Logically a message should always exist, but it appears
+         * sometimes I can get into a bad state where it doesn't. */
+        bool exists(void) const;
+
         /* Returns the full path to a message's storage on disk.  Note
          * that you probably shouldn't be using this for
          * anything... */

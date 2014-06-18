@@ -246,6 +246,17 @@ const typename mh::date message::date(void) const
     return mh::date("");
 }
 
+bool message::exists(void) const
+{
+    query select(_db, "SELECT (uid) from %s WHERE uid='%s';",
+                 TABLE, _id.string().c_str());
+    for (auto it = select.results(); !it.done(); ++it) {
+        return true;
+    }
+
+    return false;
+}
+
 const std::string message::on_disk_path(void) const
 {
     query qf(_db, "SELECT (folder) from %s WHERE uid=%s;",
