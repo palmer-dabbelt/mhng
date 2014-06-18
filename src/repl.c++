@@ -96,6 +96,15 @@ int main(int argc, const char **argv)
     fprintf(temp_file, "\n");
 
 #if defined(REPL)
+    /* Write out a little header that makes it apparent what's
+     * happening with the message. */
+    fprintf(temp_file, "On %s, %s wrote:\n",
+            source_mf.header_date("Date").local().c_str(),
+            mailrc->mail2name(source_mf.header_address("From")).c_str()
+        );
+#endif
+
+#if defined(REPL)
     /* Write out the body of the message, prefixed by a "> " to
      * indicate it's part of a reply. */
     size_t trailing_whitespace = 0;
