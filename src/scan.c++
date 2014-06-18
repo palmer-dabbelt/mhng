@@ -25,13 +25,22 @@
 #include <libmh/global_mailrc.h++>
 #include <string.h>
 
+#ifndef BUFFER_SIZE
+#define BUFFER_SIZE 1024
+#endif
+
 int main(const int argc, const char **argv)
 {
     auto o = mh::options::create(argc, argv);
     mh::mhdir dir(o);
 
+#if defined(SCAN)
     /* Opens the default folder. */
     mh::folder folder = dir.open_folder(true);
+#elif defined(POST)
+    /* Opens the drafts folder, but doesn't commit it. */
+    mh::folder folder = dir.open_folder("drafts", false);
+#endif
 
     /* Opens up a mailrc. */
     auto mailrc = mh::global_mailrc();
@@ -43,10 +52,34 @@ int main(const int argc, const char **argv)
                (*mit).cur() ? '*' : ' ',
                (*mit).seq(),
                (*mit).date().ddmm().c_str(),
+#if defined(SCAN)
                mailrc->mail2name((*mit).from()).c_str(),
+#elif defined(POST)
+               mailrc->mail2name((*mit).to()).c_str(),
+#endif
                (*mit).subject().c_str(),
                strlen((*mit).subject().c_str()) > 42 ? '\\' : ' '
             );
+
+#if defined(POST)
+        FILE *msmtp = popen("msmtp -t", "w");
+        FILE *msg = fopen((*mit).on_disk_path().c_str(), "r");
+
+        char line[BUFFER_SIZE];
+        while (fgets(line, BUFFER_SIZE, msg) != NULL)
+            fprintf(msmtp, "%s", line);
+        
+        int err = pclose(msmtp);
+        if (err != 0) {
+            perror("Unable to SMTP mail");
+            abort();
+        }
+
+        /* Remove the message that we just sent, it'll end up in the
+         * sent mail box  */
+        dir.remove(*mit);
+        dir.get_imap_store().mark_for_removal(*mit);
+#endif
     }
 
     return 0;

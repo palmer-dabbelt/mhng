@@ -63,6 +63,12 @@ SOURCES     += folders.c++
 # selected folder.
 BINARIES    += scan
 SOURCES     += scan.c++
+COMPILEOPTS += -DSCAN
+
+# Publishes and removes every message in the drafts folder
+BINARIES    += post
+SOURCES     += scan.c++
+COMPILEOPTS += -DPOST
 
 # Shows a single message to the console, optionally moving to the next
 # or previous message in the list.
