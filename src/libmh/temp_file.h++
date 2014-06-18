@@ -57,7 +57,6 @@ namespace mh {
          * is the filename. */
         void finish(void);
 
-    protected:
         /* You really shouldn't be accessing the filename of this
          * exactly, but should instead be passing this to a message in
          * order to insert it into the database. */

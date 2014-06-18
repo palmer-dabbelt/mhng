@@ -1,6 +1,6 @@
 
 /*
- * Copyright (C) 2013 Palmer Dabbelt
+ * Copyright (C) 2013,2014 Palmer Dabbelt
  *   <palmer@dabbelt.com>
  *
  * This file is part of mhng.
@@ -23,6 +23,7 @@
 #define LIBMH__MESSAGE_FILE_HXX
 
 #include "date_iter.h++"
+#include "header.h++"
 #include "mime.h++"
 #include "string_iter.h++"
 #include <map>
@@ -63,15 +64,20 @@ namespace mh {
 
         ~message_file(void);
 
+        /* Returns a raw version of the headers. */
+        std::vector<header_kv> headers(void) const;
+
         /* Iterates over all the headers whole name matches the given
          * string.  Matches are case-insensitive, and comma-seperated
          * address lists show up as just the email address with a
          * single item per entry. */
         string_iter headers(const std::string header_name) const;
+        string_iter headers(const std::vector<std::string> header_list) const;
 
         /* These are just like headers(), but they attempt to parse
          * the headers into more user-friendly sorts of formats. */
         string_iter headers_address(const std::string header_name) const;
+        string_iter headers_address(const std::vector<std::string> l) const;
         date_iter headers_date(const std::string header_name) const;
 
         /* Returns at iterator that lists all the files in the body of

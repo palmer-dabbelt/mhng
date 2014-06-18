@@ -53,6 +53,9 @@ namespace mh {
 
         /* Looks up the user's name for an email address. */
         const std::string mail2name(const std::string mail) const;
+
+        /* Returns TRUE if an address is a local address. */
+        bool local_p(const std::string mail) const;
     };
 }
 

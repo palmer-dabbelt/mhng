@@ -86,6 +86,17 @@ SOURCES     += rmm.c++
 BINARIES    += mtn
 SOURCES     += mtn.bash
 
+# Composes a reply to a message, using your editor of choice (hint:
+# it's emacs :)).
+BINARIES    += repl
+SOURCES     += repl.c++
+COMPILEOPTS += -DREPL
+
+# Composes a message
+BINARIES    += comp
+SOURCES     += repl.c++
+COMPILEOPTS += -DCOMP
+
 ##############################################################################
 # Remote-Access Binaries                                                     #
 ##############################################################################

@@ -119,6 +119,15 @@ const std::string mailrc::mail2name(const std::string mail) const
     return mail;
 }
 
+bool mailrc::local_p(const std::string mail) const
+{
+    auto l = _local_mail.find(mail);
+    if (l == _local_mail.end())
+        return false;
+
+    return l->second;
+}
+
 bool strsta(const std::string haystack, const std::string needle)
 {
     return (strncmp(haystack.c_str(), needle.c_str(), needle.length()) == 0);

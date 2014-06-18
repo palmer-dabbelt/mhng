@@ -190,6 +190,16 @@ message_file::~message_file(void)
     delete _mime;
 }
 
+std::vector<header_kv> message_file::headers(void) const
+{
+    std::vector<header_kv> v;
+    for (const auto& l: _headers)
+        for (const auto& h: l.second)
+            v.push_back(header_kv(l.first, h));
+
+    return v;
+}
+
 string_iter message_file::headers(const std::string header_name) const
 {
     std::string lower(header_name.c_str());
@@ -200,6 +210,18 @@ string_iter message_file::headers(const std::string header_name) const
         return string_iter(std::vector<std::string>());
 
     return string_iter(lookup->second);
+}
+
+string_iter
+message_file::headers(const std::vector<std::string> header_list) const
+{
+    std::vector<std::string> v;
+
+    for (const auto& h: header_list)
+        for (auto it = headers(h); !it.done(); ++it)
+            v.push_back(*it);
+
+    return string_iter(v);
 }
 
 string_iter message_file::headers_address(const std::string hn) const
@@ -243,6 +265,18 @@ string_iter message_file::headers_address(const std::string hn) const
     }
 
     return string_iter(values);
+}
+
+string_iter
+message_file::headers_address(const std::vector<std::string> header_list) const
+{
+    std::vector<std::string> v;
+
+    for (const auto& h: header_list)
+        for (auto it = headers_address(h); !it.done(); ++it)
+            v.push_back(*it);
+
+    return string_iter(v);
 }
 
 date_iter message_file::headers_date(const std::string hn) const
