@@ -134,7 +134,7 @@ int main(int argc, const char **argv)
 
     /* Open up $EDITOR to allow the user to edit the message. */
     char cmd[COMMAND_LENGTH];
-    snprintf(cmd, COMMAND_LENGTH, "emacs \"%s\"", 
+    snprintf(cmd, COMMAND_LENGTH, "emacs -nw \"%s\"", 
              temp_file_path.path().c_str());
     system(cmd);
 
