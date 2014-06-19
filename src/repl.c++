@@ -35,6 +35,15 @@
 #define DATE_LENGTH 128
 #endif
 
+#ifndef BUFFER_SIZE
+#define BUFFER_SIZE 1024
+#endif
+
+#ifdef REPL
+/* Formats a string as a reply string. */
+static std::string format_reply(const std::string subject);
+#endif
+
 int main(int argc, const char **argv)
 {
     auto o = mh::options::create(argc, argv);
@@ -83,7 +92,7 @@ int main(int argc, const char **argv)
     }
     for (auto it = source_mf.headers("Subject"); !it.done(); ++it) {
         if (mailrc->local_p(*it) == true) continue;
-        fprintf(temp_file, "Subject: Re: %s\n", (*it).c_str());
+        fprintf(temp_file, "Subject: %s\n", format_reply(*it).c_str());
     }
 #elif defined(COMP)
     fprintf(temp_file,
@@ -181,3 +190,16 @@ int main(int argc, const char **argv)
 
     return 0;
 }
+
+#ifdef REPL
+std::string format_reply(const std::string subject)
+{
+    char buf[BUFFER_SIZE];
+    snprintf(buf, BUFFER_SIZE, "Re: %s", subject.c_str());
+
+    if (strncasecmp(buf, "Re: Re:", 7) == 0)
+        return subject;
+
+    return buf;
+}
+#endif
