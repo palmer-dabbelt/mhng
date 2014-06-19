@@ -151,7 +151,7 @@ void folder::seek_seq(int offset)
         /* Attempt to find the next message along this seek path that
          * actually exists in the target. */
         /* FIXME: This MIN should be in SQL. */
-        query nseq(_db, "SELECT (seq) FROM %s WHERE folder='%s' AND seq>%d ORDER BY seq DESC;",
+        query nseq(_db, "SELECT (seq) FROM %s WHERE folder='%s' AND seq>=%d ORDER BY seq DESC;",
                    "MH__messages", _name.c_str(), seq);
         for (auto nit = nseq.results(); !nit.done(); ++nit) {
             seq = atoi((*nit).get("seq").c_str());
