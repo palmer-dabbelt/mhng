@@ -164,17 +164,30 @@ int main(int argc, const char **argv)
     auto filtered_file_path = dir.get_tmp();
     FILE *filtered_file = filtered_file_path.fp();
 
+    /* The headers that have addresses in them should be looked up in
+     * the address book */
+    std::vector<std::string> address_headers({"from", "to", "cc", "bcc"});
+    for (const auto& key: address_headers) {
+        for (auto it = edited_file.headers_address(key); !it.done(); ++it) {
+            fprintf(filtered_file, "%s: %s\n",
+                    key.c_str(),
+                    mailrc->mailias2long(*it).c_str()
+                );
+        }
+    }
+
+    /* The non-address headers are just copied directly over. */
     for (const auto& h: edited_file.headers()) {
-        /* Try to look up this address in our address book. */
-        auto value = h.value();
-        std::vector<std::string> af({"from", "to", "cc", "bcc"});
-        auto f = std::find(af.begin(), af.end(), h.key());
-        if (f != af.end())
-            value = mailrc->mailias2long(value);
+        auto f = std::find(address_headers.begin(),
+                           address_headers.end(),
+                           h.key()
+            );
+        if (f != address_headers.end())
+            continue;
 
         fprintf(filtered_file, "%s: %s\n",
                 h.key().c_str(),
-                value.c_str()
+                h.value().c_str()
             );
     }
 
