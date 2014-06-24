@@ -94,6 +94,10 @@ int main(int argc, const char **argv)
         if (mailrc->local_p(*it) == true) continue;
         fprintf(temp_file, "Subject: %s\n", format_reply(*it).c_str());
     }
+    for (auto it = source_mf.headers("Message-ID"); !it.done(); ++it) {
+        if (mailrc->local_p(*it) == true) continue;
+        fprintf(temp_file, "In-Reply-To: %s\n", (*it).c_str());
+    }
 #elif defined(COMP)
     fprintf(temp_file,
             "From:    \n"
