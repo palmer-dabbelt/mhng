@@ -26,6 +26,8 @@
 #include <libmh/options.h++>
 #include <time.h>
 #include <string.h>
+#include <unistd.h>
+#include <uuid.h>
 
 #ifndef COMMAND_LENGTH
 #define COMMAND_LENGTH 1024
@@ -181,6 +183,24 @@ int main(int argc, const char **argv)
         strftime(rfc_2822_date, DATE_LENGTH, "%a, %d %b %Y %T %z", &tm);
 
         fprintf(filtered_file, "Date: %s\n", rfc_2822_date);
+    }
+
+    /* Builds a new message ID and attaches it to the current
+     * message. */
+    {
+        uuid_t uuid;
+        uuid_generate(uuid);
+
+        char uuid_str[BUFFER_SIZE];
+        uuid_unparse(uuid, uuid_str);
+
+        char hostname[BUFFER_SIZE];
+        gethostname(hostname, BUFFER_SIZE);
+
+        char message_id[BUFFER_SIZE];
+        snprintf(message_id, BUFFER_SIZE, "mhng-%s@%s", uuid_str, hostname);
+
+        fprintf(filtered_file, "Message-ID: %s\n", message_id);
     }
 
     /* Drop in the message body right here. */
