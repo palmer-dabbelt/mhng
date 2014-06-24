@@ -70,11 +70,15 @@ mailrc::mailrc(const std::string path)
 
         if (strsta(buffer, "alias ")) {
             auto alias = skip_keyword(buffer);
+            char alias_str[BUFFER_SIZE];
+            sscanf(alias, "%s", alias_str);
 
             auto l = skip_keyword(alias);
 
             std::string name, addr;
             parse_pair(l, name, addr);
+
+            _alias2mail[alias_str] = addr;
 
             _mail2long[addr] = l;
             _mail2name[addr] = name;
@@ -117,6 +121,20 @@ const std::string mailrc::mail2name(const std::string mail) const
         return l->second;
 
     return mail;
+}
+
+const std::string mailrc::alias2mail(const std::string alias) const
+{
+    auto l = _alias2mail.find(alias);
+    if (l != _alias2mail.end())
+        return l->second;
+
+    return alias;
+}
+
+const std::string mailrc::mailias2long(const std::string mailias) const
+{
+    return mail2long(alias2mail(mailias));
 }
 
 bool mailrc::local_p(const std::string mail) const

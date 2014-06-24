@@ -42,6 +42,9 @@ namespace mh {
         /* Converts an email address to a name. */
         std::unordered_map<std::string, std::string> _mail2name;
 
+        /* Converts aliases to an email address. */
+        std::unordered_map<std::string, std::string> _alias2mail;
+
     public:
         /* The sanest way to create a mailrc file: pass the full path
          * to the file on disk. */
@@ -53,6 +56,13 @@ namespace mh {
 
         /* Looks up the user's name for an email address. */
         const std::string mail2name(const std::string mail) const;
+
+        /* Looks up the user's email from an alias. */
+        const std::string alias2mail(const std::string alias) const;
+
+        /* Looks up either an email address or an alias and converts
+         * it to a full, long name. */
+        const std::string mailias2long(const std::string mailias) const;
 
         /* Returns TRUE if an address is a local address. */
         bool local_p(const std::string mail) const;

@@ -24,6 +24,7 @@
 #include <libmh/message_file.h++>
 #include <libmh/mhdir.h++>
 #include <libmh/options.h++>
+#include <algorithm>
 #include <time.h>
 #include <string.h>
 #include <unistd.h>
@@ -79,22 +80,22 @@ int main(int argc, const char **argv)
 
     /* Write out the relevant headers to the file, somewhat modified
      * because this is a reply. */
-    fprintf(temp_file, "From:    %s\n", mailrc->mail2long(local).c_str());
+    fprintf(temp_file, "From:        %s\n", mailrc->mail2long(local).c_str());
     for (auto it = source_mf.headers_address("From"); !it.done(); ++it) {
         if (mailrc->local_p(*it) == true) continue;
-        fprintf(temp_file, "To:      %s\n", mailrc->mail2long(*it).c_str());
+        fprintf(temp_file, "To:          %s\n", mailrc->mail2long(*it).c_str());
     }
     for (auto it = source_mf.headers_address("To"); !it.done(); ++it) {
         if (mailrc->local_p(*it) == true) continue;
-        fprintf(temp_file, "CC:      %s\n", mailrc->mail2long(*it).c_str());
+        fprintf(temp_file, "CC:          %s\n", mailrc->mail2long(*it).c_str());
     }
     for (auto it = source_mf.headers_address("CC"); !it.done(); ++it) {
         if (mailrc->local_p(*it) == true) continue;
-        fprintf(temp_file, "CC:      %s\n", mailrc->mail2long(*it).c_str());
+        fprintf(temp_file, "CC:          %s\n", mailrc->mail2long(*it).c_str());
     }
     for (auto it = source_mf.headers("Subject"); !it.done(); ++it) {
         if (mailrc->local_p(*it) == true) continue;
-        fprintf(temp_file, "Subject: %s\n", format_reply(*it).c_str());
+        fprintf(temp_file, "Subject:     %s\n", format_reply(*it).c_str());
     }
     for (auto it = source_mf.headers("Message-ID"); !it.done(); ++it) {
         if (mailrc->local_p(*it) == true) continue;
@@ -164,9 +165,16 @@ int main(int argc, const char **argv)
     FILE *filtered_file = filtered_file_path.fp();
 
     for (const auto& h: edited_file.headers()) {
+        /* Try to look up this address in our address book. */
+        auto value = h.value();
+        std::vector<std::string> af({"from", "to", "cc", "bcc"});
+        auto f = std::find(af.begin(), af.end(), h.key());
+        if (f != af.end())
+            value = mailrc->mailias2long(value);
+
         fprintf(filtered_file, "%s: %s\n",
                 h.key().c_str(),
-                h.value().c_str()
+                value.c_str()
             );
     }
 
