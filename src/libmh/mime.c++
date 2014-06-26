@@ -69,6 +69,11 @@ const mime *mime::search(const std::string type) const
 
 string_iter mime::body_utf8(void) const
 {
+    /* If we're already in UTF-8 then just pass it out directly. */
+    if (strcmp(_encoding.c_str(), "UTF-8") == 0)
+        return string_iter(_body);
+
+    /* Everything else defaults to quoted-printable. */
     std::vector<std::string> filtered;
 
     for (const auto& line: _body) {
