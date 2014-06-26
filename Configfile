@@ -36,6 +36,8 @@ COMPILEOPTS += `ppkg-config gitdate++ --cflags`
 LINKOPTS    += `ppkg-config gitdate++ --libs`
 COMPILEOPTS += `ppkg-config uuid --cflags`
 LINKOPTS    += `ppkg-config uuid --libs`
+COMPILEOPTS += `ppkg-config ncurses --cflags`
+LINKOPTS    += `ppkg-config ncurses --libs`
 
 ##############################################################################
 # Libraries                                                                  #

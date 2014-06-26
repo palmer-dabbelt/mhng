@@ -24,10 +24,13 @@
 #include <libmh/options.h++>
 #include <libmh/global_mailrc.h++>
 #include <string.h>
+#include <termcap.h>
 
 #ifndef BUFFER_SIZE
 #define BUFFER_SIZE 1024
 #endif
+
+static char termbuf[2048];
 
 int main(const int argc, const char **argv)
 {
@@ -48,20 +51,30 @@ int main(const int argc, const char **argv)
     /* Opens up a mailrc. */
     auto mailrc = mh::global_mailrc();
 
+    /* Figure out the terminal size. */
+    int terminal_width = 80;
+    char *termtype = getenv("TERM");
+    if (tgetent(termbuf, termtype) >= 0) {
+        terminal_width = tgetnum("co");
+    }
+    int from_width = (terminal_width * 25) / 80;
+    int seq_width = (terminal_width > 120) ? 3 : 2;
+    int subject_width = terminal_width - from_width - seq_width - 11;
+
     /* Loops through every message in the folder, printing out
      * information about it. */
     for (auto mit = folder.messages(); !mit.done(); ++mit) {
-        printf("%c %2d %s %-25.25s %-42.42s%c\n",
+        printf("%c %*d %s %-*.*s %-*.*s%c\n",
                (*mit).cur() ? '*' : ' ',
-               (*mit).seq(),
+               seq_width, (*mit).seq(),
                (*mit).date().ddmm().c_str(),
 #if defined(SCAN) || defined(INBOX)
-               mailrc->mail2name((*mit).from()).c_str(),
+               from_width, from_width, mailrc->mail2name((*mit).from()).c_str(),
 #elif defined(POST)
-               mailrc->mail2name((*mit).to()).c_str(),
+               from_width, from_width, mailrc->mail2name((*mit).to()).c_str(),
 #endif
-               (*mit).subject().c_str(),
-               strlen((*mit).subject().c_str()) > 42 ? '\\' : ' '
+               subject_width, subject_width, (*mit).subject().c_str(),
+               strlen((*mit).subject().c_str()) > (size_t)(subject_width) ? '\\' : ' '
             );
 
 #if defined(POST)
