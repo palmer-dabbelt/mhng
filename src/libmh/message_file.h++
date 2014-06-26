@@ -97,14 +97,14 @@ namespace mh {
             {
                 for (auto it = headers_address(header_name); !it.done(); ++it)
                     return *it;
-                abort();
+
                 return "";
             }
         const date header_date(const std::string header_name) const
             {
                 for (auto it = headers_date(header_name); !it.done(); ++it)
                     return *it;
-                abort();
+
                 return date("");
             }
 
