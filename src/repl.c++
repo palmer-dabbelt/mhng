@@ -47,13 +47,18 @@
 static std::string format_reply(const std::string subject);
 #endif
 
+#ifdef FORW
+/* Formats a string as a reply string. */
+static std::string format_forward(const std::string subject);
+#endif
+
 int main(int argc, const char **argv)
 {
     auto o = mh::options::create(argc, argv);
     mh::mhdir dir(o);
     auto mailrc = mh::global_mailrc();
 
-#if defined(REPL)
+#if defined(REPL) || defined(FORW)
     /* Here we read the source message, which is the message that
      * we're templating the reply based on. */
     mh::folder source_folder = dir.open_folder(true);
@@ -101,6 +106,15 @@ int main(int argc, const char **argv)
         if (mailrc->local_p(*it) == true) continue;
         fprintf(temp_file, "In-Reply-To: %s\n", (*it).c_str());
     }
+#elif defined(FORW)
+    fprintf(temp_file,
+            "From:    \n"
+            "To:      \n"
+        );
+    for (auto it = source_mf.headers("Subject"); !it.done(); ++it) {
+        if (mailrc->local_p(*it) == true) continue;
+        fprintf(temp_file, "Subject: %s\n", format_forward(*it).c_str());
+    }
 #elif defined(COMP)
     fprintf(temp_file,
             "From:    \n"
@@ -120,7 +134,30 @@ int main(int argc, const char **argv)
         );
 #endif
 
-#if defined(REPL)
+#if defined(FORW)
+    /* Write out a little header that makes it apparent what's
+     * happening with the message. */
+    fprintf(temp_file, "---------- Forwarded message ----------\n");
+
+    for (auto it = source_mf.headers_address("From"); !it.done(); ++it) {
+        if (mailrc->local_p(*it) == true) continue;
+        fprintf(temp_file, "From:    %s\n", mailrc->mail2long(*it).c_str());
+    }
+    for (auto it = source_mf.headers_address("To"); !it.done(); ++it) {
+        if (mailrc->local_p(*it) == true) continue;
+        fprintf(temp_file, "To:      %s\n", mailrc->mail2long(*it).c_str());
+    }
+    for (auto it = source_mf.headers_address("CC"); !it.done(); ++it) {
+        if (mailrc->local_p(*it) == true) continue;
+        fprintf(temp_file, "CC:      %s\n", mailrc->mail2long(*it).c_str());
+    }
+    for (auto it = source_mf.headers("Subject"); !it.done(); ++it) {
+        if (mailrc->local_p(*it) == true) continue;
+        fprintf(temp_file, "Subject: %s\n", (*it).c_str());
+    }
+#endif
+
+#if defined(REPL) || defined(FORW)
     /* Write out the body of the message, prefixed by a "> " to
      * indicate it's part of a reply. */
     size_t trailing_whitespace = 0;
@@ -138,11 +175,24 @@ int main(int argc, const char **argv)
         /* Re-include trailing whitespace whenever it's actually
          * important. */
         for (size_t i = 0; i < trailing_whitespace; ++i)
+#if defined(REPL)
             fprintf(temp_file, "> \n");
+#elif defined(FORW)
+            fprintf(temp_file, "\n");
+#else
+#error "Define REPL or FORW"
+#endif
         trailing_whitespace = 0;
 
         /* Here we finally output the text of the message! */
+#if defined(REPL)
         fprintf(temp_file, "> %s\n", (*it).c_str());
+#elif defined(FORW)
+        fprintf(temp_file, "%s\n", (*it).c_str());
+#else
+#error "Define REPL or FORW"
+#endif
+
     }
 #endif
 
@@ -243,6 +293,19 @@ std::string format_reply(const std::string subject)
     snprintf(buf, BUFFER_SIZE, "Re: %s", subject.c_str());
 
     if (strncasecmp(buf, "Re: Re:", 7) == 0)
+        return subject;
+
+    return buf;
+}
+#endif
+
+#ifdef FORW
+std::string format_forward(const std::string subject)
+{
+    char buf[BUFFER_SIZE];
+    snprintf(buf, BUFFER_SIZE, "FW: %s", subject.c_str());
+
+    if (strncasecmp(buf, "FW: FW:", 7) == 0)
         return subject;
 
     return buf;

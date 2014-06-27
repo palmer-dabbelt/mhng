@@ -112,6 +112,11 @@ BINARIES    += comp
 SOURCES     += repl.c++
 COMPILEOPTS += -DCOMP
 
+# Forwards a message
+BINARIES    += forw
+SOURCES     += repl.c++
+COMPILEOPTS += -DFORW
+
 ##############################################################################
 # Remote-Access Binaries                                                     #
 ##############################################################################
