@@ -61,7 +61,7 @@ int main(int argc, const char **argv)
     auto mailrc = mh::global_mailrc();
 
     /* Passes everything through a pager. */
-    FILE *less = popen("less +g0", "w");
+    FILE *less = popen("fold -s | less +g0", "w");
 
     /* Format the headers. */
     for (auto it = mf.headers_address("From"); !it.done(); ++it) {
