@@ -57,6 +57,14 @@ namespace mh {
          * races. */
         const std::string full_path(void) const;
 
+        /* Frequently the current message will end up with an invalid
+         * sequence number, for example this can happen if the current
+         * message is removed.  This method will attempt to fix the
+         * problem by finding another "nearby" message, for some
+         * definition or nearby... (in other words, don't rely on
+         * exactly what that means). */
+        void canonicalize_current(void);
+
         /* Opens the current message in this folder -- note that this
          * requires a database lookup in order to determine exactly
          * which message should be opened. */

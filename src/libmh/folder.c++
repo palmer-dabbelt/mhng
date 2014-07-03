@@ -48,6 +48,70 @@ const std::string folder::full_path(void) const
     return buffer;
 }
 
+void folder::canonicalize_current(void)
+{
+    /* If we've never done anything then just don't touch stuff at
+     * all. */
+    if (_db->table_exists(TABLE) == false)
+        return;
+
+    /* Try and figure out what the current sequency number is, if
+     * there isn't any then just give up right now. */
+    query seq(_db, "SELECT (seq) FROM %s WHERE folder='%s';",
+              TABLE, _name.c_str());
+    int cur = -1;
+    for (auto it = seq.results(); !it.done(); ++it)
+        cur = atoi((*it).get("seq").c_str());
+    if (cur == -1)
+        return;
+
+    /* Check to see if the sequence number exists and if it does then
+     * just don't do anything else, we're already OK and don't want to
+     * force too many writes. */
+    query msg(_db, "SELECT (seq) FROM %s WHERE folder='%s' AND seq=%d;",
+              "MH__messages",
+              _name.c_str(),
+              cur
+        );
+    for (auto it = msg.results(); !it.done(); ++it)
+        return;
+
+    /* If we've made it here then there's no sequence number that
+     * matches what we think should be selected.  That means we should
+     * iterate through all the messages and try to find one that's
+     * close to what was requested. */
+    int ncur = -1;
+    query fcur(_db, "SELECT (seq) FROM %s WHERE folder='%s';",
+               "MH__messages",
+               _name.c_str()
+        );
+    for (auto it = fcur.results(); !it.done(); ++it) {
+        int check = atoi((*it).get("seq").c_str());
+
+        if (ncur < 0)
+            ncur = check;
+
+        if (abs(ncur - cur) > abs(check - cur))
+            ncur = check;
+    }
+
+    /* If no messages were found then we just need to give up now. */
+    if (ncur < 0)
+        return;
+
+    /* Now we simply need to store the new message ID into the
+     * database. */
+    query set(_db, "REPLACE INTO %s (folder, seq) VALUES ('%s', %d);",
+              TABLE,
+              _name.c_str(),
+              ncur
+        );
+    if (set.successful() == false) {
+        fprintf(stderr, "Unable to update table %s\n", TABLE);
+        abort();
+    }
+}
+
 message folder::open_current(void) const
 {
     /* This table holds the current sequence number for every folder,

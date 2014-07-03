@@ -38,6 +38,8 @@ int main(int argc, const char **argv)
     for (auto it = dir.folders(); !it.done(); ++it) {
         auto folder = *it;
 
+        folder.canonicalize_current();
+
         printf("%20s %10lu %10d\n",
                folder.name().c_str(),
                folder.message_count(),
