@@ -25,6 +25,7 @@
 #include "db/create_table.h++"
 #include "mhdir.h++"
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -83,14 +84,28 @@ folder mhdir::open_folder(const std::string folder_name, bool commit)
                          "MH__default", folder_name.c_str());
     }
 
-    db::query up(_db, "UPDATE MH__default SET folder='%s' WHERE folder != '';",
-                 folder_name.c_str());
+    _db->trans_up();
 
-    if (up.successful() == false) {
-        fprintf(stderr, "Unable to update current folder\n");
-        abort();
+    db::query check(_db, "SELECT (folder) FROM %s;",
+                    "MH__default");
+    std::string old_folder = "";
+    for (auto it = check.results(); !it.done(); ++it)
+        old_folder = (*it).get("folder");
+
+    if (strcmp(old_folder.c_str(), folder_name.c_str()) != 0) {
+        db::query up(_db,
+                     "UPDATE MH__default SET folder='%s' WHERE folder='%s';",
+                     folder_name.c_str(),
+                     old_folder.c_str()
+            );
+
+        if (up.successful() == false) {
+            fprintf(stderr, "Unable to update current folder\n");
+            abort();
+        }
     }
 
+    _db->trans_down();
     return folder(folder_name, _o, _db);
 }
 
