@@ -246,6 +246,17 @@ const typename mh::date message::date(void) const
     return mh::date("");
 }
 
+std::string message::folder_name(void) const
+{
+    query select(_db, "SELECT (folder) from %s WHERE uid='%s';",
+                 TABLE, _id.string().c_str());
+    for (auto it = select.results(); !it.done(); ++it) {
+        return (*it).get("folder");
+    }
+
+    return "";
+}
+
 bool message::exists(void) const
 {
     query select(_db, "SELECT (uid) from %s WHERE uid='%s';",
@@ -274,6 +285,49 @@ const std::string message::on_disk_path(void) const
 
     fprintf(stderr, "No UID found for message '%s'\n", id().string().c_str());
     abort();
+}
+
+void message::reseq(int nseq)
+{
+    /* This all needs to be within a transaction because we want to
+     * ensure that the changing of the current sequence number happens
+     * atomicly with changing the sequence number of this message.
+     * Additionally, we don't want any other messages jumping in the
+     * way. */
+    _db->trans_up();
+
+    /* We can't have duplicate sequence numbers, so we need to check
+     * to make sure there isn't already some message with this
+     * sequence number. */
+    query check(_db, "SELECT (seq) from %s WHERE folder='%s' AND seq=%d;",
+                TABLE, folder_name().c_str(), nseq);
+    for (auto it = check.results(); !it.done(); ++it) {
+        fprintf(stderr, "reseq %s/%d to duplicate seq %d\n",
+                folder_name().c_str(), seq(), nseq);
+        abort();
+    }
+
+    /* Check if we're current right now, as otherwise there'll be
+     * confusion after we've moved the sequence number. */
+    bool is_cur = cur();
+
+    query update(_db, "UPDATE %s SET seq=%d WHERE uid='%s';",
+                 TABLE, nseq, _id.string().c_str());
+    if (update.successful() == false) {
+        fprintf(stderr, "Failed to update\n");
+        abort();
+    }
+
+    if (is_cur) {
+        query ucur(_db, "UPDATE %s SET seq=%d WHERE folder='%s';",
+                   "MH__current", nseq, folder_name().c_str());
+        if (ucur.successful() == false) {
+            fprintf(stderr, "Failed to update current\n");
+            abort();
+        }
+    }
+
+    _db->trans_down();
 }
 
 message::message(uid id, const options_ptr o, db::connection_ptr db)

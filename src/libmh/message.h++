@@ -80,6 +80,7 @@ namespace mh {
         const std::string subject(void) const;
         const typename mh::date date(void) const;
         const uid id(void) const { return _id; }
+        std::string folder_name(void) const;
 
         /* Logically a message should always exist, but it appears
          * sometimes I can get into a bad state where it doesn't. */
@@ -89,6 +90,10 @@ namespace mh {
          * that you probably shouldn't be using this for
          * anything... */
         const std::string on_disk_path(void) const;
+
+        /* Changes the sequence number of a message to be something
+         * different. */
+        void reseq(int nseq);
 
     private:
         /* Constructs a new message.  Use one of the operations above

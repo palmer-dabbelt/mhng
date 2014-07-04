@@ -122,6 +122,12 @@ COMPILEOPTS += -DFORW
 BINARIES    += mh-urls
 SOURCES     += mh-urls.c++
 
+# Re-packs messages into folders.  This modifies the sequence numbers
+# such that the messages all stay in order but no longer have any
+# gaps.
+BINARIES    += mh-pack
+SOURCES     += mh-pack.c++
+
 ##############################################################################
 # Remote-Access Binaries                                                     #
 ##############################################################################
