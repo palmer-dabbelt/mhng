@@ -51,6 +51,10 @@ int main(int argc, const char **argv)
     folder.seek_seq(1);
 #endif
 
+    /* Make sure that we have a valid message before we try
+     * anything. */
+    folder.canonicalize_current();
+
     /* Reads the current message from the given folder. */
     mh::message message = folder.open_current();
 
