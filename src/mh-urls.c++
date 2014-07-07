@@ -33,6 +33,9 @@
 /* Returns a list of all the URLs in a single line. */
 static std::vector<std::string> find_urls_in(const std::string line);
 
+/* Returns TRUE when the given character terminates a URL. */
+static bool is_url_terminator(char c);
+
 int main(int argc, const char **argv)
 {
     auto o = mh::options::create(0, NULL);
@@ -114,7 +117,7 @@ std::vector<std::string> find_urls_in(const std::string line_cxx)
                 snprintf(url, BUFFER_SIZE, "%s", cur);
 
                 char *end = url;
-                while (*end != '\0' && !isspace(*end))
+                while (*end != '\0' && !is_url_terminator(*end))
                     end++;
                 *end = '\0';
 
@@ -129,4 +132,10 @@ std::vector<std::string> find_urls_in(const std::string line_cxx)
     return out;
 }
 
+bool is_url_terminator(char c)
+{
+    if (isspace(c))
+        return true;
 
+    return false;
+}
