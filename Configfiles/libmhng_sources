@@ -1,0 +1,8 @@
+#!/bin/bash
+
+cd src
+
+find libmhng -iname "*.c++" | while read file
+do
+    echo "SOURCES += $file"
+done

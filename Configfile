@@ -54,6 +54,11 @@ LIBRARIES   += libmh.so
 CONFIG      += libmh_sources
 CONFIG      += libmh_headers
 
+# The new MH library, which aims to replace the two libraries above.
+LIBRARIES   += libmhng.so
+CONFIG      += libmhng_sources
+CONFIG      += libmhng_headers
+
 ##############################################################################
 # Local-Access Binaries                                                      #
 ##############################################################################
