@@ -42,6 +42,15 @@ int main(int argc, const char **argv)
     /* Opens the default folder. */
     mh::folder folder = dir.open_folder(true);
 
+    /* If we're going to change the message then figure out what the
+     * old message was.  We need to do this because there's a
+     * canonicalize call in there that attempts to prevent this from
+     * crashing, but that means we can just end up at some arbitrary
+     * message. */
+#if defined(PREV) || defined(NEXT)
+    int old_id = folder.open_current().seq();
+#endif
+
     /* Change messages BEFORE opening the message, which is what
      * "next" is supposed to do. */
 #if defined(SHOW)
@@ -54,6 +63,20 @@ int main(int argc, const char **argv)
     /* Make sure that we have a valid message before we try
      * anything. */
     folder.canonicalize_current();
+
+    /* Check to see that the sequence number moved in the correct
+     * direction. */
+#if defined(PREV) || defined(NEXT)
+    int new_id = folder.open_current().seq();
+#if defined(PREV)
+    if (new_id >= old_id) {
+#elif defined(NEXT)
+    if (new_id <= old_id) {
+#endif
+        fprintf(stderr, "No more messages\n");
+        exit(1);
+    }
+#endif
 
     /* Reads the current message from the given folder. */
     mh::message message = folder.open_current();
