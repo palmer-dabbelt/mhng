@@ -19,30 +19,33 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mailbox.h++"
-#include "db/mh_messages.h++"
-using namespace mhng;
+#ifndef MHNG__SQLITE__RESULT_HXX
+#define MHNG__SQLITE__RESULT_HXX
 
-mailbox::mailbox(const std::string& path)
-    : _db(std::make_shared<sqlite::connection>(path + "/metadata.sqlite")),
-      _current_folder(this, _current_folder_func)
-{
-    
+#include <memory>
+
+namespace mhng {
+    namespace sqlite {
+        class result;
+        typedef std::shared_ptr<result> result_ptr;
+    }
 }
 
-folder_ptr mailbox::open_folder(std::string folder_name) const
-{
-    auto mh_messages = db::mh_messages();
+#include <sqlite3.h>
+#include <string>
 
-    fprintf(stderr, "UNIMPLEMENTED mailbox::open_folder('%s')\n",
-            folder_name.c_str()
-        );
-    abort();
-    return NULL;
+namespace mhng {
+    namespace sqlite {
+        /* Holds a single result. */
+        class result {
+        private:
+            
+        };
+
+        /* Results are paramaterized by */
+        template<class T> class result_t: public result {
+        };
+    }
 }
 
-folder_ptr mailbox::_current_folder_impl(void)
-{
-    /* FIXME: This needs to actually be implemented. */
-    return open_folder("inbox");
-}
+#endif
