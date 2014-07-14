@@ -137,5 +137,8 @@ bool is_url_terminator(char c)
     if (isspace(c))
         return true;
 
+    if (c == '>')
+        return true;
+
     return false;
 }
