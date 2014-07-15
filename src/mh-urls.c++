@@ -140,5 +140,8 @@ bool is_url_terminator(char c)
     if (c == '>')
         return true;
 
+    if (c == ')')
+        return true;
+
     return false;
 }
