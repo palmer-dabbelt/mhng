@@ -21,6 +21,7 @@
 
 #include "args.h++"
 #include "mailbox.h++"
+#include "sequence_number.h++"
 #include <unordered_map>
 using namespace mhng;
 
@@ -73,7 +74,12 @@ args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int fl
             fprintf(stderr, "Unimplemented\n");
             abort();
         } else {
-            folder_names = { dir->current_folder()->name() };
+            auto current_folder = dir->current_folder();
+            if (current_folder == NULL) {
+                fprintf(stderr, "Unable to obtain current folder\n");
+                abort();
+            }
+            folder_names = { current_folder->name() };
         }
     }
 
@@ -97,8 +103,11 @@ args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int fl
      * what it should be by default. */
     if (messages_written == false) {
         if (flags & pf_allm) {
-            fprintf(stderr, "Unimplemented\n");
-            abort();
+            for (const auto& folder: folders)
+                for (const auto& message: folder->messages())
+                    message_seqs.push_back(std::make_pair(folder->name(),
+                                                          message->seq()));
+
         } else {
             fprintf(stderr, "Unimplemented\n");
             abort();
@@ -108,6 +117,25 @@ args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int fl
     /* Now that we've got the message IDs we can go ahead and
      * construct them all. */
     std::vector<message_ptr> messages;
+    for (const auto& pair: message_seqs) {
+        auto seq_int = pair.second;
+        auto folder_name = pair.first;
+
+        /* First figure out the folder we want to look into.  If this
+         * fails it's some internal inconsistency, as the folder map
+         * should always be properly populated. */
+        auto l = folder_map.find(folder_name);
+        if (l == folder_map.end()) {
+            fprintf(stderr, "Unable to re-open folderd '%s'\n",
+                    folder_name.c_str());
+            abort();
+        }
+
+        auto folder = l->second;
+        auto seq = std::make_shared<sequence_number>(seq_int);
+        auto message = folder->open(seq);
+        messages.push_back(message);
+    }
 
     /* At this point everything should be fixed up so we can just go
      * ahead and construct the relevant argument structure. */

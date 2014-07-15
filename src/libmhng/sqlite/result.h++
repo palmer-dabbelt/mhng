@@ -31,19 +31,42 @@ namespace mhng {
     }
 }
 
-#include <sqlite3.h>
+#include "error_code.h++"
+#include <map>
 #include <string>
+#include <vector>
 
 namespace mhng {
     namespace sqlite {
-        /* Holds a single result. */
+        /* Holds the result of a SQL command. */
         class result {
         private:
-            
-        };
+            /* Here we handle the return code from SQLite.*/
+            bool _return_set;
+            enum error_code _return_value;
+            std::string _return_string;
 
-        /* Results are paramaterized by */
-        template<class T> class result_t: public result {
+            /* This contains the actual return data, which is the
+             * whole point of this object. */
+            std::vector<std::map<std::string, std::string>> _data;
+
+        public:
+            /* Creates a new result set that hasn't yet been
+             * finalized. */
+            result(void);
+
+        public:
+            /* Returns the error code (which can be "Success") that
+             * cooresponds to this command.  Note that you can only
+             * call this _after_ set_error()! */
+            enum error_code return_value(void) const;
+
+            /* This actually finalizes the construction of the result
+             * and makes it usable. */
+            void set_error(int code, std::string str);
+
+            /* Adds an entry to the list of results. */
+            void add_map(const std::map<std::string, std::string>& m);
         };
     }
 }

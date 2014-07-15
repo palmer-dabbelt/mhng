@@ -19,13 +19,18 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "table.h++"
-using namespace mhng;
-using namespace mhng::sqlite;
+#ifndef MHNG__SQLITE__ERROR_CODE_HXX
+#define MHNG__SQLITE__ERROR_CODE_HXX
 
-table::table(const std::string& name,
-             const std::vector<column_ptr>& cols)
-    : _name(name),
-      _cols(cols)
-{
+#include <sqlite3.h>
+#include <string>
+
+namespace mhng {
+    namespace sqlite {
+        enum class error_code {
+            SUCCESS = 0,
+        };
+    }
 }
+
+#endif

@@ -45,6 +45,10 @@ namespace mhng {
                 : _name(name)
                 {
                 }
+
+        public:
+            const std::string& name(void) const
+                { return _name; }
         };
 
         /* Represents a singel SQLite column type, which is actually

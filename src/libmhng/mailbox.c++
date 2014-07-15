@@ -21,24 +21,27 @@
 
 #include "mailbox.h++"
 #include "db/mh_messages.h++"
+#include <unistd.h>
 using namespace mhng;
 
 mailbox::mailbox(const std::string& path)
-    : _db(std::make_shared<sqlite::connection>(path + "/metadata.sqlite")),
+    : _path(path),
+      _db(std::make_shared<sqlite::connection>(path + "/metadata.sqlite")),
       _current_folder(this, _current_folder_func)
 {
-    
 }
 
 folder_ptr mailbox::open_folder(std::string folder_name) const
 {
-    auto mh_messages = db::mh_messages();
+    /* Check to see that this folder exists before trying to return
+     * it. */
+    auto folder_path = _path + "/mail/" + folder_name;
+    if (access(folder_path.c_str(), X_OK) != 0)
+        return NULL;
 
-    fprintf(stderr, "UNIMPLEMENTED mailbox::open_folder('%s')\n",
-            folder_name.c_str()
-        );
-    abort();
-    return NULL;
+    /* Now that we know we have access to the folder it's time to
+     * simply return a handle for that folder. */
+    return std::make_shared<folder>(_db, folder_name);
 }
 
 folder_ptr mailbox::_current_folder_impl(void)

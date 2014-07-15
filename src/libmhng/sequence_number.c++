@@ -19,13 +19,10 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "table.h++"
+#include "sequence_number.h++"
 using namespace mhng;
-using namespace mhng::sqlite;
 
-table::table(const std::string& name,
-             const std::vector<column_ptr>& cols)
-    : _name(name),
-      _cols(cols)
+sequence_number::sequence_number(int num)
+    : _num(num)
 {
 }

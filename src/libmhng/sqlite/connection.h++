@@ -61,23 +61,23 @@ namespace mhng {
              * default this will select every row and column, but it's
              * strongly suggested that you use better query
              * methods. */
-            std::vector<result_ptr> select(const table_ptr& table);
-            std::vector<result_ptr> select(const table_ptr& table,
+            result_ptr select(const table_ptr& table);
+            result_ptr select(const table_ptr& table,
                                            const std::vector<column_ptr>& c);
-            std::vector<result_ptr> select(const table_ptr& table,
+            result_ptr select(const table_ptr& table,
                                            const char *format,
                                            ...);
-            std::vector<result_ptr> select(const table_ptr& table,
+            result_ptr select(const table_ptr& table,
                                            const char *format,
                                            va_list args);
-            std::vector<result_ptr> select(const table_ptr& table,
+            result_ptr select(const table_ptr& table,
                                            const std::vector<column_ptr>& c,
                                            const char *format,
                                            ...);
-            std::vector<result_ptr> select(const table_ptr& table,
-                                           const std::vector<column_ptr>& c,
-                                           const char *format,
-                                           va_list args);
+            result_ptr select(const table_ptr& table,
+                              const std::vector<column_ptr>& c,
+                              const char *format,
+                              va_list args);
                                        
         };
     }

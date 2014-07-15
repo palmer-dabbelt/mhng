@@ -57,6 +57,11 @@ namespace mhng {
             );
 
     public:
+        /* Obtains the list of messages that were provided on the
+         * commandline (or the default message list, if none were
+         * provided). */
+        const std::vector<message_ptr>& messages(void) const
+            { return _messages; }
 
     public:
         /* Parses normal command-line arguments, which means arguments

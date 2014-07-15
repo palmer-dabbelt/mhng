@@ -42,11 +42,21 @@ namespace mhng {
          * order. */
         class table {
         private:
+            std::string _name;
             std::vector<column_ptr> _cols;
 
         public:
             /* Creates a new column from a list of tables. */
-            table(const std::vector<column_ptr>& cols);
+            table(const std::string& name,
+                  const std::vector<column_ptr>& cols);
+
+        public:
+            /* Returns the list of all columns in this table. */
+            const std::vector<column_ptr>& columns(void) const
+                { return _cols; }
+
+            const std::string& name(void) const
+                { return _name; }
         };
     }
 }

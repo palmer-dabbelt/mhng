@@ -31,18 +31,34 @@ namespace mhng {
 
 #include "message.h++"
 #include "promise.h++"
+#include "sqlite/connection.h++"
 #include <string>
 
 namespace mhng {
     /* Stores a single MHng folder.  */
     class folder {
     private:
+        sqlite::connection_ptr _db;
+
         /* The folder name, which is essentially used as a key to
          * fetch everything folder-related from the database. */
         std::string _name;
 
         /* Allows access to the current message. */
         promise<folder, message> _current_message;
+
+        /* Allows access to all messages in this folder. */
+        promise<folder, std::vector<message_ptr>> _messages;
+
+    public:
+        /* Creates a new folder handle.  Note that this database
+         * handle will end up filling out information as it's
+         * requested, so there aren't any synchronization guarantees
+         * here.  Specifically that means you need to create a brand
+         * new folder handle within a transaction if you want some
+         * sort of synchronization here! */
+        folder(const sqlite::connection_ptr& db,
+               const std::string name);
 
     public:
         /* Returns the name of this folder. */
@@ -53,10 +69,30 @@ namespace mhng {
          * want to slurp the message list from an "args" class. */
         message_ptr current_message(void) const;
 
+        /* Lists every message in the current folder. */
+        /* FIXME: There must ba a better way to deal with this than
+         * just copying the entire vector... */
+        std::vector<message_ptr> messages(void)
+            {
+                std::shared_ptr<std::vector<message_ptr>> m = _messages;
+                std::vector<message_ptr> out;
+                for (auto it = m->begin(); it != m->end(); ++it)
+                    out.push_back(*it);
+                return out;
+            }
+
+        /* Opens a message, given the sequence number for that
+         * message. */
+        message_ptr open(const sequence_number_ptr& seq);
+
     private:
         static message_ptr _current_message_func(folder* f)
             { return f->_current_message_impl(); }
         message_ptr _current_message_impl(void);
+
+        static std::shared_ptr<std::vector<message_ptr>>
+        _messages_func(folder* f) { return f->_messages_impl(); }
+        std::shared_ptr<std::vector<message_ptr>> _messages_impl(void);
     };
 }
 

@@ -40,6 +40,10 @@ namespace mhng {
      * create one from an "args" class in a sane manner. */
     class mailbox {
     private:
+        /* Holds a path to the MH directory, in case anyone needs
+         * access to it later. */
+        const std::string _path;
+
         /* Holds a connection to the SQLite database. */
         sqlite::connection_ptr _db;
 

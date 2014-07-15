@@ -19,43 +19,38 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MHNG__MESSAGE_HXX
-#define MHNG__MESSAGE_HXX
+#ifndef MHNG__SEQUENCE_NUMBER_HXX
+#define MHNG__SEQUENCE_NUMBER_HXX
 
 #include <memory>
 
 namespace mhng {
-    class message;
-    typedef std::shared_ptr<message> message_ptr;
+    class sequence_number;
+    typedef std::shared_ptr<sequence_number> sequence_number_ptr;
 }
 
-#include "sequence_number.h++"
+#include "folder.h++"
+#include "promise.h++"
+#include "sqlite/connection.h++"
 #include <string>
 
 namespace mhng {
-    /* Stores a single MHng message.  */
-    class message {
+    /* A thin wrapper around integers that allows them to represent
+     * sequence numbers. */
+    class sequence_number {
     private:
+        int _num;
 
     public:
+        /* Allows a sequence number to be created from a plain-old
+         * integer.  Note that you should probably only be using this
+         * if you're formatting strings, otherwise it's a bit
+         * unsafe. */
+        sequence_number(int num);
 
     public:
-        /* Returns TRUE if this message is the current message in its
-         * folder. */
-        bool cur(void) const { return false; }
-
-        /* Returns the sequence number associated with this
-         * message. */
-        int seq(void) const { return -1; }
-
-        /* Returns the date this message was recieved. */
-        std::string date(void) const { return "date"; }
-
-        /* Returns the sender of this message. */
-        std::string from(void) const { return "from"; }
-
-        /* Returns the subject line of this message. */
-        std::string subject(void) const { return "subject"; }
+        /* Converts to an integer. */
+        int to_int(void) const { return _num; }
     };
 }
 

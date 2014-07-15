@@ -19,35 +19,32 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mh_messages.h++"
+#include "folder.h++"
+#include "db/mh_messages.h++"
 using namespace mhng;
 
-static sqlite::table_ptr generate_columns(void);
-
-db::mh_messages::mh_messages(const sqlite::connection_ptr& db)
+folder::folder(const sqlite::connection_ptr& db,
+               std::string name)
     : _db(db),
-      _table(generate_columns())
+      _name(name),
+      _current_message(this, _current_message_func),
+      _messages(this, _messages_func)
 {
 }
 
-message_ptr db::mh_messages::select(const std::string& folder_name,
-                                    const sequence_number_ptr& seq)
+message_ptr folder::open(const sequence_number_ptr& seq)
 {
-    auto resp = _db->select(_table, "WHERE folder='%s' AND seq='%d';",
-                            folder_name.c_str(), seq->to_int());
+    auto messages = std::make_shared<db::mh_messages>(_db);
+    return messages->select(this->name(), seq);
+}
 
-    switch (resp->return_value()) {
-    case sqlite::error_code::SUCCESS:
-        return NULL;
-        break;
-    }
-
+message_ptr folder::_current_message_impl(void)
+{
     return NULL;
 }
 
-sqlite::table_ptr generate_columns(void)
+std::shared_ptr<std::vector<message_ptr>> folder::_messages_impl(void)
 {
-    std::vector<sqlite::column_ptr> out;
-    out.push_back(std::make_shared<sqlite::column_t<int>>("seq"));
-    return std::make_shared<sqlite::table>("MH__messages", out);
+    auto out = std::make_shared<std::vector<message_ptr>>();
+    return out;
 }

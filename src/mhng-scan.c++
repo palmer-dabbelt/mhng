@@ -1,6 +1,6 @@
 
 /*
- * Copyright (C) 2013 Palmer Dabbelt
+ * Copyright (C) 2014 Palmer Dabbelt
  *   <palmer@dabbelt.com>
  *
  * This file is part of mhng.
@@ -20,10 +20,36 @@
  */
 
 #include <libmhng/args.h++>
+#include <string.h>
 
 int main(int argc, const char **argv)
 {
-    auto args = mhng::args::parse_all_messages(argc, argv );
+    auto args = mhng::args::parse_all_messages(argc, argv);
+
+    /* Find some information about the terminal. */
+    size_t terminal_width = 80;
+#if 0
+    char *termtype = getenv("TERM");
+    if (tgetent(termbuf, termtype) >= 0) {
+        terminal_width = tgetnum("co");
+    }
+#endif
+    size_t from_width = (terminal_width * 25) / 80;
+    size_t seq_width = (terminal_width > 120) ? 3 : 2;
+    size_t subject_width = terminal_width - from_width - seq_width - 11;
+
+    /* At this point that argument list contains the entire set of
+     * messages that should be examined as part of the scan. */
+    for (const auto& msg: args->messages()) {
+        printf("%c %*d %s %-*.*s %-*.*s%c\n",
+               msg->cur() ? '*' : ' ',
+               (int)seq_width, msg->seq(),
+               msg->date().c_str(),
+               (int)from_width, (int)from_width, msg->from().c_str(),
+               (int)subject_width, (int)subject_width, msg->subject().c_str(),
+               strlen(msg->subject().c_str()) > subject_width ? '\\' : ' '
+            );
+    }
 
     return 0;
 }
