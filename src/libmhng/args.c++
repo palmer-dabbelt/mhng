@@ -103,11 +103,11 @@ args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int fl
      * what it should be by default. */
     if (messages_written == false) {
         if (flags & pf_allm) {
+            std::vector<message_ptr> messages;
             for (const auto& folder: folders)
                 for (const auto& message: folder->messages())
-                    message_seqs.push_back(std::make_pair(folder->name(),
-                                                          message->seq()));
-
+                    messages.push_back(message);
+            return std::make_shared<args>(messages, folders);
         } else {
             fprintf(stderr, "Unimplemented\n");
             abort();
