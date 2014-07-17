@@ -24,17 +24,17 @@ using namespace mhng;
 
 static sqlite::table_ptr generate_columns(void);
 
-db::mh_messages::mh_messages(const sqlite::connection_ptr& db)
-    : _db(db),
-      _table(generate_columns())
+db::mh_messages::mh_messages(const mailbox_ptr& mbox)
+    : _table(generate_columns()),
+      _mbox(mbox)
 {
 }
 
 message_ptr db::mh_messages::select(const std::string& folder_name,
                                     const sequence_number_ptr& seq)
 {
-    auto resp = _db->select(_table, "folder='%s' AND seq='%u'",
-                            folder_name.c_str(), seq->to_uint());
+    auto resp = _mbox->db()->select(_table, "folder='%s' AND seq='%u'",
+                                    folder_name.c_str(), seq->to_uint());
 
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
@@ -55,11 +55,11 @@ message_ptr db::mh_messages::select(const std::string& folder_name,
 
     auto row = resp->row(0);
     return std::make_shared<message>(
-        _db,
+        _mbox,
         std::make_shared<sequence_number>(row->get_uint("seq")),
         folder_name,
         std::make_shared<date>(row->get_str("date")),
-        row->get_str("fadr"),
+        _mbox->mrc()->email(row->get_str("fadr")),
         row->get_str("subject"),
         row->get_str("uid")
         );
@@ -67,8 +67,8 @@ message_ptr db::mh_messages::select(const std::string& folder_name,
 
 std::vector<message_ptr> db::mh_messages::select(const std::string& folder)
 {
-    auto resp = _db->select(_table, "folder='%s'",
-                            folder.c_str());
+    auto resp = _mbox->db()->select(_table, "folder='%s'",
+                                    folder.c_str());
 
     auto out = std::vector<message_ptr>();
     switch (resp->return_value()) {
@@ -82,11 +82,11 @@ std::vector<message_ptr> db::mh_messages::select(const std::string& folder)
 
     for (const auto& row: resp->rows()) {
         auto m =  std::make_shared<message>(
-            _db,
+            _mbox,
             std::make_shared<sequence_number>(row->get_uint("seq")),
             folder,
             std::make_shared<date>(row->get_str("date")),
-            row->get_str("fadr"),
+            _mbox->mrc()->email(row->get_str("fadr")),
             row->get_str("subject"),
             row->get_str("uid")
             );

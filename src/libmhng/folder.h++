@@ -29,8 +29,10 @@ namespace mhng {
     typedef std::shared_ptr<folder> folder_ptr;
 }
 
+#include "mailbox.h++"
 #include "message.h++"
 #include "promise.h++"
+#include "sequence_number.h++"
 #include "sqlite/connection.h++"
 #include <string>
 
@@ -38,7 +40,7 @@ namespace mhng {
     /* Stores a single MHng folder.  */
     class folder {
     private:
-        sqlite::connection_ptr _db;
+        mailbox_ptr _mbox;
 
         /* The folder name, which is essentially used as a key to
          * fetch everything folder-related from the database. */
@@ -57,7 +59,7 @@ namespace mhng {
          * here.  Specifically that means you need to create a brand
          * new folder handle within a transaction if you want some
          * sort of synchronization here! */
-        folder(const sqlite::connection_ptr& db,
+        folder(const mailbox_ptr& mbox,
                const std::string name);
 
     public:

@@ -22,6 +22,7 @@
 #ifndef MHNG__DB__MH_CURRENT_HXX
 #define MHNG__DB__MH_CURRENT_HXX
 
+#include <libmhng/mailbox.h++>
 #include <libmhng/message.h++>
 #include <libmhng/sqlite/table.h++>
 #include <libmhng/sqlite/connection.h++>
@@ -32,13 +33,13 @@ namespace mhng {
          * that exists in the mailbox. */
         class mh_current {
         private:
-            sqlite::connection_ptr _db;
             sqlite::table_ptr _table;
+            mailbox_ptr _mbox;
 
         public:
             /* This is a tiny little table that maps every folder to
              * the current message in it (by sequence number). */
-            mh_current(const sqlite::connection_ptr& db);
+            mh_current(const mailbox_ptr& mbox);
 
         public:
             /* Returns the current message in the given folder. */

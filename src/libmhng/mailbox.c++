@@ -20,14 +20,20 @@
  */
 
 #include "mailbox.h++"
+#include "mailrc.h++"
 #include "db/mh_messages.h++"
 #include <unistd.h>
 using namespace mhng;
 
+#ifndef BUFFER_SIZE
+#define BUFFER_SIZE 1024
+#endif
+
 mailbox::mailbox(const std::string& path)
     : _path(path),
       _db(std::make_shared<sqlite::connection>(path + "/metadata.sqlite3")),
-      _current_folder(this, _current_folder_func)
+      _current_folder(this, _current_folder_func),
+      _mailrc(this, _mailrc_func)
 {
 }
 
@@ -41,11 +47,19 @@ folder_ptr mailbox::open_folder(std::string folder_name) const
 
     /* Now that we know we have access to the folder it's time to
      * simply return a handle for that folder. */
-    return std::make_shared<folder>(_db, folder_name);
+    return std::make_shared<folder>(_self_ptr.lock(), folder_name);
 }
 
 folder_ptr mailbox::_current_folder_impl(void)
 {
     /* FIXME: This needs to actually be implemented. */
     return open_folder("inbox");
+}
+
+mailrc_ptr mailbox::_mailrc_impl(void)
+{
+    char path[BUFFER_SIZE];
+    snprintf(path, BUFFER_SIZE, "%s/.local/share/pim/mailrc",
+             getenv("HOME"));
+    return std::make_shared<typename mhng::mailrc>(path);
 }

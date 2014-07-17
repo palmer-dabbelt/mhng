@@ -22,6 +22,8 @@
 #ifndef MHNG__DB__MH_MESSAGES_HXX
 #define MHNG__DB__MH_MESSAGES_HXX
 
+#include <libmhng/mailbox.h++>
+#include <libmhng/mailrc.h++>
 #include <libmhng/message.h++>
 #include <libmhng/sqlite/table.h++>
 #include <libmhng/sqlite/connection.h++>
@@ -32,15 +34,15 @@ namespace mhng {
          * that exists in the mailbox. */
         class mh_messages {
         private:
-            sqlite::connection_ptr _db;
             sqlite::table_ptr _table;
+            mailbox_ptr _mbox;
 
         public:
             /* In order to do anything with this table we need to give
              * it a mechanism for accessing the database.  Note that
              * this will create the necessary table if it doesn't
              * exist. */
-            mh_messages(const sqlite::connection_ptr& db);
+            mh_messages(const mailbox_ptr& mbox);
 
         public:
             /* There are two sane ways to select a message: either by

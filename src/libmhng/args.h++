@@ -30,7 +30,10 @@ namespace mhng {
 }
 
 #include "folder.h++"
+#include "mailrc.h++"
 #include "message.h++"
+#include "promise.h++"
+#include "sqlite/connection.h++"
 #include <string>
 #include <vector>
 
@@ -53,8 +56,7 @@ namespace mhng {
          * of the public static methods below to ensure you parse your
          * arguments in the correct form. */
         args(const std::vector<message_ptr>& messages,
-             const std::vector<folder_ptr>& folders
-            );
+             const std::vector<folder_ptr>& folders);
 
     public:
         /* Obtains the list of messages that were provided on the

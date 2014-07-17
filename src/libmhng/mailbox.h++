@@ -30,6 +30,7 @@ namespace mhng {
 }
 
 #include "folder.h++"
+#include "mailrc.h++"
 #include "promise.h++"
 #include "sqlite/connection.h++"
 #include <string>
@@ -47,13 +48,23 @@ namespace mhng {
         /* Holds a connection to the SQLite database. */
         sqlite::connection_ptr _db;
 
-        /* Contains the current. */
+        /* Contains the current folder, which we need to look up if
+         * asked for it. */
         promise<mailbox, folder> _current_folder;
+
+        /* Contains a pointer to a mailrc, which is only filled out if
+         * someone asks for it. */
+        promise<mailbox, mailrc> _mailrc;
+
+        /* Sometimes we need a back-pointer to ourselves. */
+        std::weak_ptr<mailbox> _self_ptr;
 
     public:
         /* Creates a new mailbox, given the folder that contaians the
          * MHng information. */
         mailbox(const std::string& path);
+        void set_self_pointer(const mailbox_ptr& self)
+            { _self_ptr = self; }
 
     public:
         /* Returns the current folder, which involves a database
@@ -63,10 +74,23 @@ namespace mhng {
         /* Opens a folder by name. */
         folder_ptr open_folder(const std::string name) const;
 
+        /* Returns the database connection that relates to this
+         * mailbox. */
+        sqlite::connection_ptr db(void) const
+            { return _db; }
+
+        /* Returns a copy of the mailrc, which is used for all sorts
+         * of stuff! */
+        mailrc_ptr mrc(void) { return _mailrc; }
+
     private:
         static folder_ptr _current_folder_func(mailbox *mbox)
             { return mbox->_current_folder_impl(); }
         folder_ptr _current_folder_impl(void);
+
+        static mailrc_ptr _mailrc_func(mailbox *mbox)
+            { return mbox->_mailrc_impl(); }
+        mailrc_ptr _mailrc_impl(void);
     };
 }
 

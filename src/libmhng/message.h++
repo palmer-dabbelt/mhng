@@ -29,7 +29,9 @@ namespace mhng {
     typedef std::shared_ptr<message> message_ptr;
 }
 
+#include "address.h++"
 #include "date.h++"
+#include "mailbox.h++"
 #include "sequence_number.h++"
 #include "sqlite/connection.h++"
 #include <string>
@@ -38,12 +40,12 @@ namespace mhng {
     /* Stores a single MHng message.  */
     class message {
     private:
-        std::shared_ptr<sqlite::connection> _db;
+        mailbox_ptr _mbox;
         const bool _cur;
         const sequence_number_ptr _seq;
         const std::string _folder;
         const date_ptr _date;
-        const std::string _from;
+        const address_ptr _from;
         const std::string _subject;
         const std::string _uid;
 
@@ -51,11 +53,11 @@ namespace mhng {
         /* Here's the sole way of creating a new message: with all the
          * data that's necessary in order to show it to a user.  This
          * means that messages can only ever be valid! */
-        message(const sqlite::connection_ptr& _db,
+        message(const mailbox_ptr& mbox,
                 const sequence_number_ptr& seq,
                 const std::string& folder,
                 const date_ptr& date,
-                const std::string& from,
+                const address_ptr& from,
                 const std::string& subject,
                 const std::string& uid);
 
@@ -66,7 +68,7 @@ namespace mhng {
         const sequence_number_ptr& seq(void) const { return _seq; }
         const std::string& folder(void) const { return _folder; }
         const date_ptr& date(void) const { return _date; }
-        const std::string& from(void) const { return _from; }
+        const address_ptr& from(void) const { return _from; }
         const std::string& subject(void) const { return _subject; }
         const std::string& uid(void) const { return _uid; }
     };

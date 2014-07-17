@@ -19,37 +19,30 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "folder.h++"
-#include "db/mh_messages.h++"
+#include "address.h++"
 using namespace mhng;
 
-folder::folder(const mailbox_ptr& mbox,
-               std::string name)
-    : _mbox(mbox),
+address::address(const unknown<std::string>& email,
+                 const unknown<std::string>& name,
+                 const unknown<std::string>& alias)
+    : _email(email),
       _name(name),
-      _current_message(this, _current_message_func),
-      _messages(this, _messages_func)
+      _alias(alias)
 {
 }
 
-message_ptr folder::open(const sequence_number_ptr& seq)
+std::string address::nom(void) const
 {
-    auto messages = std::make_shared<db::mh_messages>(_mbox);
-    return messages->select(this->name(), seq);
+    if (_name.known() == true)
+        return _name.data();
+    return _email.data();
 }
 
-message_ptr folder::_current_message_impl(void)
+address_ptr address::from_email(const std::string email)
 {
-    return NULL;
-}
-
-std::shared_ptr<std::vector<message_ptr>> folder::_messages_impl(void)
-{
-    auto out = std::make_shared<std::vector<message_ptr>>();
-    auto table = std::make_shared<db::mh_messages>(_mbox);
-
-    for (const auto& message: table->select(this->name()))
-        out->push_back(message);
-
-    return out;
+    return std::make_shared<address>(
+        unknown<std::string>(email),
+        unknown<std::string>(),
+        unknown<std::string>()
+        );
 }

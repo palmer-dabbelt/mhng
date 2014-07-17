@@ -43,8 +43,8 @@ namespace mh {
          * later use.  Note that it shouldn't be necessary to use this
          * during the course of regular operation because everything
          * will be parsed by the constructor. */
-        const int _argc;
-        const char **_argv;
+        //const int _argc;
+        //const char **_argv;
 
         /* Holds the folder name if one was passed on the command
          * line. */

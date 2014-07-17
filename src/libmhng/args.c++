@@ -33,8 +33,7 @@ using namespace mhng;
 static std::string default_mhng_folder_path(void);
 
 args::args(const std::vector<message_ptr>& messages,
-           const std::vector<folder_ptr>& folders
-    )
+           const std::vector<folder_ptr>& folders)
     : _messages(messages),
       _folders(folders)
 {
@@ -66,6 +65,7 @@ args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int fl
     }
 
     auto dir = std::make_shared<mailbox>(mhng_folder);
+    dir->set_self_pointer(dir);
 
     /* If the folder hasn't been written to then take a guess as to
      * which folders should be looked at. */

@@ -24,16 +24,16 @@ using namespace mhng;
 
 static sqlite::table_ptr generate_columns(void);
 
-db::mh_current::mh_current(const sqlite::connection_ptr& db)
-    : _db(db),
-      _table(generate_columns())
+db::mh_current::mh_current(const mailbox_ptr& mbox)
+    : _table(generate_columns()),
+      _mbox(mbox)
 {
 }
 
 unsigned db::mh_current::select(const std::string& folder)
 {
-    auto resp = _db->select(_table, "folder='%s'",
-                            folder.c_str());
+    auto resp = _mbox->db()->select(_table, "folder='%s'",
+                                    folder.c_str());
 
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:

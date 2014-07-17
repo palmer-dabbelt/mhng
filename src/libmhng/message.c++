@@ -25,19 +25,19 @@ using namespace mhng;
 
 /* Returns TRUE if the given message is the current message and FALSE
  * otherwise. */
-static bool check_for_current(const std::shared_ptr<sqlite::connection>& db,
+static bool check_for_current(const mailbox_ptr& mbox,
                               const std::string& table,
                               const unsigned& seq);
 
-message::message(const sqlite::connection_ptr& db,
+message::message(const mailbox_ptr& mbox,
                  const sequence_number_ptr& seq,
                  const std::string& folder,
                  const date_ptr& date,
-                 const std::string& from,
+                 const address_ptr& from,
                  const std::string& subject,
                  const std::string& uid)
-    : _db(db),
-      _cur(check_for_current(db, folder, seq->to_uint())),
+    : _mbox(mbox),
+      _cur(check_for_current(mbox, folder, seq->to_uint())),
       _seq(seq),
       _folder(folder),
       _date(date),
@@ -47,10 +47,10 @@ message::message(const sqlite::connection_ptr& db,
 {
 }
 
-bool check_for_current(const std::shared_ptr<sqlite::connection>& db,
+bool check_for_current(const mailbox_ptr& mbox,
                        const std::string& folder,
                        const unsigned& seq)
 {
-    auto table = std::make_shared<db::mh_current>(db);
+    auto table = std::make_shared<db::mh_current>(mbox);
     return table->select(folder) == seq;
 }
