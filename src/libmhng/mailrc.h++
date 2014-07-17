@@ -38,7 +38,9 @@ namespace mhng {
      * configuration information. */
     class mailrc {
     private:
-        std::unordered_map<std::string, address_ptr> _mailmap;
+        std::unordered_map<std::string, address_ptr> _mail_map;
+        std::unordered_map<std::string, address_ptr> _alias_map;
+        std::unordered_map<std::string, address_ptr> _name_map;
 
     public:
         /* Creates a new mailrc given the full path to the file that
@@ -48,6 +50,12 @@ namespace mhng {
     public:
         /* Returns an address */
         address_ptr email(const std::string& email);
+
+    private:
+        /* Adds a new address to this database.  This will probably
+         * only be called from the constructor, so be careful with
+         * it! */
+        void add(const address_ptr& addr);
     };
 }
 

@@ -21,10 +21,19 @@
 
 #include "mailrc.h++"
 #include <stdio.h>
+#include <string.h>
 using namespace mhng;
 
+#ifndef BUFFER_SIZE
+#define BUFFER_SIZE 1024
+#endif
+
+static bool strsta(const std::string haystack, const std::string needle);
+
 mailrc::mailrc(const std::string& path)
-    : _mailmap()
+    : _mail_map(),
+      _alias_map(),
+      _name_map()
 {
     FILE *file = fopen(path.c_str(), "r");
     if (file == NULL) {
@@ -33,16 +42,69 @@ mailrc::mailrc(const std::string& path)
         abort();
     }
 
-    
+    char line[BUFFER_SIZE];
+    while (fgets(line, BUFFER_SIZE, file) != NULL) {
+        while (isspace(line[strlen(line)-1]))
+            line[strlen(line)-1] = '\0';
+
+        if (line[0] == '#')
+            continue;
+        if (strlen(line) == 0)
+            continue;
+
+        if (strsta(line, "local ") == true) {
+            auto addr = address::parse_rfc(line + strlen("local "));
+            add(addr);
+            continue;
+        }
+
+        if (strsta(line, "address ") == true) {
+            auto addr = address::parse_rfc(line + strlen("address "));
+            add(addr);
+            continue;
+        }
+
+        if (strsta(line, "alias ") == true) {
+            auto alias = line + strlen("alias ");
+            if (strstr(alias, " ") == NULL) {
+                fprintf(stderr, "Unable to parse mailrc line: '%s'\n", line);
+                fprintf(stderr, "  Bad alias definition\n");
+                abort();
+            }
+
+            auto address = strstr(alias, " ");
+            address[0] = '\0';
+            address++;
+
+            auto addr = address::parse_alias(address, alias);
+            add(addr);
+            continue;
+        }
+
+        fprintf(stderr, "Unable to parse mailrc line: '%s'\n", line);
+        abort();
+    }
 
     fclose(file);
 }
 
 address_ptr mailrc::email(const std::string& email)
 {
-    auto l = _mailmap.find(email);
-    if (l == _mailmap.end())
+    auto l = _mail_map.find(email);
+    if (l == _mail_map.end())
         return address::from_email(email);
     return l->second;
 }
 
+bool strsta(const std::string haystack, const std::string needle)
+{
+    return strncmp(haystack.c_str(),
+                   needle.c_str(),
+                   strlen(needle.c_str())) == 0;
+}
+
+void mailrc::add(const address_ptr& addr)
+{
+    if (addr->email_known())
+        _mail_map[addr->email()] = addr;
+}

@@ -51,12 +51,34 @@ namespace mhng {
                 const unknown<std::string>& alias);
 
     public:
+        /* Allows access to the internal fields (pretty much)
+         * directly. */
+        bool email_known(void) const { return _email.known(); }
+        std::string email(void) const { return _email.data(); }
+        bool name_known(void) const { return _name.known(); }
+        std::string name(void) const { return _name.data(); }
+        bool alias_known(void) const { return _alias.known(); }
+        std::string alias(void) const { return _alias.data(); }
+
         /* Returns either the name or email address for this address.
          * Note that this always succeeds */
         std::string nom(void) const;
 
     public:
+        /* Parses a raw email address.  This doesn't do any checks at
+         * all, so you'll probably want to be very sure */
         static address_ptr from_email(const std::string email);
+
+        /* Parses the sort of line you might see in a mail header. */
+        static address_ptr parse_rfc(const std::string rfc)
+            { return parse_alias(rfc, unknown<std::string>()); }
+
+        /* Exactly like parse_rfc(), but might contain an alias. */
+        static address_ptr parse_alias(const std::string rfc,
+                                       const unknown<std::string>& alias);
+        static address_ptr parse_alias(const std::string rfc,
+                                       const std::string alias)
+            { return parse_alias(rfc, unknown<std::string>(alias)); }
     };
 }
 

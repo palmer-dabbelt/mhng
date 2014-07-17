@@ -20,7 +20,12 @@
  */
 
 #include "address.h++"
+#include <string.h>
 using namespace mhng;
+
+#ifndef BUFFER_SIZE
+#define BUFFER_SIZE 1024
+#endif
 
 address::address(const unknown<std::string>& email,
                  const unknown<std::string>& name,
@@ -44,5 +49,51 @@ address_ptr address::from_email(const std::string email)
         unknown<std::string>(email),
         unknown<std::string>(),
         unknown<std::string>()
+        );
+}
+
+address_ptr address::parse_alias(const std::string rfc,
+                                 const unknown<std::string>& alias)
+{
+    if (strstr(rfc.c_str(), "<") == NULL) {
+        return std::make_shared<address>(
+            unknown<std::string>(rfc),
+            unknown<std::string>(),
+            alias
+            );
+    }
+
+    char buf[BUFFER_SIZE];
+    snprintf(buf, BUFFER_SIZE, "%s", rfc.c_str());
+
+    /* Here we seperate out the mail and strip the < > from it. */
+    auto mail_start = strstr(buf, "<");
+    if (strstr(mail_start, ">") == NULL) {
+        fprintf(stderr, "Found mail with <, but not >\n");
+        abort();
+    }
+   
+    strstr(mail_start, ">")[0] = '\0';
+    mail_start++;
+    mail_start[-1] = '\0';
+
+    /* Now we strip out the name to figure out what to call that. */
+    auto name_start = buf;
+    while (isspace(name_start[0]))
+        name_start++;
+    while (isspace(name_start[strlen(name_start)-1]))
+        name_start[strlen(name_start)-1] = '\0';
+
+    /* It's possible that names start with some sort of quotation, if
+     * so skip that. */
+    if (name_start[0] == '"')
+        name_start++;
+    if (name_start[strlen(name_start)-1] == '"')
+        name_start[strlen(name_start)-1] = '\0';
+
+    return std::make_shared<address>(
+        unknown<std::string>(mail_start),
+        unknown<std::string>(name_start),
+        alias
         );
 }
