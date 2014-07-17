@@ -39,18 +39,18 @@ namespace mhng {
      * sequence numbers. */
     class sequence_number {
     private:
-        int _num;
+        unsigned _num;
 
     public:
         /* Allows a sequence number to be created from a plain-old
          * integer.  Note that you should probably only be using this
          * if you're formatting strings, otherwise it's a bit
          * unsafe. */
-        sequence_number(int num);
+        sequence_number(unsigned num);
 
     public:
         /* Converts to an integer. */
-        int to_int(void) const { return _num; }
+        unsigned to_uint(void) const { return _num; }
     };
 }
 

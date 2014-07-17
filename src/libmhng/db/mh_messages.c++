@@ -33,8 +33,8 @@ db::mh_messages::mh_messages(const sqlite::connection_ptr& db)
 message_ptr db::mh_messages::select(const std::string& folder_name,
                                     const sequence_number_ptr& seq)
 {
-    auto resp = _db->select(_table, "folder='%s' AND seq='%d'",
-                            folder_name.c_str(), seq->to_int());
+    auto resp = _db->select(_table, "folder='%s' AND seq='%u'",
+                            folder_name.c_str(), seq->to_uint());
 
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
@@ -56,7 +56,7 @@ message_ptr db::mh_messages::select(const std::string& folder_name,
     auto row = resp->row(0);
     return std::make_shared<message>(
         _db,
-        row->get_uint("seq"),
+        std::make_shared<sequence_number>(row->get_uint("seq")),
         folder_name,
         std::make_shared<date>(row->get_str("date")),
         row->get_str("fadr"),
@@ -83,7 +83,7 @@ std::vector<message_ptr> db::mh_messages::select(const std::string& folder)
     for (const auto& row: resp->rows()) {
         auto m =  std::make_shared<message>(
             _db,
-            row->get_uint("seq"),
+            std::make_shared<sequence_number>(row->get_uint("seq")),
             folder,
             std::make_shared<date>(row->get_str("date")),
             row->get_str("fadr"),

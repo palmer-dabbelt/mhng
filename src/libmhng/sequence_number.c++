@@ -22,7 +22,7 @@
 #include "sequence_number.h++"
 using namespace mhng;
 
-sequence_number::sequence_number(int num)
+sequence_number::sequence_number(unsigned num)
     : _num(num)
 {
 }

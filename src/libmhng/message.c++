@@ -29,15 +29,15 @@ static bool check_for_current(const std::shared_ptr<sqlite::connection>& db,
                               const std::string& table,
                               const unsigned& seq);
 
-message::message(const std::shared_ptr<sqlite::connection>& db,
-                 const unsigned& seq,
+message::message(const sqlite::connection_ptr& db,
+                 const sequence_number_ptr& seq,
                  const std::string& folder,
                  const date_ptr& date,
                  const std::string& from,
                  const std::string& subject,
                  const std::string& uid)
     : _db(db),
-      _cur(check_for_current(db, folder, seq)),
+      _cur(check_for_current(db, folder, seq->to_uint())),
       _seq(seq),
       _folder(folder),
       _date(date),

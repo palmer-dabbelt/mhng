@@ -40,7 +40,7 @@ namespace mhng {
     private:
         std::shared_ptr<sqlite::connection> _db;
         const bool _cur;
-        const unsigned _seq;
+        const sequence_number_ptr _seq;
         const std::string _folder;
         const date_ptr _date;
         const std::string _from;
@@ -51,8 +51,8 @@ namespace mhng {
         /* Here's the sole way of creating a new message: with all the
          * data that's necessary in order to show it to a user.  This
          * means that messages can only ever be valid! */
-        message(const std::shared_ptr<sqlite::connection>& _db,
-                const unsigned& seq,
+        message(const sqlite::connection_ptr& _db,
+                const sequence_number_ptr& seq,
                 const std::string& folder,
                 const date_ptr& date,
                 const std::string& from,
@@ -63,7 +63,7 @@ namespace mhng {
         /* Accessors for the various database fields, these are all
          * fast. */
         bool cur(void) const { return _cur; }
-        int seq(void) const { return _seq; }
+        const sequence_number_ptr& seq(void) const { return _seq; }
         const std::string& folder(void) const { return _folder; }
         const date_ptr& date(void) const { return _date; }
         const std::string& from(void) const { return _from; }

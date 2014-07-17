@@ -43,9 +43,9 @@ int main(int argc, const char **argv)
     /* At this point that argument list contains the entire set of
      * messages that should be examined as part of the scan. */
     for (const auto& msg: args->messages()) {
-        printf("%c %*d %s %-*.*s %-*.*s%c\n",
+        printf("%c %*u %s %-*.*s %-*.*s%c\n",
                msg->cur() ? '*' : ' ',
-               (int)seq_width, msg->seq(),
+               (int)seq_width, msg->seq()->to_uint(),
                msg->date()->ddmm().c_str(),
                (int)from_width, (int)from_width, msg->from().c_str(),
                (int)subject_width, (int)subject_width, msg->subject().c_str(),
