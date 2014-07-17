@@ -26,7 +26,7 @@ using namespace mhng;
 
 mailbox::mailbox(const std::string& path)
     : _path(path),
-      _db(std::make_shared<sqlite::connection>(path + "/metadata.sqlite")),
+      _db(std::make_shared<sqlite::connection>(path + "/metadata.sqlite3")),
       _current_folder(this, _current_folder_func)
 {
 }

@@ -33,21 +33,80 @@ db::mh_messages::mh_messages(const sqlite::connection_ptr& db)
 message_ptr db::mh_messages::select(const std::string& folder_name,
                                     const sequence_number_ptr& seq)
 {
-    auto resp = _db->select(_table, "WHERE folder='%s' AND seq='%d';",
+    auto resp = _db->select(_table, "folder='%s' AND seq='%d'",
                             folder_name.c_str(), seq->to_int());
 
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
+        break;
+
+    default:
         return NULL;
         break;
     }
 
-    return NULL;
+    if (resp->result_count() > 1) {
+        fprintf(stderr, "UNIQUE not respected\n");
+        abort();
+    }
+
+    if (resp->result_count() == 0)
+        return NULL;
+
+    auto row = resp->row(0);
+    return std::make_shared<message>(
+        _db,
+        row->get_uint("seq"),
+        folder_name,
+        std::make_shared<date>(row->get_str("date")),
+        row->get_str("fadr"),
+        row->get_str("subject"),
+        row->get_str("uid")
+        );
+}
+
+std::vector<message_ptr> db::mh_messages::select(const std::string& folder)
+{
+    auto resp = _db->select(_table, "folder='%s'",
+                            folder.c_str());
+
+    auto out = std::vector<message_ptr>();
+    switch (resp->return_value()) {
+    case sqlite::error_code::SUCCESS:
+            break;
+
+    default:
+        return out;
+        break;
+    }
+
+    for (const auto& row: resp->rows()) {
+        auto m =  std::make_shared<message>(
+            _db,
+            row->get_uint("seq"),
+            folder,
+            std::make_shared<date>(row->get_str("date")),
+            row->get_str("fadr"),
+            row->get_str("subject"),
+            row->get_str("uid")
+            );
+        out.push_back(m);
+    }
+
+    return out;
 }
 
 sqlite::table_ptr generate_columns(void)
 {
     std::vector<sqlite::column_ptr> out;
+    out.push_back(std::make_shared<sqlite::column_t<std::string>>("uid"));
+#if 0
+    /* FIXME: Fix the database format! */
+    out.push_back(std::make_shared<sqlite::column_t<bool>>("cur"));
+#endif
     out.push_back(std::make_shared<sqlite::column_t<int>>("seq"));
+    out.push_back(std::make_shared<sqlite::column_t<std::string>>("date"));
+    out.push_back(std::make_shared<sqlite::column_t<std::string>>("fadr"));
+    out.push_back(std::make_shared<sqlite::column_t<std::string>>("subject"));
     return std::make_shared<sqlite::table>("MH__messages", out);
 }

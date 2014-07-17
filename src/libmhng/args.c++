@@ -126,7 +126,7 @@ args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int fl
          * should always be properly populated. */
         auto l = folder_map.find(folder_name);
         if (l == folder_map.end()) {
-            fprintf(stderr, "Unable to re-open folderd '%s'\n",
+            fprintf(stderr, "Unable to re-open folder '%s'\n",
                     folder_name.c_str());
             abort();
         }

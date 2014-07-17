@@ -45,8 +45,13 @@ void sqlite::result::set_error(int code, std::string str)
     }
 
     switch (code) {
+    case 0:
+        _return_value = error_code::SUCCESS;
+        break;
+
     default:
         fprintf(stderr, "Unknown SQLite error code %d\n", code);
+        fprintf(stderr, "  Associated string: '%s'\n", str.c_str());
         abort();
         break;
     }
@@ -62,6 +67,6 @@ void sqlite::result::add_map(const std::map<std::string, std::string>& m)
         abort();
     }
 
-    _data.push_back(m);
+    _data.push_back(std::make_shared<sqlite::row>(m));
 }
 

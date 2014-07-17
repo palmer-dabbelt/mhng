@@ -29,33 +29,46 @@ namespace mhng {
     typedef std::shared_ptr<message> message_ptr;
 }
 
+#include "date.h++"
 #include "sequence_number.h++"
+#include "sqlite/connection.h++"
 #include <string>
 
 namespace mhng {
     /* Stores a single MHng message.  */
     class message {
     private:
+        std::shared_ptr<sqlite::connection> _db;
+        const bool _cur;
+        const unsigned _seq;
+        const std::string _folder;
+        const date_ptr _date;
+        const std::string _from;
+        const std::string _subject;
+        const std::string _uid;
 
     public:
+        /* Here's the sole way of creating a new message: with all the
+         * data that's necessary in order to show it to a user.  This
+         * means that messages can only ever be valid! */
+        message(const std::shared_ptr<sqlite::connection>& _db,
+                const unsigned& seq,
+                const std::string& folder,
+                const date_ptr& date,
+                const std::string& from,
+                const std::string& subject,
+                const std::string& uid);
 
     public:
-        /* Returns TRUE if this message is the current message in its
-         * folder. */
-        bool cur(void) const { return false; }
-
-        /* Returns the sequence number associated with this
-         * message. */
-        int seq(void) const { return -1; }
-
-        /* Returns the date this message was recieved. */
-        std::string date(void) const { return "date"; }
-
-        /* Returns the sender of this message. */
-        std::string from(void) const { return "from"; }
-
-        /* Returns the subject line of this message. */
-        std::string subject(void) const { return "subject"; }
+        /* Accessors for the various database fields, these are all
+         * fast. */
+        bool cur(void) const { return _cur; }
+        int seq(void) const { return _seq; }
+        const std::string& folder(void) const { return _folder; }
+        const date_ptr& date(void) const { return _date; }
+        const std::string& from(void) const { return _from; }
+        const std::string& subject(void) const { return _subject; }
+        const std::string& uid(void) const { return _uid; }
     };
 }
 

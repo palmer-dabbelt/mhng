@@ -91,12 +91,12 @@ sqlite::result_ptr sqlite::connection::select(const table_ptr& table,
     for (const auto& column: c)
         column_length += strlen(column->name().c_str()) + 2;
     char *column_spec = new char[column_length];
-    strcpy(column_spec, "(");
+    column_spec[0] = '\0';
     for (const auto& column: c) {
         strcat(column_spec, column->name().c_str());
         strcat(column_spec, ", ");
     }
-    strcat(column_spec, ")");
+    column_spec[strlen(column_spec)-2] = '\0';
 
     /* Now we can assemble the final SQL query string. */
     size_t command_length =
@@ -112,6 +112,7 @@ sqlite::result_ptr sqlite::connection::select(const table_ptr& table,
             column_spec,
             table->name().c_str(),
             query);
+    fprintf(stderr, "command: '%s'\n", command);
 
     /* SQLite fills out an argument pointer, so we need one
      * created. */
@@ -127,6 +128,8 @@ sqlite::result_ptr sqlite::connection::select(const table_ptr& table,
                                  &sqlite3_exec_func,
                                  &args,
                                  &error_string);
+        if (error_string == NULL)
+            error_string = (char *)"";
         out->set_error(error, error_string);
     }
 

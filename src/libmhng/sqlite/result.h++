@@ -32,6 +32,7 @@ namespace mhng {
 }
 
 #include "error_code.h++"
+#include "row.h++"
 #include <map>
 #include <string>
 #include <vector>
@@ -48,7 +49,7 @@ namespace mhng {
 
             /* This contains the actual return data, which is the
              * whole point of this object. */
-            std::vector<std::map<std::string, std::string>> _data;
+            std::vector<row_ptr> _data;
 
         public:
             /* Creates a new result set that hasn't yet been
@@ -67,6 +68,17 @@ namespace mhng {
 
             /* Adds an entry to the list of results. */
             void add_map(const std::map<std::string, std::string>& m);
+
+            /* Returns the number of results that exist in this
+             * entry. */
+            size_t result_count(void) const
+                { return _data.size(); }
+
+            /* Returns a single row from the listing. */
+            const row_ptr& row(size_t i) const
+                { return _data[i]; }
+            const std::vector<row_ptr>& rows(void) const
+                { return _data; }
         };
     }
 }
