@@ -23,6 +23,10 @@
 #include "db/mh_messages.h++"
 using namespace mhng;
 
+#ifndef BUFFER_SIZE
+#define BUFFER_SIZE 1024
+#endif
+
 folder::folder(const mailbox_ptr& mbox,
                std::string name)
     : _mbox(mbox),
@@ -36,6 +40,16 @@ message_ptr folder::open(const sequence_number_ptr& seq)
 {
     auto messages = std::make_shared<db::mh_messages>(_mbox);
     return messages->select(this->name(), seq);
+}
+
+std::string folder::full_path(void) const
+{
+    char path[BUFFER_SIZE];
+    snprintf(path, BUFFER_SIZE, "%s/.mhng/mail/%s",
+             getenv("HOME"),
+             _name.c_str()
+        );
+    return path;
 }
 
 message_ptr folder::_current_message_impl(void)

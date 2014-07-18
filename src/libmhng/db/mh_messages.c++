@@ -57,7 +57,7 @@ message_ptr db::mh_messages::select(const std::string& folder_name,
     return std::make_shared<message>(
         _mbox,
         std::make_shared<sequence_number>(row->get_uint("seq")),
-        folder_name,
+        _mbox->open_folder(folder_name),
         std::make_shared<date>(row->get_str("date")),
         _mbox->mrc()->email(row->get_str("fadr")),
         row->get_str("subject"),
@@ -74,17 +74,13 @@ std::vector<message_ptr> db::mh_messages::select(const std::string& folder)
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
             break;
-
-    default:
-        return out;
-        break;
     }
 
     for (const auto& row: resp->rows()) {
         auto m =  std::make_shared<message>(
             _mbox,
             std::make_shared<sequence_number>(row->get_uint("seq")),
-            folder,
+            _mbox->open_folder(folder),
             std::make_shared<date>(row->get_str("date")),
             _mbox->mrc()->email(row->get_str("fadr")),
             row->get_str("subject"),
@@ -94,6 +90,17 @@ std::vector<message_ptr> db::mh_messages::select(const std::string& folder)
     }
 
     return out;
+}
+
+void db::mh_messages::remove(uint64_t uid)
+{
+    auto resp = _mbox->db()->remove(_table, "uid='%lu'",
+                                    uid);
+
+    switch (resp->return_value()) {
+    case sqlite::error_code::SUCCESS:
+        break;
+    }
 }
 
 sqlite::table_ptr generate_columns(void)

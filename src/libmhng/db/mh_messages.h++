@@ -55,6 +55,11 @@ namespace mhng {
 
             /* This selects all the messages in a given folder. */
             std::vector<message_ptr> select(const std::string& folder_name);
+
+            /* This removes a single message.  Here we only allow
+             * messages to be removed by their unique ID as otherwise
+             * we could easily have race conditions. */
+            void remove(uint64_t uid);
         };
     }
 }

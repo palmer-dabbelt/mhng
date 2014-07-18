@@ -32,22 +32,31 @@ namespace mhng {
 #include "address.h++"
 #include "date.h++"
 #include "mailbox.h++"
+#include "promise.h++"
 #include "sequence_number.h++"
 #include "sqlite/connection.h++"
 #include <string>
+#include <vector>
 
 namespace mhng {
     /* Stores a single MHng message.  */
     class message {
     private:
         mailbox_ptr _mbox;
+
+        /* These are all provided by SQLite, so it doesn't really cost
+         * anything to just read them out right away. */
         const bool _cur;
         const sequence_number_ptr _seq;
-        const std::string _folder;
+        const folder_ptr _folder;
         const date_ptr _date;
         const address_ptr _from;
         const std::string _subject;
         const std::string _uid;
+
+        /* Contains the raw bytes of the message, parsed as strings
+         * (one per line). */
+        promise<message, std::vector<std::string>> _raw;
 
     public:
         /* Here's the sole way of creating a new message: with all the
@@ -55,7 +64,7 @@ namespace mhng {
          * means that messages can only ever be valid! */
         message(const mailbox_ptr& mbox,
                 const sequence_number_ptr& seq,
-                const std::string& folder,
+                const folder_ptr& folder,
                 const date_ptr& date,
                 const address_ptr& from,
                 const std::string& subject,
@@ -66,11 +75,28 @@ namespace mhng {
          * fast. */
         bool cur(void) const { return _cur; }
         const sequence_number_ptr& seq(void) const { return _seq; }
-        const std::string& folder(void) const { return _folder; }
+        const folder_ptr& folder(void) const { return _folder; }
         const date_ptr& date(void) const { return _date; }
         const address_ptr& from(void) const { return _from; }
         const std::string& subject(void) const { return _subject; }
         const std::string& uid(void) const { return _uid; }
+
+        /* Accessors for slower fields. */
+        std::shared_ptr<std::vector<std::string>> raw_pointer(void)
+            { return _raw; }
+        std::vector<std::string> raw(void) { return *(raw_pointer()); }
+
+        /* Removes a message from the store.  Note that this is a
+         * somewhat dangerous operation: there could be a whole bunch
+         * of pointers still sitting around (both in this process and
+         * others).  Essentially this means that the fact that you've
+         * got a pointer to a message doesn't really mean anything. */
+        void remove(void);
+
+    private:
+        static std::shared_ptr<std::vector<std::string>> _raw_func(message *m)
+            { return m->_raw_impl(); }
+        std::shared_ptr<std::vector<std::string>> _raw_impl(void);
     };
 }
 

@@ -21,17 +21,22 @@
 
 #include "message.h++"
 #include "db/mh_current.h++"
+#include "db/mh_messages.h++"
 using namespace mhng;
+
+#ifndef BUFFER_SIZE
+#define BUFFER_SIZE 1024
+#endif
 
 /* Returns TRUE if the given message is the current message and FALSE
  * otherwise. */
 static bool check_for_current(const mailbox_ptr& mbox,
-                              const std::string& table,
+                              const folder_ptr& folder,
                               const unsigned& seq);
 
 message::message(const mailbox_ptr& mbox,
                  const sequence_number_ptr& seq,
-                 const std::string& folder,
+                 const folder_ptr& folder,
                  const date_ptr& date,
                  const address_ptr& from,
                  const std::string& subject,
@@ -43,14 +48,44 @@ message::message(const mailbox_ptr& mbox,
       _date(date),
       _from(from),
       _subject(subject),
-      _uid(uid)
+      _uid(uid),
+      _raw(this, _raw_func)
 {
 }
 
+void message::remove(void)
+{
+    auto messages = std::make_shared<db::mh_messages>(_mbox);
+    messages->remove(atoi(_uid.c_str()));
+}
+
+std::shared_ptr<std::vector<std::string>> message::_raw_impl(void)
+{
+    char path[BUFFER_SIZE];
+    snprintf(path, BUFFER_SIZE, "%s/%s",
+             _folder->full_path().c_str(),
+             _uid.c_str()
+        );
+
+    FILE *file = fopen(path, "r");
+    if (file == NULL) {
+        fprintf(stderr, "Unable to open message: '%s'\n", path);
+        abort();
+    }
+
+    auto out = std::make_shared<std::vector<std::string>>();
+    char line[BUFFER_SIZE];
+    while (fgets(line, BUFFER_SIZE, file) != NULL)
+        out->push_back(line);
+
+    fclose(file);
+    return out;
+}
+
 bool check_for_current(const mailbox_ptr& mbox,
-                       const std::string& folder,
+                       const folder_ptr& folder,
                        const unsigned& seq)
 {
     auto table = std::make_shared<db::mh_current>(mbox);
-    return table->select(folder) == seq;
+    return table->select(folder->name()) == seq;
 }

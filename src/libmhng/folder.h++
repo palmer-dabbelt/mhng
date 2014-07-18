@@ -87,6 +87,9 @@ namespace mhng {
          * message. */
         message_ptr open(const sequence_number_ptr& seq);
 
+        /* Returns the path that's associated with this folder. */
+        std::string full_path(void) const;
+
     private:
         static message_ptr _current_message_func(folder* f)
             { return f->_current_message_impl(); }

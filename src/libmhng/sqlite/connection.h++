@@ -90,6 +90,14 @@ namespace mhng {
                                const row_ptr& row,
                                const char *format,
                                va_list args);
+
+            /* Removes any matching entries. */
+            result_ptr remove(const table_ptr& table,
+                              const char *format,
+                              ...);
+            result_ptr remove(const table_ptr& table,
+                              const char *format,
+                              va_list args);
         };
     }
 }

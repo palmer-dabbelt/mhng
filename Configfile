@@ -145,5 +145,8 @@ COMPILEOPTS += -DFETCH
 # selected folder.
 BINARIES    += mhng-scan
 SOURCES     += mhng-scan.c++
-COMPILEOPTS += -DSCAN
 
+# Writes some (or by default, many) messages out to SMTP and then
+# removes them.
+BINARIES    += mhng-post
+SOURCES     += mhng-post.c++
