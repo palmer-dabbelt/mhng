@@ -82,10 +82,6 @@ BINARIES    += prev
 SOURCES     += show.c++
 COMPILEOPTS += -DPREV
 
-# Moves the current message to the trash
-BINARIES    += rmm
-SOURCES     += rmm.c++
-
 # Just "rmm && show"
 BINARIES    += mtn
 SOURCES     += mtn.bash
