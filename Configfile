@@ -68,21 +68,10 @@ CONFIG      += libmhng_headers
 BINARIES    += folders
 SOURCES     += folders.c++
 
-# Lists the messages in the given folder, defaulting to the currently
-# selected folder.
-BINARIES    += scan
-SOURCES     += scan.c++
-COMPILEOPTS += -DSCAN
-
 # Publishes and removes every message in the drafts folder
 BINARIES    += post
 SOURCES     += scan.c++
 COMPILEOPTS += -DPOST
-
-# Simply a short command that opens the inbox
-BINARIES    += inbox
-SOURCES     += scan.c++
-COMPILEOPTS += -DINBOX
 
 # Shows a single message to the console, optionally moving to the next
 # or previous message in the list.
