@@ -112,7 +112,9 @@ sqlite::result_ptr sqlite::connection::select(const table_ptr& table,
             column_spec,
             table->name().c_str(),
             query);
+#ifdef DEBUG_SQLITE_COMMANDS
     fprintf(stderr, "command: '%s'\n", command);
+#endif
 
     /* SQLite fills out an argument pointer, so we need one
      * created. */
@@ -205,7 +207,9 @@ sqlite::result_ptr sqlite::connection::replace(const table_ptr& table,
             table->name().c_str(),
             column_spec,
             query);
+#ifdef DEBUG_SQLITE_COMMANDS
     fprintf(stderr, "command: '%s'\n", command);
+#endif
 
     /* SQLite fills out an argument pointer, so we need one
      * created. */
