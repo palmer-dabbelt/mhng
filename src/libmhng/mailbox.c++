@@ -22,6 +22,7 @@
 #include "mailbox.h++"
 #include "mailrc.h++"
 #include "db/mh_messages.h++"
+#include "db/mh_default.h++"
 #include <unistd.h>
 using namespace mhng;
 
@@ -52,8 +53,8 @@ folder_ptr mailbox::open_folder(std::string folder_name) const
 
 folder_ptr mailbox::_current_folder_impl(void)
 {
-    /* FIXME: This needs to actually be implemented. */
-    return open_folder("inbox");
+    auto table = std::make_shared<db::mh_default>(_self_ptr.lock());
+    return table->select();
 }
 
 mailrc_ptr mailbox::_mailrc_impl(void)
