@@ -94,6 +94,9 @@ namespace mhng {
         void remove(void);
 
     private:
+        std::string full_path(void) const;
+
+    private:
         static std::shared_ptr<std::vector<std::string>> _raw_func(message *m)
             { return m->_raw_impl(); }
         std::shared_ptr<std::vector<std::string>> _raw_impl(void);

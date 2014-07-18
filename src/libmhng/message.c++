@@ -22,6 +22,7 @@
 #include "message.h++"
 #include "db/mh_current.h++"
 #include "db/mh_messages.h++"
+#include <unistd.h>
 using namespace mhng;
 
 #ifndef BUFFER_SIZE
@@ -57,19 +58,30 @@ void message::remove(void)
 {
     auto messages = std::make_shared<db::mh_messages>(_mbox);
     messages->remove(atoi(_uid.c_str()));
+
+    int err = unlink(full_path().c_str());
+    if (err < 0) {
+        perror("Unable to remove message file");
+        abort();
+    }
 }
 
-std::shared_ptr<std::vector<std::string>> message::_raw_impl(void)
+std::string message::full_path(void) const
 {
     char path[BUFFER_SIZE];
     snprintf(path, BUFFER_SIZE, "%s/%s",
              _folder->full_path().c_str(),
              _uid.c_str()
         );
+    return path;
+}
 
-    FILE *file = fopen(path, "r");
+std::shared_ptr<std::vector<std::string>> message::_raw_impl(void)
+{
+    FILE *file = fopen(full_path().c_str(), "r");
     if (file == NULL) {
-        fprintf(stderr, "Unable to open message: '%s'\n", path);
+        fprintf(stderr, "Unable to open message: '%s'\n",
+                full_path().c_str());
         abort();
     }
 
