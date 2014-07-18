@@ -23,6 +23,7 @@
 #include "mailbox.h++"
 #include "sequence_number.h++"
 #include <unordered_map>
+#include <string.h>
 using namespace mhng;
 
 #ifndef BUFFER_SIZE
@@ -39,6 +40,17 @@ args::args(const std::vector<message_ptr>& messages,
       _folders(folders),
       _mbox(mbox)
 {
+}
+
+args_ptr args::parse_normal(int argc, const char **argv)
+{
+    int flags = 0;
+    flags |= pf_skipplus;
+    flags |= pf_folders;
+    flags |= pf_messages;
+    flags |= pf_numbers;
+
+    return parse(argc, argv, flags);
 }
 
 args_ptr args::parse_all_messages(int argc, const char **argv)
@@ -113,6 +125,7 @@ args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int fl
      * an array of folders. */
     std::vector<folder_ptr> folders;
     std::unordered_map<std::string, folder_ptr> folder_map;
+    folder_ptr last_folder_ptr = NULL;
     for (const auto& folder_name: folder_names) {
         auto folder = dir->open_folder(folder_name);
         if (folder == NULL) {
@@ -123,6 +136,7 @@ args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int fl
 
         folders.push_back(folder);
         folder_map[folder_name] = folder;
+        last_folder_ptr = folder;
     }
 
     /* If we haven't touched the message list then try and figure out
@@ -135,8 +149,9 @@ args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int fl
                     messages.push_back(message);
             return std::make_shared<args>(messages, folders, dir);
         } else {
-            fprintf(stderr, "Unimplemented\n");
-            abort();
+            std::vector<message_ptr> messages;
+            messages.push_back(last_folder_ptr->current_message());
+            return std::make_shared<args>(messages, folders, dir);
         }
     }
 
@@ -146,6 +161,9 @@ args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int fl
     for (const auto& pair: message_seqs) {
         auto seq_int = pair.second;
         auto folder_name = pair.first;
+
+        if (strcmp(folder_name.c_str(), "") == 0)
+            folder_name = dir->current_folder()->name();
 
         /* First figure out the folder we want to look into.  If this
          * fails it's some internal inconsistency, as the folder map
@@ -160,6 +178,14 @@ args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int fl
         auto folder = l->second;
         auto seq = std::make_shared<sequence_number>(seq_int);
         auto message = folder->open(seq);
+        if (message == NULL) {
+            fprintf(stderr, "Unable to open '%d' in '%s'\n",
+                    seq_int,
+                    folder_name.c_str()
+                );
+            abort();
+        }
+
         messages.push_back(message);
     }
 

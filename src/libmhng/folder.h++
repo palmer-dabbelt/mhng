@@ -69,7 +69,8 @@ namespace mhng {
         /* Returns the currently-selected message in this folder.
          * Note that you probably don't want to use this but instead
          * want to slurp the message list from an "args" class. */
-        message_ptr current_message(void) const;
+        message_ptr current_message(void)
+            { return _current_message; }
 
         /* Lists every message in the current folder. */
         /* FIXME: There must ba a better way to deal with this than

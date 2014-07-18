@@ -20,6 +20,7 @@
  */
 
 #include "message.h++"
+#include "db/imap_messages.h++"
 #include "db/mh_current.h++"
 #include "db/mh_messages.h++"
 #include <unistd.h>
@@ -58,6 +59,9 @@ void message::remove(void)
 {
     auto messages = std::make_shared<db::mh_messages>(_mbox);
     messages->remove(atoi(_uid.c_str()));
+
+    auto imap = std::make_shared<db::imap_messages>(_mbox);
+    imap->update_purge(atoi(_uid.c_str()), true);
 
     int err = unlink(full_path().c_str());
     if (err < 0) {

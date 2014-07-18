@@ -20,6 +20,7 @@
  */
 
 #include "folder.h++"
+#include "db/mh_current.h++"
 #include "db/mh_messages.h++"
 using namespace mhng;
 
@@ -54,7 +55,14 @@ std::string folder::full_path(void) const
 
 message_ptr folder::_current_message_impl(void)
 {
-    return NULL;
+    auto cur = std::make_shared<db::mh_current>(_mbox);
+    auto seq_uint = cur->select(_name);
+    auto seq = std::make_shared<sequence_number>(seq_uint);
+
+    auto msgs = std::make_shared<db::mh_messages>(_mbox);
+    auto msg = msgs->select(_name, seq);
+
+    return msg;
 }
 
 std::shared_ptr<std::vector<message_ptr>> folder::_messages_impl(void)

@@ -80,7 +80,8 @@ namespace mhng {
         static args_ptr parse_normal(int argc, const char **argv);
 
         /* Like a normal parse, but defaults to listing every message
-         * in the default folder (or whatever folder is passed in). */
+         * in the default folder (or whatever folder is passed in)
+         * rather than just the current message. */
         static args_ptr parse_all_messages(int argc, const char **argv);
 
         /* Parses command-line arguments, but doesn't do any implicit

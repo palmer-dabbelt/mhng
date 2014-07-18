@@ -145,3 +145,7 @@ SOURCES     += mhng-scan.c++
 # removes them.
 BINARIES    += mhng-post
 SOURCES     += mhng-post.c++
+
+# Removes the current message.
+BINARIES    += mhng-rmm
+SOURCES     += mhng-rmm.c++
