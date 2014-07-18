@@ -79,6 +79,10 @@ args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int fl
             message_seqs.push_back(
                 std::make_pair(last_folder, atoi(argv[i]))
                 );
+        } else if (argv[i][0] == '+') {
+            folders_written = true;
+            folder_names.push_back(argv[i]+1);
+            last_folder = argv[i]+1;
         } else {
             folders_written = true;
             folder_names.push_back(argv[i]);
