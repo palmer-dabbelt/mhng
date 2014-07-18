@@ -51,19 +51,24 @@ namespace mhng {
          * arguments. */
         std::vector<folder_ptr> _folders;
 
+        /* Stores the mailbox associated with this run. */
+        mailbox_ptr _mbox;
+
     public:
         /* This constructor is private because you should be using one
          * of the public static methods below to ensure you parse your
          * arguments in the correct form. */
         args(const std::vector<message_ptr>& messages,
-             const std::vector<folder_ptr>& folders);
+             const std::vector<folder_ptr>& folders,
+             const mailbox_ptr& mbox);
 
     public:
-        /* Obtains the list of messages that were provided on the
-         * commandline (or the default message list, if none were
-         * provided). */
+        /* Accessor functions. */
         const std::vector<message_ptr>& messages(void) const
             { return _messages; }
+        const std::vector<folder_ptr>& folders(void) const
+            { return _folders; }
+        const mailbox_ptr& mbox(void) const { return _mbox; }
 
     public:
         /* Parses normal command-line arguments, which means arguments

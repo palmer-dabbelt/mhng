@@ -51,6 +51,13 @@ folder_ptr mailbox::open_folder(std::string folder_name) const
     return std::make_shared<folder>(_self_ptr.lock(), folder_name);
 }
 
+void mailbox::set_current_folder(const folder_ptr& folder)
+{
+    auto table = std::make_shared<db::mh_default>(_self_ptr.lock());
+    table->replace(folder);
+    _current_folder = folder;
+}
+
 folder_ptr mailbox::_current_folder_impl(void)
 {
     auto table = std::make_shared<db::mh_default>(_self_ptr.lock());

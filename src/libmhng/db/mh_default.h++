@@ -49,6 +49,10 @@ namespace mhng {
              * entry.  Thus there's really only one entry you can
              * select! */
             folder_ptr select(void);
+
+            /* Overwrites the only row in this table to contain a new
+             * value. */
+            void replace(const folder_ptr& folder);
         };
     }
 }

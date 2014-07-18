@@ -33,9 +33,11 @@ using namespace mhng;
 static std::string default_mhng_folder_path(void);
 
 args::args(const std::vector<message_ptr>& messages,
-           const std::vector<folder_ptr>& folders)
+           const std::vector<folder_ptr>& folders,
+           const mailbox_ptr& mbox)
     : _messages(messages),
-      _folders(folders)
+      _folders(folders),
+      _mbox(mbox)
 {
 }
 
@@ -58,10 +60,30 @@ args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int fl
 
     bool folders_written = false;
     std::vector<std::string> folder_names;
+    std::string last_folder = "";
 
     auto mhng_folder = default_mhng_folder_path();
 
     for (int i = 1; i < argc; ++i) {
+        /* FIXME: Much of this isn't implemented yet... */
+        /* Here is my attempt to parse folder names, sequence numbers,
+         * etc.  The rules are as follows:
+         *  - Any integer is a sequence number
+         *  - Anything that starts with a "+" is a folder name
+         *  - Anything that starts with a "@" is a UID
+         *  - Anything that starts with a "-" is an argument
+         *  - Anything else is a folder name
+         */
+        if (atoi(argv[i]) > 0) {
+            messages_written = true;
+            message_seqs.push_back(
+                std::make_pair(last_folder, atoi(argv[i]))
+                );
+        } else {
+            folders_written = true;
+            folder_names.push_back(argv[i]);
+            last_folder = argv[i];
+        }
     }
 
     auto dir = std::make_shared<mailbox>(mhng_folder);
@@ -107,7 +129,7 @@ args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int fl
             for (const auto& folder: folders)
                 for (const auto& message: folder->messages())
                     messages.push_back(message);
-            return std::make_shared<args>(messages, folders);
+            return std::make_shared<args>(messages, folders, dir);
         } else {
             fprintf(stderr, "Unimplemented\n");
             abort();
@@ -139,7 +161,7 @@ args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int fl
 
     /* At this point everything should be fixed up so we can just go
      * ahead and construct the relevant argument structure. */
-    return std::make_shared<args>(messages, folders);
+    return std::make_shared<args>(messages, folders, dir);
 }
 
 std::string default_mhng_folder_path(void)

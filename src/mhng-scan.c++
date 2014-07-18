@@ -28,6 +28,7 @@ static char termbuf[2048];
 int main(int argc, const char **argv)
 {
     auto args = mhng::args::parse_all_messages(argc, argv);
+    args->mbox()->set_current_folder(args->folders()[0]);
 
     /* Find some information about the terminal. */
     size_t terminal_width = 80;

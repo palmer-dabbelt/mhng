@@ -47,6 +47,20 @@ folder_ptr db::mh_default::select(void)
     return std::make_shared<folder>(_mbox, folder_name);
 }
 
+void db::mh_default::replace(const folder_ptr& folder)
+{
+    auto map = std::map<std::string, std::string>();
+    map["folder"] = folder->name();
+    auto row = std::make_shared<sqlite::row>(map);
+
+    auto resp = _mbox->db()->replace(_table, row, "folder != ''");
+
+    switch (resp->return_value()) {
+    case sqlite::error_code::SUCCESS:
+        return;
+    }
+}
+
 sqlite::table_ptr generate_columns(void)
 {
     std::vector<sqlite::column_ptr> out;

@@ -33,13 +33,15 @@ namespace mhng {
 
 #include <map>
 #include <string>
+#include <vector>
 
 namespace mhng {
     namespace sqlite {
         /* Holds a single row that was returned from a query. */
         class row {
         private:
-            std::map<std::string, std::string> _m;
+            const std::vector<std::string> _columns;
+            const std::map<std::string, std::string> _m;
 
         public:
             /* Creates a new row, given the data it contains. */
@@ -51,6 +53,18 @@ namespace mhng {
             std::string get_str(const std::string& col);
             unsigned get_uint(const std::string& col);
             bool get_bool(const std::string& col);
+
+            /* Returns the list of the columns that are known to this
+             * row.  This is guarnteed */
+            std::vector<std::string> columns(void) const
+                { return _columns; }
+
+            /* Returns the value associated with a column. */
+            std::string value(const std::string& str) const
+                { 
+                    auto l = _m.find(str);
+                    return l->second;
+                }
         };
     }
 }

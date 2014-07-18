@@ -22,9 +22,12 @@
 #include "row.h++"
 using namespace mhng;
 
+template<class K, class V>
+static std::vector<K> map_keys(const std::map<K, V>& m);
 
 sqlite::row::row(const std::map<std::string, std::string>& m)
-    : _m(m)
+    : _columns(map_keys(m)),
+      _m(m)
 {
 }
 
@@ -66,3 +69,11 @@ bool sqlite::row::get_bool(const std::string& col)
     }
 }
 
+template<class K, class V>
+std::vector<K> map_keys(const std::map<K, V>& m)
+{
+    std::vector<K> out;
+    for (const auto& pair: m)
+        out.push_back(pair.first);
+    return out;
+}

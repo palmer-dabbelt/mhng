@@ -71,6 +71,9 @@ namespace mhng {
          * lookup. */
         folder_ptr current_folder(void) { return _current_folder; }
 
+        /* Sets the current folder to be something else. */
+        void set_current_folder(const folder_ptr& folder);
+
         /* Opens a folder by name. */
         folder_ptr open_folder(const std::string name) const;
 

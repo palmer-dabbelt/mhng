@@ -55,7 +55,7 @@ namespace mhng {
             connection(const std::string& path);
 
         public:
-            /* Runs a select query against the given table, returning
+            /* Runs a SELECT query against the given table, returning
              * a list of results that match the query.  Note that
              * there are a few different forms of this call: by
              * default this will select every row and column, but it's
@@ -78,7 +78,18 @@ namespace mhng {
                               const std::vector<column_ptr>& c,
                               const char *format,
                               va_list args);
-                                       
+
+            /* Runs a REPLACE query against the given table, returning
+             * a list of results that come back from the SQLite server
+             * (note that I expect this to be none...). */
+            result_ptr replace(const table_ptr& table,
+                               const row_ptr& row,
+                               const char *format,
+                               ...);
+            result_ptr replace(const table_ptr& table,
+                               const row_ptr& row,
+                               const char *format,
+                               va_list args);
         };
     }
 }
