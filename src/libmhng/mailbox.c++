@@ -23,6 +23,7 @@
 #include "mailrc.h++"
 #include "db/mh_messages.h++"
 #include "db/mh_default.h++"
+#include <string.h>
 #include <unistd.h>
 using namespace mhng;
 
@@ -53,6 +54,16 @@ folder_ptr mailbox::open_folder(std::string folder_name) const
 
 void mailbox::set_current_folder(const folder_ptr& folder)
 {
+    /* Check to see if the current folder matches the folder we've
+     * requented to move to and if so just don't worry about issuing
+     * the update.  Note that this is racy, but who cares: if you want
+     * this to actually work then you'll have to wrap everything in a
+     * transaction anyway, so it's not like it matters.  This has the
+     * huge advantage of not doing writes all the time, so I think
+     * it's worth it! */
+    if (current_folder()->name() == folder->name())
+        return;
+
     auto table = std::make_shared<db::mh_default>(_self_ptr.lock());
     table->replace(folder);
     _current_folder = folder;
