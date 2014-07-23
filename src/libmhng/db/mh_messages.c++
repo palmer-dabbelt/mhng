@@ -60,6 +60,7 @@ message_ptr db::mh_messages::select(const std::string& folder_name,
         _mbox->open_folder(folder_name),
         std::make_shared<date>(row->get_str("date")),
         _mbox->mrc()->email(row->get_str("fadr")),
+        _mbox->mrc()->email(row->get_str("tadr")),
         row->get_str("subject"),
         row->get_str("uid")
         );
@@ -83,6 +84,7 @@ std::vector<message_ptr> db::mh_messages::select(const std::string& folder)
             _mbox->open_folder(folder),
             std::make_shared<date>(row->get_str("date")),
             _mbox->mrc()->email(row->get_str("fadr")),
+            _mbox->mrc()->email(row->get_str("tadr")),
             row->get_str("subject"),
             row->get_str("uid")
             );
@@ -114,6 +116,7 @@ sqlite::table_ptr generate_columns(void)
     out.push_back(std::make_shared<sqlite::column_t<int>>("seq"));
     out.push_back(std::make_shared<sqlite::column_t<std::string>>("date"));
     out.push_back(std::make_shared<sqlite::column_t<std::string>>("fadr"));
+    out.push_back(std::make_shared<sqlite::column_t<std::string>>("tadr"));
     out.push_back(std::make_shared<sqlite::column_t<std::string>>("subject"));
     return std::make_shared<sqlite::table>("MH__messages", out);
 }

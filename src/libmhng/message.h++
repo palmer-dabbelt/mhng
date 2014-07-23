@@ -51,6 +51,7 @@ namespace mhng {
         const folder_ptr _folder;
         const date_ptr _date;
         const address_ptr _from;
+        const address_ptr _to;
         const std::string _subject;
         const std::string _uid;
 
@@ -67,6 +68,7 @@ namespace mhng {
                 const folder_ptr& folder,
                 const date_ptr& date,
                 const address_ptr& from,
+                const address_ptr& to,
                 const std::string& subject,
                 const std::string& uid);
 
@@ -78,6 +80,7 @@ namespace mhng {
         const folder_ptr& folder(void) const { return _folder; }
         const date_ptr& date(void) const { return _date; }
         const address_ptr& first_from(void) const { return _from; }
+        const address_ptr& first_to(void) const { return _to; }
         const std::string& subject(void) const { return _subject; }
         const std::string& uid(void) const { return _uid; }
 

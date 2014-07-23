@@ -53,7 +53,7 @@ int main(int argc, const char **argv)
         printf("%*u %s %-*.*s %-*.*s%c\n",
                (int)seq_width, msg->seq()->to_uint(),
                msg->date()->ddmm().c_str(),
-               (int)from_width, (int)from_width, msg->first_from()->nom().c_str(),
+               (int)from_width, (int)from_width, msg->first_to()->nom().c_str(),
                (int)subject_width, (int)subject_width, msg->subject().c_str(),
                strlen(msg->subject().c_str()) > subject_width ? '\\' : ' '
             );
