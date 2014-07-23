@@ -77,7 +77,7 @@ namespace mhng {
         const sequence_number_ptr& seq(void) const { return _seq; }
         const folder_ptr& folder(void) const { return _folder; }
         const date_ptr& date(void) const { return _date; }
-        const address_ptr& from(void) const { return _from; }
+        const address_ptr& first_from(void) const { return _from; }
         const std::string& subject(void) const { return _subject; }
         const std::string& uid(void) const { return _uid; }
 
