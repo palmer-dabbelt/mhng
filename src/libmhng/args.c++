@@ -35,9 +35,11 @@ static std::string default_mhng_folder_path(void);
 
 args::args(const std::vector<message_ptr>& messages,
            const std::vector<folder_ptr>& folders,
+           const std::vector<int>& numbers,
            const mailbox_ptr& mbox)
     : _messages(messages),
       _folders(folders),
+      _numbers(numbers),
       _mbox(mbox)
 {
 }
@@ -48,7 +50,6 @@ args_ptr args::parse_normal(int argc, const char **argv)
     flags |= pf_skipplus;
     flags |= pf_folders;
     flags |= pf_messages;
-    flags |= pf_numbers;
 
     return parse(argc, argv, flags);
 }
@@ -59,13 +60,22 @@ args_ptr args::parse_all_messages(int argc, const char **argv)
     flags |= pf_skipplus;
     flags |= pf_folders;
     flags |= pf_messages;
-    flags |= pf_numbers;
     flags |= pf_allm;
 
     return parse(argc, argv, flags);
 }
 
-args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int flags)
+args_ptr args::parse_numbers(int argc, const char **argv)
+{
+    int flags = 0;
+    flags |= pf_skipplus;
+    flags |= pf_folders;
+    flags |= pf_numbers;
+
+    return parse(argc, argv, flags);
+}
+
+args_ptr args::parse(int argc, const char **argv, int flags)
 {
     bool messages_written = false;
     std::vector<std::pair<std::string, int>> message_seqs;
@@ -73,6 +83,8 @@ args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int fl
     bool folders_written = false;
     std::vector<std::string> folder_names;
     std::string last_folder = "";
+
+    std::vector<int> numbers;
 
     auto mhng_folder = default_mhng_folder_path();
 
@@ -82,15 +94,20 @@ args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int fl
          * etc.  The rules are as follows:
          *  - Any integer is a sequence number
          *  - Anything that starts with a "+" is a folder name
+         *  - Anything that starts with a ":" is a sequence number
          *  - Anything that starts with a "@" is a UID
          *  - Anything that starts with a "-" is an argument
          *  - Anything else is a folder name
          */
         if (atoi(argv[i]) > 0) {
-            messages_written = true;
-            message_seqs.push_back(
-                std::make_pair(last_folder, atoi(argv[i]))
-                );
+            if (flags & pf_numbers) {
+                numbers.push_back(atoi(argv[i]));
+            } else {
+                messages_written = true;
+                message_seqs.push_back(
+                    std::make_pair(last_folder, atoi(argv[i]))
+                    );
+            }
         } else if (argv[i][0] == '+') {
             folders_written = true;
             folder_names.push_back(argv[i]+1);
@@ -147,11 +164,11 @@ args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int fl
             for (const auto& folder: folders)
                 for (const auto& message: folder->messages())
                     messages.push_back(message);
-            return std::make_shared<args>(messages, folders, dir);
+            return std::make_shared<args>(messages, folders, numbers, dir);
         } else {
             std::vector<message_ptr> messages;
             messages.push_back(last_folder_ptr->current_message());
-            return std::make_shared<args>(messages, folders, dir);
+            return std::make_shared<args>(messages, folders, numbers, dir);
         }
     }
 
@@ -191,7 +208,7 @@ args_ptr args::parse(int argc, const char **argv __attribute__((unused)), int fl
 
     /* At this point everything should be fixed up so we can just go
      * ahead and construct the relevant argument structure. */
-    return std::make_shared<args>(messages, folders, dir);
+    return std::make_shared<args>(messages, folders, numbers, dir);
 }
 
 std::string default_mhng_folder_path(void)
