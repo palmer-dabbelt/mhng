@@ -78,10 +78,10 @@ namespace mhng {
         bool cur(void) const { return _cur; }
         const sequence_number_ptr& seq(void) const { return _seq; }
         const folder_ptr& folder(void) const { return _folder; }
-        const date_ptr& date(void) const { return _date; }
+        const date_ptr& first_date(void) const { return _date; }
         const address_ptr& first_from(void) const { return _from; }
         const address_ptr& first_to(void) const { return _to; }
-        const std::string& subject(void) const { return _subject; }
+        const std::string& first_subject(void) const { return _subject; }
         const std::string& uid(void) const { return _uid; }
 
         /* Accessors for slower fields. */

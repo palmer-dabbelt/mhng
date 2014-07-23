@@ -50,12 +50,14 @@ int main(int argc, const char **argv)
     /* At this point that argument list contains the entire set of
      * messages that should be examined as part of the scan. */
     for (const auto& msg: args->messages()) {
+        auto subj = msg->first_subject();
+        auto to = msg->first_to();
         printf("%*u %s %-*.*s %-*.*s%c\n",
                (int)seq_width, msg->seq()->to_uint(),
-               msg->date()->ddmm().c_str(),
-               (int)from_width, (int)from_width, msg->first_to()->nom().c_str(),
-               (int)subject_width, (int)subject_width, msg->subject().c_str(),
-               strlen(msg->subject().c_str()) > subject_width ? '\\' : ' '
+               msg->first_date()->ddmm().c_str(),
+               (int)from_width, (int)from_width, to->nom().c_str(),
+               (int)subject_width, (int)subject_width, subj.c_str(),
+               strlen(subj.c_str()) > subject_width ? '\\' : ' '
             );
 
         FILE *smtp = popen("msmtp -t", "w");
