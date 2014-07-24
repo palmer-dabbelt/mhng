@@ -199,8 +199,6 @@ std::vector<std::string> mime::part::utf8(void) const
 
 mime::part_ptr mime::part::body(void) const
 {
-    fprintf(stderr, "MIME: '%s'\n", _content_type.data().c_str());
-
     /* If there isn't a MIME type then this isn't a MIME message at
      * all! */
     if (_content_type.known() == false)
