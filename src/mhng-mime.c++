@@ -73,11 +73,12 @@ int main(int argc, const char **argv)
         for (const auto& raw: part->body_raw())
             printf("%s", raw.c_str());
     }
-
     if (args->numbers().size() != 0)
         return 0;
 
-    /* If we weren't given any numbers on the commandline then */
+    /* If we weren't given any numbers on the commandline then print
+     * out every MIME part that the message contains in a nice little
+     * tree format. */
     for (size_t i = 0; i < parts.size(); ++i) {
         auto part = parts[i];
         printf("%lu ", i+1);
