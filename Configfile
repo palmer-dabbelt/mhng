@@ -146,6 +146,12 @@ SOURCES     += mhng-post.c++
 BINARIES    += mhng-rmm
 SOURCES     += mhng-rmm.c++
 
+# Shows the current message (or a passed in message), optionally
+# moving to the next/previous message in the list.
+BINARIES    += mhng-show
+SOURCES     += mhng-show.c++
+COMPILEOPTS += -DSHOW
+
 # Lists the MIME parts of a given message
 BINARIES    += mhng-mime
 SOURCES     += mhng-mime.c++

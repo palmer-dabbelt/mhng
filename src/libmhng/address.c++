@@ -43,6 +43,20 @@ std::string address::nom(void) const
     return _email.data();
 }
 
+std::string address::rfc(void) const
+{
+    if (_name.known() && _email.known()) {
+        char buffer[BUFFER_SIZE];
+        snprintf(buffer, BUFFER_SIZE, "%s <%s>",
+                 _name.data().c_str(),
+                 _email.data().c_str()
+            );
+        return buffer;
+    }
+
+    return _email.data();
+}
+
 address_ptr address::from_email(const std::string email)
 {
     return std::make_shared<address>(

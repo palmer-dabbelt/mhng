@@ -64,6 +64,9 @@ namespace mhng {
          * Note that this always succeeds */
         std::string nom(void) const;
 
+        /* Returns the full RFC representation of this address. */
+        std::string rfc(void) const;
+
     public:
         /* Parses a raw email address.  This doesn't do any checks at
          * all, so you'll probably want to be very sure */

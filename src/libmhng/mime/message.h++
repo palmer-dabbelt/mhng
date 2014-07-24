@@ -33,6 +33,7 @@ namespace mhng {
 
 #include "header.h++"
 #include "part.h++"
+#include <map>
 #include <string>
 #include <vector>
 
@@ -44,7 +45,12 @@ namespace mhng {
          * format. */
         class message {
         private:
+            /* This is the root MIME part of this message. */
             part_ptr _root;
+
+            /* A lookup table that allows us to easily seach the list
+             * of headers for one that matches a string. */
+            std::multimap<std::string, header_ptr> _headers;
 
         public:
             /* Creates a MIME message, given the raw text of the
@@ -57,8 +63,13 @@ namespace mhng {
             const part_ptr& root(void) const { return _root; }
 
             /* Returns all the header that match the given string in
-             * the top-level MIME message. */
+             * the top-level MIME message.  Note that these seaches
+             * are all case insensitive. */
             std::vector<header_ptr> header(const std::string name) const;
+
+            /* Searches for a body for this message, returning what is
+             * found. */
+            part_ptr body(void) const;
         };
     }
 }

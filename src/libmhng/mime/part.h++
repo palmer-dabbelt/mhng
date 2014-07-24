@@ -82,11 +82,24 @@ namespace mhng {
             const std::vector<std::string>& body_raw(void) const
                 { return _body_raw; }
 
+            const std::vector<header_ptr> headers(void) const
+                { return _headers; }
+
+            /* Formats the body of this MIME part as UTF-8. */
+            std::vector<std::string> utf8(void) const;
+
+            /* Searches this MIME subtree for a suitable body part. */
+            part_ptr body(void) const;
+
         private:
             /* Returns TRUE if the boundary is known and the given
              * line matches the boundary. */
-            bool matches_boundary(const std::string& line);
-            bool matches_end_boundary(const std::string& line);
+            bool matches_boundary(const std::string& line) const;
+            bool matches_end_boundary(const std::string& line) const;
+
+            /* Returns TRUE if this matches the given content-type
+             * header. */
+            bool matches_content_type(const std::string& type) const;
         };
     }
 }

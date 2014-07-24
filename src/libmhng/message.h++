@@ -131,6 +131,11 @@ namespace mhng {
          * format you actually care about. */
         std::vector<mime::header_ptr> header(const std::string hdr);
 
+        /* Returns the body of the message, parsed as UTF-8 and
+         * suitable for writing to stdout. */
+        std::vector<std::string> body_utf8(void)
+            { return mime()->body()->utf8(); }
+
     private:
         std::string full_path(void) const;
 

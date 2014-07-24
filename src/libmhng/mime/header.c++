@@ -61,6 +61,26 @@ std::string mime::header::single_line(void) const
     return out;
 }
 
+std::string mime::header::key(void) const
+{
+    char buffer[BUFFER_SIZE];
+    snprintf(buffer, BUFFER_SIZE, "%s", _raw[0].c_str());
+    strstr(buffer, ":")[0] = '\0';
+    return buffer;
+}
+
+std::string mime::header::key_downcase(void) const
+{
+    char buffer[BUFFER_SIZE];
+    snprintf(buffer, BUFFER_SIZE, "%s", _raw[0].c_str());
+    strstr(buffer, ":")[0] = '\0';
+
+    for (size_t i = 0; i < strlen(buffer); ++i)
+        buffer[i] = tolower(buffer[i]);
+
+    return buffer;
+}
+
 void mime::header::add_line(const std::string& line)
 {
     _raw.push_back(line);

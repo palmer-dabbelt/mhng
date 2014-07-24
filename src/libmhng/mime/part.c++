@@ -175,7 +175,53 @@ mime::part::part(const std::vector<std::string>& raw)
     }
 }
 
-bool mime::part::matches_boundary(const std::string& line)
+std::vector<std::string> mime::part::utf8(void) const
+{
+    std::vector<std::string> out;
+
+    for (const auto& line: _body_raw) {
+        char buffer[BUFFER_SIZE];
+        snprintf(buffer, BUFFER_SIZE, "%s", line.c_str());
+        while (isspace(buffer[strlen(buffer)-1]))
+            buffer[strlen(buffer)-1] = '\0';
+        out.push_back(buffer);
+    }
+
+    return out;
+}
+
+mime::part_ptr mime::part::body(void) const
+{
+    /* If there isn't a MIME type then this isn't a MIME message at
+     * all! */
+    if (_content_type.known() == false)
+        return NULL;
+
+    /* If this doesn't have any children then there's nothing we can
+     * do to search it. */
+    if (_children.size() == 0)
+        return NULL;
+
+    /* Attempt to select the correct multipart. */
+    if (matches_content_type("multipart/alternative") == true) {
+        for (const auto& child: _children)
+            if (child->matches_content_type("text/utf-8"))
+                return child;
+
+        for (const auto& child: _children)
+            if (child->matches_content_type("text/plain"))
+                return child;
+
+        for (const auto& child: _children)
+            if (child->matches_content_type("text/html"))
+                return child;
+    }
+
+    /* Otherwise we can't find anything, so just give up. */
+    return NULL;
+}
+
+bool mime::part::matches_boundary(const std::string& line) const
 {
     if (_boundary.known() == false)
         return false;
@@ -187,13 +233,25 @@ bool mime::part::matches_boundary(const std::string& line)
     return false;
 }
 
-bool mime::part::matches_end_boundary(const std::string& line)
+bool mime::part::matches_end_boundary(const std::string& line) const
 {
     if (_end_boundary.known() == false)
         return false;
 
     auto boundary = _end_boundary.data();
     if (strcmp(line.c_str(), boundary.c_str()) == 0)
+        return true;
+
+    return false;
+}
+
+bool mime::part::matches_content_type(const std::string& type) const
+{
+    if (_content_type.known() == false)
+        return false;
+
+    auto boundary = _content_type.data();
+    if (strcasecmp(type.c_str(), boundary.c_str()) == 0)
         return true;
 
     return false;

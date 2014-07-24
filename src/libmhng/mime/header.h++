@@ -58,6 +58,11 @@ namespace mhng {
              * line changes over. */
             std::string single_line(void) const;
 
+            /* Returns the key of this header, which is the stuff
+             * before the colon. */
+            std::string key(void) const;
+            std::string key_downcase(void) const;
+
             /* Checks to see if the key of this header matches the
              * given key. */
             bool match(const std::string& key);
