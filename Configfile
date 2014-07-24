@@ -78,11 +78,6 @@ BINARIES    += forw
 SOURCES     += repl.c++
 COMPILEOPTS += -DFORW
 
-# Prints all the URLs in a message, also allows you to open one of
-# them.
-BINARIES    += mh-urls
-SOURCES     += mh-urls.c++
-
 # Re-packs messages into folders.  This modifies the sequence numbers
 # such that the messages all stay in order but no longer have any
 # gaps.
