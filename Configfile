@@ -62,12 +62,6 @@ CONFIG      += libmhng_headers
 ##############################################################################
 # Local-Access Binaries                                                      #
 ##############################################################################
-# Lists the folders that are currently known by this client.  Note
-# that this has nothing to do with the on-server folders that may be
-# being fetched by some IMAP client...
-BINARIES    += folders
-SOURCES     += folders.c++
-
 # Composes a reply to a message, using your editor of choice (hint:
 # it's emacs :)).
 BINARIES    += repl
