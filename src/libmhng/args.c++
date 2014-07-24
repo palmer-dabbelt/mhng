@@ -65,6 +65,17 @@ args_ptr args::parse_all_messages(int argc, const char **argv)
     return parse(argc, argv, flags);
 }
 
+args_ptr args::parse_all_folders(int argc, const char **argv)
+{
+    int flags = 0;
+    flags |= pf_skipplus;
+    flags |= pf_folders;
+    flags |= pf_messages;
+    flags |= pf_allf;
+
+    return parse(argc, argv, flags);
+}
+
 args_ptr args::parse_numbers(int argc, const char **argv)
 {
     int flags = 0;
@@ -126,8 +137,12 @@ args_ptr args::parse(int argc, const char **argv, int flags)
      * which folders should be looked at. */
     if (folders_written == false) {
         if (flags & pf_allf) {
-            fprintf(stderr, "Unimplemented\n");
-            abort();
+            /* FIXME: This is wrong... :) */
+            folder_names = { "inbox",
+                             "drafts",
+                             "rss",
+                             "promo",
+                             "lists" };
         } else {
             auto current_folder = dir->current_folder();
             if (current_folder == NULL) {

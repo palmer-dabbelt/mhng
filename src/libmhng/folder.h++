@@ -87,6 +87,11 @@ namespace mhng {
                 return out;
             }
 
+        /* Returns the count of the number of messages in this folder.
+         * Note that right now it's horrible, but it exists in case I
+         * want to eventually make it fast. */
+        size_t message_count(void) { return messages().size(); }
+
         /* Opens a message, given the sequence number for that
          * message. */
         message_ptr open(const sequence_number_ptr& seq);

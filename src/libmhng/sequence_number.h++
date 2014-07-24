@@ -51,6 +51,7 @@ namespace mhng {
     public:
         /* Converts to an integer. */
         unsigned to_uint(void) const { return _num; }
+        int to_int(void) const { return (int)_num; }
     };
 }
 

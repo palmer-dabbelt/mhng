@@ -157,3 +157,7 @@ COMPILEOPTS += -DRMM
 # Lists the MIME parts of a given message
 BINARIES    += mhng-mime
 SOURCES     += mhng-mime.c++
+
+# Lists every folder known to the system
+BINARIES    += mhng-folders
+SOURCES     += mhng-folders.c++

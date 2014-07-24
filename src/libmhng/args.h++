@@ -92,6 +92,10 @@ namespace mhng {
          * rather than just the current message. */
         static args_ptr parse_all_messages(int argc, const char **argv);
 
+        /* Like a normal parse, but defaults to listing every folder
+         * in the mailbox, but no messages at all. */
+        static args_ptr parse_all_folders(int argc, const char **argv);
+
         /* Parses command-line arguments, but doesn't do any implicit
          * folder or message ID parsing.  This will just bail out on
          * any other */
