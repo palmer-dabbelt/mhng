@@ -26,23 +26,43 @@ int main(int argc, const char **argv)
 {
     auto args = mhng::args::parse_normal(argc, argv);
 
-#if defined(SHOW)
+    auto folders = args->folders();
     auto messages = args->messages();
 
-    if (args->folders().size() == 1 && args->messages().size() == 1) {
-        args->mbox()->set_current_folder(args->folders()[0]);
-        args->folders()[0]->set_current_message(args->messages()[0]);
+    /* It's possible we need to remove the current message.  Note that
+     * this really only makes any form of sense when given a
+     * NEXT/PREV, as otherwise it would be impossible to show the
+     * message. */
+#if defined(RMM)
+#if defined(NEXT) || defined(PREV)
+    if (messages.size() != 0) {
+        fprintf(stderr, "Attempted to mhng-{mtn,mtp} with many messages\n");
+        abort();
+    }
+
+    messages[0]->remove();
+#else
+#error "Can't RMM without NEXT || PREV"
+#endif
+#endif
+
+    /* Here we figure out what to do with this message: either we
+     * attempt to move the current message pointer around based on
+     * what was given on the commandline, or we move to the
+     * next/previous message based on sequence numbers. */
+#if defined(SHOW)
+    if (folders.size() == 1 && messages.size() == 1) {
+        args->mbox()->set_current_folder(folders[0]);
+        folders[0]->set_current_message(messages[0]);
     }
 #elif defined(NEXT) || defined(PREV)
 #if defined(NEXT)
-    auto next = args->messages()[0]->next_message( 1);
+    auto next = messages[0]->next_message( 1);
 #elif defined(PREV)
-    auto next = args->messages()[0]->next_message(-1);
+    auto next = messages[0]->next_message(-1);
 #endif
     args->folders()[0]->set_current_message(next);
-
-    std::vector<mhng::message_ptr> messages =
-        {args->folders()[0]->current_message()};
+    messages = {args->folders()[0]->current_message()};
 #else
 #error "Define some operation mode..."
 #endif

@@ -68,20 +68,6 @@ CONFIG      += libmhng_headers
 BINARIES    += folders
 SOURCES     += folders.c++
 
-# Shows a single message to the console, optionally moving to the next
-# or previous message in the list.
-BINARIES    += show
-SOURCES     += show.c++
-COMPILEOPTS += -DSHOW
-
-BINARIES    += next
-SOURCES     += show.c++
-COMPILEOPTS += -DNEXT
-
-BINARIES    += prev
-SOURCES     += show.c++
-COMPILEOPTS += -DPREV
-
 # Just "rmm && show"
 BINARIES    += mtn
 SOURCES     += mtn.bash
@@ -159,6 +145,18 @@ COMPILEOPTS += -DNEXT
 BINARIES    += mhng-prev
 SOURCES     += mhng-show.c++
 COMPILEOPTS += -DPREV
+
+# This one is really just a mhng-rmm && mhng-{next,prev}, but it's all
+# put in a single binary for ease of use.
+BINARIES    += mhng-mtn
+SOURCES     += mhng-show.c++
+COMPILEOPTS += -DNEXT
+COMPILEOPTS += -DRMM
+
+BINARIES    += mhng-mtp
+SOURCES     += mhng-show.c++
+COMPILEOPTS += -DPREV
+COMPILEOPTS += -DRMM
 
 # Lists the MIME parts of a given message
 BINARIES    += mhng-mime
