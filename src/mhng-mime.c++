@@ -65,13 +65,10 @@ int main(int argc, const char **argv)
             abort();
         }
 
-        /* FIXME: Output the decoded data here, as the raw stuff is
-         * actually pretty worthless as it explicitly doesn't decode
-         * anything (making the output attachments not useful at
-         * all). */
+        /* This decodes the message and writes it. */
         auto part = parts[num - 1];
-        for (const auto& raw: part->body_raw())
-            printf("%s", raw.c_str());
+        for (const auto& line: part->utf8())
+            printf("%s\n", line.c_str());
     }
     if (args->numbers().size() != 0)
         return 0;
