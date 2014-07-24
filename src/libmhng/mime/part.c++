@@ -332,9 +332,12 @@ mime::part_ptr mime::part::body(void) const
              * message), which itself gets CATted into the body of the
              * message. */
             auto child_body = child->body();
-            if (child_body == NULL) child_body = child;
-            for (const auto& line: child_body->utf8())
-                out_raw.push_back(line + "\r\n");
+            if (child_body == NULL)
+                child_body = child;
+
+            if (child_body->matches_content_type("text/plain") == true)
+                for (const auto& line: child_body->utf8())
+                    out_raw.push_back(line + "\r\n");
 
             first_child = false;
         }
