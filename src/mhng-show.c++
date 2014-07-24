@@ -69,7 +69,7 @@ int main(int argc, const char **argv)
 
     /* Here's the command we want to run in order to produce some
      * formatted output. */
-    FILE *out = popen("fold -s | less +g", "w");
+    FILE *out = popen("fold -s | less -FRSX", "w");
 
     /* Show every message out to the pager.  Note that this is
      * essentially the mbox format, but by default I don't bother
