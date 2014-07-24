@@ -68,10 +68,6 @@ CONFIG      += libmhng_headers
 BINARIES    += folders
 SOURCES     += folders.c++
 
-# Just "rmm && show"
-BINARIES    += mtn
-SOURCES     += mtn.bash
-
 # Composes a reply to a message, using your editor of choice (hint:
 # it's emacs :)).
 BINARIES    += repl
