@@ -199,6 +199,8 @@ std::vector<std::string> mime::part::utf8(void) const
 
 mime::part_ptr mime::part::body(void) const
 {
+    fprintf(stderr, "MIME: '%s'\n", _content_type.data().c_str());
+
     /* If there isn't a MIME type then this isn't a MIME message at
      * all! */
     if (_content_type.known() == false)
@@ -209,19 +211,75 @@ mime::part_ptr mime::part::body(void) const
     if (_children.size() == 0)
         return NULL;
 
-    /* Attempt to select the correct multipart. */
-    if (matches_content_type("multipart/alternative") == true) {
-        for (const auto& child: _children)
-            if (child->matches_content_type("text/utf-8"))
-                return child;
+    /* RFC-822 messages are actually just containers for other
+     * messages, so we simply pass this call on. */
+    if (matches_content_type("message/rfc822") == true)
+        return _children[0]->body();
 
+    /* Attempt to select the correct multipart, alternative means we
+     * pick one of them. */
+    if ((matches_content_type("multipart/alternative") == true)
+        || (matches_content_type("multipart/related") == true)) {
+        /* First, prefer anything that's just plain text. */
         for (const auto& child: _children)
             if (child->matches_content_type("text/plain"))
                 return child;
 
+        /* Attempt a recursive parse, looking for a plain text part.
+         * The idea here is that it might be hidden in another
+         * "multipart/related" or "multipart/mixed" sort of thing. */
+        for (const auto& child: _children) {
+            auto child_body = child->body();
+            if (child_body != NULL)
+                return child_body;
+        }
+
+        /* Finally, if there's a HTML part then show it begrudgingly. */
         for (const auto& child: _children)
             if (child->matches_content_type("text/html"))
                 return child;
+
+        /* If there's nothing that we know how to deal with then just
+         * go ahead and dump out everything. */
+        return NULL;
+    }
+
+    /* If we've got a "mixed" multipart then we actually need to
+     * return _all_ of them! */
+    if (matches_content_type("multipart/mixed") == true) {
+        auto out_raw = std::vector<std::string>();
+
+        bool first_child = true;
+        for (const auto& child: _children) {
+            /* The first child will have its headers set, everything
+             * else won't. */
+            if (first_child == true) {
+                for (const auto& raw: child->_raw) {
+                    if (strlen(raw.c_str()) <= 2)
+                        break;
+
+                    out_raw.push_back(raw);
+                }
+
+                /* Here we push a content-type in because this has
+                 * already been decoded. */
+                out_raw.push_back("Content-Type: text/plain; charset=UTF-8\r\n");
+                out_raw.push_back("\r\n");
+            }
+
+            /* Recursively search every other message part for a body
+             * (which may very well just be the full contents of the
+             * message), which itself gets CATted into the body of the
+             * message. */
+            auto child_body = child->body();
+            if (child_body == NULL) child_body = child;
+            for (const auto& line: child_body->utf8())
+                out_raw.push_back(line + "\r\n");
+
+            first_child = false;
+        }
+
+        return std::make_shared<part>(out_raw);
     }
 
     /* Otherwise we can't find anything, so just give up. */
