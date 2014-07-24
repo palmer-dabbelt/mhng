@@ -44,6 +44,10 @@ namespace mhng {
         public:
             /* Returns the current message in the given folder. */
             unsigned select(const std::string& folder_name);
+
+            /* Replaces the folder name with a new value. */
+            void update(const std::string& folder_name,
+                        unsigned new_current);
         };
     }
 }

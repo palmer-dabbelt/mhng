@@ -25,8 +25,10 @@
 int main(int argc, const char **argv)
 {
     auto args = mhng::args::parse_normal(argc, argv);
-    args->mbox()->set_current_folder(args->folders()[0]);
-//    args->mbox()->set_current_message(args->messages()[0]);
+    if (args->folders().size() == 1 && args->messages().size() == 1) {
+        args->mbox()->set_current_folder(args->folders()[0]);
+        args->folders()[0]->set_current_message(args->messages()[0]);
+    }
 
     /* Here's the command we want to run in order to produce some
      * formatted output. */

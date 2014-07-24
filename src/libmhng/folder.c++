@@ -53,6 +53,12 @@ std::string folder::full_path(void) const
     return path;
 }
 
+void folder::set_current_message(const message_ptr& message)
+{
+    auto cur = std::make_shared<db::mh_current>(_mbox);
+    cur->update(message->folder()->name(), message->seq()->to_uint());
+}
+
 message_ptr folder::_current_message_impl(void)
 {
     auto cur = std::make_shared<db::mh_current>(_mbox);

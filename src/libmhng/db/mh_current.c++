@@ -51,6 +51,22 @@ unsigned db::mh_current::select(const std::string& folder)
     return row->get_uint("seq");
 }
 
+void db::mh_current::update(const std::string& folder,
+                            unsigned seq)
+{
+    auto map = std::map<std::string, std::string>();
+    map["seq"] = std::to_string(seq);
+    auto row = std::make_shared<sqlite::row>(map);
+
+    auto resp = _mbox->db()->replace(_table, row, "folder = '%s'",
+                                     folder.c_str());
+
+    switch (resp->return_value()) {
+    case sqlite::error_code::SUCCESS:
+        return;
+    }
+}
+
 sqlite::table_ptr generate_columns(void)
 {
     std::vector<sqlite::column_ptr> out;

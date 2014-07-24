@@ -31,6 +31,7 @@ namespace mhng {
 
 #include "folder.h++"
 #include "mailrc.h++"
+#include "message.h++"
 #include "promise.h++"
 #include "sqlite/connection.h++"
 #include <string>

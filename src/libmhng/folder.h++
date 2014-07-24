@@ -72,6 +72,9 @@ namespace mhng {
         message_ptr current_message(void)
             { return _current_message; }
 
+        /* Sets the current messagae in this folder. */
+        void set_current_message(const message_ptr& message);
+
         /* Lists every message in the current folder. */
         /* FIXME: There must ba a better way to deal with this than
          * just copying the entire vector... */
