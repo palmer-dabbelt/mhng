@@ -173,6 +173,13 @@ mime::part::part(const std::vector<std::string>& raw)
             break;
         }
     }
+
+    /* Here's a special case: some messages need to be parsed
+     * again! */
+    if (matches_content_type("message/rfc822")) {
+        auto child = std::make_shared<part>(_body_raw);
+        _children.push_back(child);
+    }
 }
 
 std::vector<std::string> mime::part::utf8(void) const
