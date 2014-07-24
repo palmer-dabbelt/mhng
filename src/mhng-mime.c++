@@ -28,7 +28,7 @@ int main(int argc, const char **argv)
 {
     auto args = mhng::args::parse_numbers(argc, argv);
     args->mbox()->set_current_folder(args->folders()[0]);
-//    args->mbox()->set_current_message(args->messages()[0]);
+    args->folders()[0]->set_current_message(args->messages()[0]);
 
     /* The first thing we want to do is build up a vector of the
      * MIME parts that are availiable to this message. */
