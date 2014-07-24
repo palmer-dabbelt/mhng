@@ -53,7 +53,8 @@ message::message(const mailbox_ptr& mbox,
       _to(to),
       _subject(subject),
       _uid(uid),
-      _raw(this, _raw_func)
+      _raw(this, _raw_func),
+      _mime(this, _mime_func)
 {
 }
 
@@ -70,6 +71,47 @@ void message::remove(void)
         perror("Unable to remove message file");
         abort();
     }
+}
+
+std::vector<address_ptr> message::header_addr(const std::string name)
+{
+    std::vector<address_ptr> out;
+
+    for (const auto& hdr: header(name)) {
+        auto addr = address::parse_rfc(hdr->single_line());
+        out.push_back(addr);
+    }
+
+    return out;
+}
+
+std::vector<std::string> message::header_string(const std::string name)
+{
+    std::vector<std::string> out;
+
+    for (const auto& hdr: header(name)) {
+        auto str = hdr->single_line();
+        out.push_back(str);
+    }
+
+    return out;
+}
+
+std::vector<date_ptr> message::header_date(const std::string name)
+{
+    std::vector<date_ptr> out;
+
+    for (const auto& hdr: header(name)) {
+        auto d = std::make_shared<mhng::date>(hdr->single_line());
+        out.push_back(d);
+    }
+
+    return out;
+}
+
+std::vector<mime::header_ptr> message::header(const std::string name)
+{
+    return mime()->header(name);
 }
 
 std::string message::full_path(void) const
@@ -98,6 +140,11 @@ std::shared_ptr<std::vector<std::string>> message::_raw_impl(void)
 
     fclose(file);
     return out;
+}
+
+std::shared_ptr<mime::message> message::_mime_impl(void)
+{
+    return std::make_shared<mime::message>(this->raw());
 }
 
 bool check_for_current(const mailbox_ptr& mbox,

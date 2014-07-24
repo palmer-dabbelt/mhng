@@ -34,6 +34,7 @@ namespace mhng {
 #include "mailbox.h++"
 #include "promise.h++"
 #include "sequence_number.h++"
+#include "mime/message.h++"
 #include "sqlite/connection.h++"
 #include <string>
 #include <vector>
@@ -58,6 +59,9 @@ namespace mhng {
         /* Contains the raw bytes of the message, parsed as strings
          * (one per line). */
         promise<message, std::vector<std::string>> _raw;
+
+        /* This contains the message formatted as a MIME message. */
+        promise<message, mime::message> _mime;
 
     public:
         /* Here's the sole way of creating a new message: with all the
@@ -88,6 +92,7 @@ namespace mhng {
         std::shared_ptr<std::vector<std::string>> raw_pointer(void)
             { return _raw; }
         std::vector<std::string> raw(void) { return *(raw_pointer()); }
+        mime::message_ptr mime(void) { return _mime; }
 
         /* Removes a message from the store.  Note that this is a
          * somewhat dangerous operation: there could be a whole bunch
@@ -96,6 +101,36 @@ namespace mhng {
          * got a pointer to a message doesn't really mean anything. */
         void remove(void);
 
+        /* Allows access to _all_ the headers of particular types in a
+         * message, not just the first one.  Note that this requires
+         * reading and parsing the entire message, so it's fairly
+         * slow!  If you're just going to throw out everything but the
+         * first header then go ahead and use the fast accessors
+         * above, but this is significantly safer... */
+        std::vector<address_ptr> header_addr  (const std::string hdr);
+        std::vector<std::string> header_string(const std::string hdr);
+        std::vector<date_ptr>    header_date  (const std::string hdr);
+
+        std::vector<address_ptr> from(void)
+            { return header_addr("From"); }
+        std::vector<address_ptr> to(void)
+            { return header_addr("To"); }
+        std::vector<address_ptr> cc(void)
+            { return header_addr("CC"); }
+        std::vector<address_ptr> bcc(void)
+            { return header_addr("BCC"); }
+
+        std::vector<date_ptr> date(void)
+            { return header_date("Date"); }
+
+        std::vector<std::string> subject(void)
+            { return header_string("Subject"); }
+
+        /* You shouldn't be using this directly but should instead be
+         * using the other functions that parse these headers into a
+         * format you actually care about. */
+        std::vector<mime::header_ptr> header(const std::string hdr);
+
     private:
         std::string full_path(void) const;
 
@@ -103,6 +138,10 @@ namespace mhng {
         static std::shared_ptr<std::vector<std::string>> _raw_func(message *m)
             { return m->_raw_impl(); }
         std::shared_ptr<std::vector<std::string>> _raw_impl(void);
+
+        static std::shared_ptr<mime::message> _mime_func(message *m)
+            { return m->_mime_impl(); }
+        std::shared_ptr<mime::message> _mime_impl(void);
     };
 }
 

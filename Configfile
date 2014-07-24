@@ -145,3 +145,7 @@ SOURCES     += mhng-post.c++
 # Removes the current message.
 BINARIES    += mhng-rmm
 SOURCES     += mhng-rmm.c++
+
+# Lists the MIME parts of a given message
+BINARIES    += mhng-mime
+SOURCES     += mhng-mime.c++
