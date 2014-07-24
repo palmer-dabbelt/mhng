@@ -136,6 +136,11 @@ namespace mhng {
         std::vector<std::string> body_utf8(void)
             { return mime()->body()->utf8(); }
 
+        /* Obtains the next message in the current folder, if one
+         * exists.  The offset is the minimum offset that we search
+         * for a message in. */
+        message_ptr next_message(int offset = 1);
+
     private:
         std::string full_path(void) const;
 

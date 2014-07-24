@@ -53,6 +53,11 @@ namespace mhng {
                                const sequence_number_ptr& seq);
             message_ptr select(uint64_t uid);
 
+            /* Searches for a message offset */
+            message_ptr select(const std::string& folder_name,
+                               const sequence_number_ptr& seq,
+                               int offset);
+
             /* This selects all the messages in a given folder. */
             std::vector<message_ptr> select(const std::string& folder_name);
 

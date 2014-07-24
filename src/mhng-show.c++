@@ -25,10 +25,27 @@
 int main(int argc, const char **argv)
 {
     auto args = mhng::args::parse_normal(argc, argv);
+
+#if defined(SHOW)
+    auto messages = args->messages();
+
     if (args->folders().size() == 1 && args->messages().size() == 1) {
         args->mbox()->set_current_folder(args->folders()[0]);
         args->folders()[0]->set_current_message(args->messages()[0]);
     }
+#elif defined(NEXT) || defined(PREV)
+#if defined(NEXT)
+    auto next = args->messages()[0]->next_message( 1);
+#elif defined(PREV)
+    auto next = args->messages()[0]->next_message(-1);
+#endif
+    args->folders()[0]->set_current_message(next);
+
+    std::vector<mhng::message_ptr> messages =
+        {args->folders()[0]->current_message()};
+#else
+#error "Define some operation mode..."
+#endif
 
     /* Here's the command we want to run in order to produce some
      * formatted output. */
@@ -38,7 +55,7 @@ int main(int argc, const char **argv)
      * essentially the mbox format, but by default I don't bother
      * re-formatting From lines in the original messages, as this is
      * designed for human consumption. */
-    for (const auto& msg: args->messages()) {
+    for (const auto& msg: messages) {
         for (const auto& addr: msg->from())
             fprintf(out, "From:    %s\n", addr->rfc().c_str());
         for (const auto& addr: msg->to())

@@ -152,6 +152,14 @@ BINARIES    += mhng-show
 SOURCES     += mhng-show.c++
 COMPILEOPTS += -DSHOW
 
+BINARIES    += mhng-next
+SOURCES     += mhng-show.c++
+COMPILEOPTS += -DNEXT
+
+BINARIES    += mhng-prev
+SOURCES     += mhng-show.c++
+COMPILEOPTS += -DPREV
+
 # Lists the MIME parts of a given message
 BINARIES    += mhng-mime
 SOURCES     += mhng-mime.c++

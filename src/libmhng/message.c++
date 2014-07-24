@@ -115,6 +115,12 @@ std::vector<mime::header_ptr> message::header(const std::string name)
     return mime()->header(name);
 }
 
+message_ptr message::next_message(int offset)
+{
+    auto table = std::make_shared<db::mh_messages>(_mbox);
+    return table->select(_folder->name(), _seq, offset);
+}
+
 std::string message::full_path(void) const
 {
     char path[BUFFER_SIZE];

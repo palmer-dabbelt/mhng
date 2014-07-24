@@ -94,6 +94,44 @@ std::vector<message_ptr> db::mh_messages::select(const std::string& folder)
     return out;
 }
 
+message_ptr db::mh_messages::select(const std::string& folder,
+                                    const sequence_number_ptr& seq,
+                                    int offset)
+{
+    auto resp = _mbox->db()->select(_table,
+                                    "folder='%s' AND seq%s%u ORDER BY seq %s",
+                                    folder.c_str(),
+                                    (offset >= 0) ? ">=" : "<=",
+                                    (int)(seq->to_uint()) + offset,
+                                    (offset >= 0) ? "ASC" : "DESC"
+        );
+
+    
+    switch (resp->return_value()) {
+    case sqlite::error_code::SUCCESS:
+        break;
+
+    default:
+        return NULL;
+        break;
+    }
+
+    if (resp->result_count() == 0)
+        return NULL;
+
+    auto row = resp->row(0);
+    return std::make_shared<message>(
+        _mbox,
+        std::make_shared<sequence_number>(row->get_uint("seq")),
+        _mbox->open_folder(folder),
+        std::make_shared<date>(row->get_str("date")),
+        _mbox->mrc()->email(row->get_str("fadr")),
+        _mbox->mrc()->email(row->get_str("tadr")),
+        row->get_str("subject"),
+        row->get_str("uid")
+        );
+}
+
 void db::mh_messages::remove(uint64_t uid)
 {
     auto resp = _mbox->db()->remove(_table, "uid='%lu'",
