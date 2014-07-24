@@ -155,3 +155,7 @@ SOURCES     += mhng-mime.c++
 # Lists every folder known to the system
 BINARIES    += mhng-folders
 SOURCES     += mhng-folders.c++
+
+# Lists all the URLs found in a message
+BINARIES    += mhng-urls
+SOURCES     += mhng-urls.c++
