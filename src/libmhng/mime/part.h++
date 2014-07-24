@@ -52,6 +52,10 @@ namespace mhng {
             unknown<std::string> _boundary;
             unknown<std::string> _end_boundary;
 
+            /* Determines how we should convert this MIME part to
+             * plain UTF-8. */
+            unknown<std::string> _content_transfer_encoding;
+
             /* Contains a vector that lists all the children of this
              * MIME part. */
             std::vector<part_ptr> _children;
@@ -100,6 +104,10 @@ namespace mhng {
             /* Returns TRUE if this matches the given content-type
              * header. */
             bool matches_content_type(const std::string& type) const;
+
+            /* Returns TRUE if this matches the given
+             * content-transfer-encoding header. */
+            bool matches_encoding(const std::string& enc) const;
         };
     }
 }

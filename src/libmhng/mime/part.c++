@@ -20,6 +20,7 @@
  */
 
 #include "part.h++"
+#include <stdlib.h>
 #include <string.h>
 using namespace mhng;
 
@@ -86,6 +87,9 @@ mime::part::part(const std::vector<std::string>& raw)
                     _content_type = std::string(strip);
                 }
             }
+
+            if (header->match("Content-Transfer-Encoding"))
+                _content_transfer_encoding = header->single_line();
 
             _headers.push_back(header);
         };
@@ -186,6 +190,65 @@ std::vector<std::string> mime::part::utf8(void) const
 {
     std::vector<std::string> out;
 
+    /* Quoted-printable has a bit of magic related to '=', but not
+     * much else to do.  Note that I do merge together long line
+     * fragments, so they'll have to be split up later when it's time
+     * to actually display them.  In other words, this gives you the
+     * raw message as UTF-8 with no filters applied. */
+    if (matches_encoding("quoted-printable") == true) {
+        std::string last_line = "";
+        for (const auto& linestr: _body_raw) {
+            char line[BUFFER_SIZE];
+            snprintf(line, BUFFER_SIZE, "%s", linestr.c_str());
+            while (isspace(line[strlen(line)-1]))
+                line[strlen(line)-1] = '\0';
+
+            char linebuf[BUFFER_SIZE];
+            memset(linebuf, '\0', BUFFER_SIZE);
+
+            size_t ii = 0;
+            size_t io = 0;
+            while (ii < strlen(line)) {
+                if (io >= BUFFER_SIZE - 1) {
+                    fprintf(stderr, "Long line\n");
+                    abort();
+                }
+
+                if (line[ii] == '=') {
+                    if (line[ii+1] == '\0') {
+                        ii++;
+                    } else {
+                        char ci1 = tolower(line[ii+1]);
+                        char ci2 = tolower(line[ii+2]);
+
+                        char str[] = {ci1, ci2, '\0'};
+
+                        char co = strtol(str, NULL, 16);
+                        linebuf[io] = co;
+                        io++;
+                        ii += 3;
+                    }
+                } else {
+                    linebuf[io] = line[ii];
+                    io++;
+                    ii++;
+                }
+            }
+
+            last_line = last_line + linebuf;
+
+            if (line[strlen(line)-1] != '=') {
+                out.push_back(last_line);
+                last_line = "";
+            }
+        }
+
+        out.push_back(last_line);
+        return out;
+    }
+
+    /* The default is to just strip whitespace at the end of the
+     * line and do nothing else! */
     for (const auto& line: _body_raw) {
         char buffer[BUFFER_SIZE];
         snprintf(buffer, BUFFER_SIZE, "%s", line.c_str());
@@ -193,7 +256,6 @@ std::vector<std::string> mime::part::utf8(void) const
             buffer[strlen(buffer)-1] = '\0';
         out.push_back(buffer);
     }
-
     return out;
 }
 
@@ -314,6 +376,18 @@ bool mime::part::matches_content_type(const std::string& type) const
         return false;
 
     auto boundary = _content_type.data();
+    if (strcasecmp(type.c_str(), boundary.c_str()) == 0)
+        return true;
+
+    return false;
+}
+
+bool mime::part::matches_encoding(const std::string& type) const
+{
+    if (_content_transfer_encoding.known() == false)
+        return false;
+
+    auto boundary = _content_transfer_encoding.data();
     if (strcasecmp(type.c_str(), boundary.c_str()) == 0)
         return true;
 
