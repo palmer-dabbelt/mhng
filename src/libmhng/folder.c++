@@ -74,6 +74,8 @@ message_ptr folder::_current_message_impl(void)
 
 std::shared_ptr<std::vector<message_ptr>> folder::_messages_impl(void)
 {
+    auto tr = _mbox->db()->deferred_transaction();
+
     auto out = std::make_shared<std::vector<message_ptr>>();
     auto table = std::make_shared<db::mh_messages>(_mbox);
 

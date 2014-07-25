@@ -38,7 +38,8 @@ static int sqlite3_exec_func(void *args,
                              char **names);
 
 sqlite::connection::connection(const std::string& db_path)
-    : _db(NULL)
+    : _db(NULL),
+      _tr(std::shared_ptr<transaction>(NULL))
 {
     int err = sqlite3_open(db_path.c_str(), &_db);
     if (err != SQLITE_OK) {
@@ -305,6 +306,166 @@ sqlite::result_ptr sqlite::connection::remove(const table_ptr& table,
     delete[] nformat;
     delete[] query;
     delete[] command;
+    return out;
+}
+
+sqlite::exclusive_transaction_ptr
+sqlite::connection::exclusive_transaction(void)
+{
+    /* Check to see if there's already an existing transaction. */
+    auto tr = _tr.lock();
+    if (tr != NULL) {
+        auto cast = std::dynamic_pointer_cast<sqlite::exclusive_transaction>(tr);
+        if (cast == NULL) {
+            fprintf(stderr, "Attempted to grab an exclusive transaction\n");
+            fprintf(stderr, "  Weaker transaction already in use\n");
+            abort();
+        }
+
+        return cast;
+    }
+
+#ifdef DEBUG_SQLITE_COMMANDS
+    fprintf(stderr, "command: '%s'\n", "BEGIN EXCLUSIVE TRANSACTION;");
+#endif
+
+    /* At this point the SQL query can actually be run. */
+    {
+        auto out = std::make_shared<result>();
+        struct sqlite3_exec_args args;
+        char *error_string = NULL;
+        args.result = out;
+        int error = sqlite3_exec(_db,
+                                 "BEGIN EXCLUSIVE TRANSACTION;",
+                                 &sqlite3_exec_func,
+                                 &args,
+                                 &error_string);
+        if (error_string == NULL)
+            error_string = (char *)"";
+        out->set_error(error, error_string);
+
+        switch (out->return_value()) {
+        case sqlite::error_code::SUCCESS:
+            break;
+        }
+    }
+
+    auto ntr = std::make_shared<sqlite::exclusive_transaction>(this);
+    _tr = ntr;
+    return ntr;
+}
+
+sqlite::immediate_transaction_ptr
+sqlite::connection::immediate_transaction(void)
+{
+    /* Check to see if there's already an existing transaction. */
+    auto tr = _tr.lock();
+    if (tr != NULL) {
+        auto cast = std::dynamic_pointer_cast<sqlite::immediate_transaction>(tr);
+        if (cast == NULL) {
+            fprintf(stderr, "Attempted to grab an immediate transaction\n");
+            fprintf(stderr, "  Weaker transaction already in use\n");
+            abort();
+        }
+
+        return cast;
+    }
+
+#ifdef DEBUG_SQLITE_COMMANDS
+    fprintf(stderr, "command: '%s'\n", "BEGIN IMMEDIATE TRANSACTION;");
+#endif
+
+    /* At this point the SQL query can actually be run. */
+    {
+        auto out = std::make_shared<result>();
+        struct sqlite3_exec_args args;
+        char *error_string = NULL;
+        args.result = out;
+        int error = sqlite3_exec(_db,
+                                 "BEGIN IMMEDIATE TRANSACTION;",
+                                 &sqlite3_exec_func,
+                                 &args,
+                                 &error_string);
+        if (error_string == NULL)
+            error_string = (char *)"";
+        out->set_error(error, error_string);
+
+        switch (out->return_value()) {
+        case sqlite::error_code::SUCCESS:
+            break;
+        }
+    }
+
+    auto ntr = std::make_shared<sqlite::immediate_transaction>(this);
+    _tr = ntr;
+    return ntr;
+}
+
+sqlite::deferred_transaction_ptr
+sqlite::connection::deferred_transaction(void)
+{
+    /* Check to see if there's already an existing transaction. */
+    auto tr = _tr.lock();
+    if (tr != NULL) {
+        auto cast = std::dynamic_pointer_cast<sqlite::deferred_transaction>(tr);
+        if (cast == NULL) {
+            fprintf(stderr, "Attempted to grab an deferred transaction\n");
+            fprintf(stderr, "  Weaker transaction already in use\n");
+            abort();
+        }
+
+        return cast;
+    }
+
+#ifdef DEBUG_SQLITE_COMMANDS
+    fprintf(stderr, "command: '%s'\n", "BEGIN DEFERRED TRANSACTION;");
+#endif
+
+    /* At this point the SQL query can actually be run. */
+    {
+        auto out = std::make_shared<result>();
+        struct sqlite3_exec_args args;
+        char *error_string = NULL;
+        args.result = out;
+        int error = sqlite3_exec(_db,
+                                 "BEGIN DEFERRED TRANSACTION;",
+                                 &sqlite3_exec_func,
+                                 &args,
+                                 &error_string);
+        if (error_string == NULL)
+            error_string = (char *)"";
+        out->set_error(error, error_string);
+
+        switch (out->return_value()) {
+        case sqlite::error_code::SUCCESS:
+            break;
+        }
+    }
+
+    auto ntr = std::make_shared<sqlite::deferred_transaction>(this);
+    _tr = ntr;
+    return ntr;
+}
+
+sqlite::result_ptr sqlite::connection::commit_transaction(void)
+{
+#ifdef DEBUG_SQLITE_COMMANDS
+    fprintf(stderr, "command: '%s'\n", "END TRANSACTION;");
+#endif
+
+    auto out = std::make_shared<result>();
+    struct sqlite3_exec_args args;
+    char *error_string = NULL;
+    args.result = out;
+    int error = sqlite3_exec(_db,
+                             "END TRANSACTION;",
+                             &sqlite3_exec_func,
+                             &args,
+                             &error_string);
+    if (error_string == NULL)
+        error_string = (char *)"";
+    out->set_error(error, error_string);
+
     return out;
 }
 

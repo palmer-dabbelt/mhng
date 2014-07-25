@@ -33,6 +33,7 @@ namespace mhng {
 
 #include "result.h++"
 #include "table.h++"
+#include "transaction.h++"
 #include <sqlite3.h>
 #include <string>
 #include <vector>
@@ -48,6 +49,11 @@ namespace mhng {
              * SQLite3 database connection in a way that's ammenable
              * to C++11. */
             struct sqlite3 *_db;
+
+            /* Holds a copy of the current transaction, which we use
+             * to ensure that we only hand out a single
+             * transaction. */
+            std::weak_ptr<transaction> _tr;
 
         public:
             /* Opens a new connection to a SQLite database given the
@@ -98,6 +104,18 @@ namespace mhng {
             result_ptr remove(const table_ptr& table,
                               const char *format,
                               va_list args);
+
+            /* You can ask for two sorts of transactions on a
+             * database: either a write-only lock or a read-write
+             * lock. */
+            exclusive_transaction_ptr exclusive_transaction(void);
+            immediate_transaction_ptr immediate_transaction(void);
+            deferred_transaction_ptr deferred_transaction(void);
+
+        protected:
+            /* This is really only allowed to be called from transaction. */
+            friend class transaction;
+            result_ptr commit_transaction(void);
         };
     }
 }
