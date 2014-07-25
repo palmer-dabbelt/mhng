@@ -158,3 +158,9 @@ SOURCES     += mhng-urls.c++
 # An installation helper script
 BINARIES    += mhng-install
 SOURCES     += mhng-install.bash
+
+# Re-packs messages into folders.  This modifies the sequence numbers
+# such that the messages all stay in order but no longer have any
+# gaps.
+BINARIES    += mhng-pack
+SOURCES     += mhng-pack.c++

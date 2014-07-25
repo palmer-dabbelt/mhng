@@ -58,6 +58,11 @@ namespace mhng {
                                const sequence_number_ptr& seq,
                                int offset);
 
+            /* Updates a message with a new sequence number, given the
+             * message's unique ID. */
+            void update(uint64_t uid,
+                        const sequence_number_ptr& seq);
+
             /* This selects all the messages in a given folder. */
             std::vector<message_ptr> select(const std::string& folder_name);
 

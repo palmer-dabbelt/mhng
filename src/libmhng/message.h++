@@ -141,6 +141,11 @@ namespace mhng {
          * for a message in. */
         message_ptr next_message(int offset = 1);
 
+        /* Updates the sequence number of this message.  Note that
+         * this is very problematic because it can lead to a bunch of
+         * race conditions, so be careful with it! */
+        void set_sequence_number(const sequence_number_ptr& seq);
+
     private:
         std::string full_path(void) const;
 

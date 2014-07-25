@@ -132,6 +132,22 @@ message_ptr db::mh_messages::select(const std::string& folder,
         );
 }
 
+void db::mh_messages::update(uint64_t uid,
+                             const sequence_number_ptr& seq)
+{
+    auto map = std::map<std::string, std::string>();
+    map["seq"] = std::to_string(seq->to_uint());
+    auto row = std::make_shared<sqlite::row>(map);
+
+    auto resp = _mbox->db()->replace(_table, row, "uid='%s'",
+                                     std::to_string(uid).c_str());
+
+    switch (resp->return_value()) {
+    case sqlite::error_code::SUCCESS:
+        return;
+    }
+}
+
 void db::mh_messages::remove(uint64_t uid)
 {
     auto resp = _mbox->db()->remove(_table, "uid='%lu'",

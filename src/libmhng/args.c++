@@ -139,10 +139,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
         if (flags & pf_allf) {
             /* FIXME: This is wrong... :) */
             folder_names = { "inbox",
-                             "drafts",
-                             "rss",
-                             "promo",
-                             "lists" };
+                             "drafts" };
         } else {
             auto current_folder = dir->current_folder();
             if (current_folder == NULL) {

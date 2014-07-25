@@ -131,6 +131,20 @@ std::string message::full_path(void) const
     return path;
 }
 
+void message::set_sequence_number(const sequence_number_ptr& seq)
+{
+    auto tr = _mbox->db()->deferred_transaction();
+
+    if (_seq->to_uint() == seq->to_uint())
+        return;
+
+    auto messages = std::make_shared<db::mh_messages>(_mbox);
+    messages->update(atoi(_uid.c_str()), seq);
+
+    auto current = std::make_shared<db::mh_current>(_mbox);
+    current->update(_folder->name(), seq->to_uint());
+}
+
 std::shared_ptr<std::vector<std::string>> message::_raw_impl(void)
 {
     FILE *file = fopen(full_path().c_str(), "r");
