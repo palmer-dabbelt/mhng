@@ -35,7 +35,7 @@ int main(int argc, const char **argv)
      * message. */
 #if defined(RMM)
 #if defined(NEXT) || defined(PREV)
-    if (messages.size() != 0) {
+    if (messages.size() != 1) {
         fprintf(stderr, "Attempted to mhng-{mtn,mtp} with many messages\n");
         abort();
     }
