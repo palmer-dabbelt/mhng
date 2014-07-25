@@ -45,9 +45,20 @@ namespace mhng {
             /* Returns the current message in the given folder. */
             unsigned select(const std::string& folder_name);
 
-            /* Replaces the folder name with a new value. */
+            /* Replaces the folder name with a sequence number. */
             void update(const std::string& folder_name,
-                        unsigned new_current);
+                        unsigned new_seq);
+
+            /* Allows for the modification of the current flag, which
+             * determines which folder is the one that is open right
+             * now.  Note that you'll have to make sure to put these
+             * within a transaction because there's a UNIQUE
+             * constraint on the table! */
+            void clear_current(const std::string& folder_name);
+            void set_current(const std::string& folder_name);
+
+            /* Returns the name of the folder that's currently set. */
+            std::string select_current(void);
         };
     }
 }

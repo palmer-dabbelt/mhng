@@ -105,6 +105,17 @@ namespace mhng {
                               const char *format,
                               va_list args);
 
+            /* Sets the given columns to NULL in the matching
+             * rows. */
+            result_ptr clear(const table_ptr& table,
+                             const std::vector<std::string>& cols,
+                             const char *format,
+                             ...);
+            result_ptr clear(const table_ptr& table,
+                             const std::vector<std::string>& cols,
+                             const char *format,
+                             va_list args);
+
             /* You can ask for two sorts of transactions on a
              * database: either a write-only lock or a read-write
              * lock. */

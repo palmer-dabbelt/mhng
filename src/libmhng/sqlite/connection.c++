@@ -309,6 +309,101 @@ sqlite::result_ptr sqlite::connection::remove(const table_ptr& table,
     return out;
 }
 
+sqlite::result_ptr sqlite::connection::clear(const table_ptr& table,
+                                             const std::vector<std::string>& cols,
+                                             const char *format,
+                                             ...)
+{
+    va_list args; va_start(args, format);
+    auto out = clear(table, cols, format, args);
+    va_end(args);
+    return out;
+}
+
+sqlite::result_ptr sqlite::connection::clear(const table_ptr& table,
+                                             const std::vector<std::string>& cols,
+                                             const char *format,
+                                             va_list args)
+{
+    /* It turns out that SQLite provides a mechanism for eliminating
+     * SQL injection attacks, but it conflicts with GCC's printf-like
+     * format string checker.  Thus I work around the problem by
+     * simply converting everything to injection-proof right here. */
+    char *nformat = new char[strlen(format) + 1];
+    strcpy(nformat, format);
+    for (size_t i = 0; i < strlen(nformat); ++i)
+        if (strncmp(nformat + i, "%s",  2) == 0)
+            nformat[i+1] = 'q';
+
+    /* Here we format the string to avoid injection attacks. */
+    size_t query_length = strlen(nformat) * 10 + 1;
+    char *query = new char[query_length];
+    sqlite3_vsnprintf(query_length, query, nformat, args);
+
+    /* That's not the whole SQL command, we also need the "SELECT (...)
+     * FROM ..." part.  */
+    size_t column_length = 3;
+    for (const auto& column: cols) {
+        column_length += strlen(column.c_str());
+        column_length += 3;
+        column_length += strlen("NULL");
+        column_length += 1;
+    }
+    char *column_spec = new char[column_length];
+    column_spec[0] = '\0';
+    for (const auto& column: cols) {
+        strcat(column_spec, column.c_str());
+        strcat(column_spec, "=");
+        strcat(column_spec, "NULL");
+        strcat(column_spec, ", ");
+    }
+    column_spec[strlen(column_spec)-2] = '\0';
+
+    /* Now we can assemble the final SQL query string. */
+    size_t command_length =
+        strlen("UPDATE ")
+        + strlen(table->name().c_str())
+        + strlen(" SET ")
+        + strlen(column_spec)
+        + strlen(" WHERE ")
+        + strlen(query)
+        + 2;
+    char *command = new char[command_length];
+    sprintf(command, "UPDATE %s SET %s WHERE %s;",
+            table->name().c_str(),
+            column_spec,
+            query);
+#ifdef DEBUG_SQLITE_COMMANDS
+    fprintf(stderr, "command: '%s'\n", command);
+#endif
+
+    /* SQLite fills out an argument pointer, so we need one
+     * created. */
+    auto out = std::make_shared<result>();
+
+    /* At this point the SQL query can actually be run. */
+    {
+        struct sqlite3_exec_args args;
+        char *error_string = NULL;
+        args.result = out;
+        int error = sqlite3_exec(_db,
+                                 command,
+                                 &sqlite3_exec_func,
+                                 &args,
+                                 &error_string);
+        if (error_string == NULL)
+            error_string = (char *)"";
+        out->set_error(error, error_string);
+    }
+
+    /* Finally we can clean up those allocated strings and return! */
+    delete[] nformat;
+    delete[] query;
+    delete[] column_spec;
+    delete[] command;
+    return out;
+}
+
 sqlite::exclusive_transaction_ptr
 sqlite::connection::exclusive_transaction(void)
 {
@@ -476,9 +571,11 @@ int sqlite3_exec_func(void *args_uncast,
 {
     std::map<std::string, std::string> name2datum;
     for (int i = 0; i < count; ++i) {
-        auto name = names[i];
-        auto datum = data[i];
-        name2datum[name] = datum;
+        if (data[i] != NULL) {
+            std::string name = names[i];
+            std::string datum = data[i];
+            name2datum[name] = datum;
+        }
     }
 
     struct sqlite3_exec_args *args = (struct sqlite3_exec_args *)args_uncast;

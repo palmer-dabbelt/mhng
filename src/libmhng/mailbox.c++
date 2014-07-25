@@ -22,7 +22,7 @@
 #include "mailbox.h++"
 #include "mailrc.h++"
 #include "db/mh_messages.h++"
-#include "db/mh_default.h++"
+#include "db/mh_current.h++"
 #include <string.h>
 #include <unistd.h>
 using namespace mhng;
@@ -64,15 +64,18 @@ void mailbox::set_current_folder(const folder_ptr& folder)
     if (current_folder()->name() == folder->name())
         return;
 
-    auto table = std::make_shared<db::mh_default>(_self_ptr.lock());
-    table->replace(folder);
+    auto tr = _db->deferred_transaction();
+
+    auto table = std::make_shared<db::mh_current>(_self_ptr.lock());
+    table->clear_current(current_folder()->name());
+    table->set_current(folder->name());
     _current_folder = folder;
 }
 
 folder_ptr mailbox::_current_folder_impl(void)
 {
-    auto table = std::make_shared<db::mh_default>(_self_ptr.lock());
-    return table->select();
+    auto table = std::make_shared<db::mh_current>(_self_ptr.lock());
+    return open_folder(table->select_current());
 }
 
 mailrc_ptr mailbox::_mailrc_impl(void)

@@ -67,10 +67,59 @@ void db::mh_current::update(const std::string& folder,
     }
 }
 
+void db::mh_current::clear_current(const std::string& folder_name)
+{
+    std::vector<std::string> map = {"cur"};
+
+    auto resp = _mbox->db()->clear(_table, map, "folder = '%s'",
+                                     folder_name.c_str());
+
+    switch (resp->return_value()) {
+    case sqlite::error_code::SUCCESS:
+        return;
+    }
+}
+
+void db::mh_current::set_current(const std::string& folder_name)
+{
+    auto map = std::map<std::string, std::string>();
+    map["cur"] = std::to_string(1);
+    auto row = std::make_shared<sqlite::row>(map);
+
+    auto resp = _mbox->db()->replace(_table, row, "folder = '%s'",
+                                     folder_name.c_str());
+
+    switch (resp->return_value()) {
+    case sqlite::error_code::SUCCESS:
+        return;
+    }
+}
+
+std::string db::mh_current::select_current(void)
+{
+    auto resp = _mbox->db()->select(_table, "cur=1");
+
+    switch (resp->return_value()) {
+    case sqlite::error_code::SUCCESS:
+            break;
+
+    default:
+        abort();
+        break;
+    }
+
+    if (resp->result_count() != 1)
+        abort();
+
+    auto row = resp->row(0);
+    return row->get_str("folder");
+}
+
 sqlite::table_ptr generate_columns(void)
 {
     std::vector<sqlite::column_ptr> out;
     out.push_back(std::make_shared<sqlite::column_t<std::string>>("folder"));
     out.push_back(std::make_shared<sqlite::column_t<std::string>>("seq"));
+    out.push_back(std::make_shared<sqlite::column_t<std::string>>("cur"));
     return std::make_shared<sqlite::table>("MH__current", out);
 }

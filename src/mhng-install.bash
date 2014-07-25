@@ -11,22 +11,26 @@ fi
 mkdir -p $HOME/.mhng/tmp
 mkdir -p $HOME/.mhng/mail/inbox
 mkdir -p $HOME/.mhng/mail/drafts
+mkdir -p $HOME/.mhng/mail/rss
+mkdir -p $HOME/.mhng/mail/promo
+mkdir -p $HOME/.mhng/mail/lists
 
 # Initialize the SQLite database that's necessary to make anything
 # work with some default options.  Doing this greatly simplifies the
 # MHng implementation, as I don't have to have a bunch of create-table
 # commands all over the place...
 cat > $HOME/.mhng/init.sql <<EOF
-CREATE TABLE MH__default (folder STRING CHECK(folder != '')
-       );
-INSERT INTO MH__default (folder) VALUES ("inbox");
-
 CREATE TABLE MH__current (folder STRING CHECK(folder != ''),
                           seq INTEGER CHECK(seq > 0),
+                          cur INTEGER CHECK(cur > 0 AND cur <= 1),
                           UNIQUE(folder)
+                          UNIQUE(cur)
        );
-INSERT INTO MH__current (folder, seq) VALUES ("inbox", 1);
+INSERT INTO MH__current (folder, seq, cur) VALUES ("inbox", 1, 1);
 INSERT INTO MH__current (folder, seq) VALUES ("drafts", 1);
+INSERT INTO MH__current (folder, seq) VALUES ("rss", 1);
+INSERT INTO MH__current (folder, seq) VALUES ("promo", 1);
+INSERT INTO MH__current (folder, seq) VALUES ("lists", 1);
 
 CREATE TABLE MH__messages (uid INTEGER PRIMARY KEY CHECK(uid > 0),
                            seq INTEGER CHECK(seq > 0),
