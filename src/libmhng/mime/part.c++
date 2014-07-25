@@ -20,6 +20,7 @@
  */
 
 #include "part.h++"
+#include "base64.h++"
 #include <stdlib.h>
 #include <string.h>
 using namespace mhng;
@@ -189,6 +190,31 @@ mime::part::part(const std::vector<std::string>& raw)
 std::vector<std::string> mime::part::utf8(void) const
 {
     std::vector<std::string> out;
+
+#if 0
+    /* I handle base64 very simply: I just decode it, break newlines,
+     * and store it out. */
+    if (matches_encoding("base64") == true) {
+        std::string last_line = "";
+        for (const auto& linestr: _body_raw) {
+            char decoded[BUFFER_SIZE];
+            snprintf(decoded, BUFFER_SIZE, "%s",
+                     base64_decode(linestr).c_str());
+
+            for (size_t i = 0; i < strlen(decoded); ++i) {
+                if (decoded[i] == '\n') {
+                    out.push_back(last_line);
+                    last_line = "";
+                } else {
+                    last_line += decoded[i];
+                }
+            }
+        }
+
+        out.push_back(last_line);
+        return out;
+    }
+#endif
 
     /* Quoted-printable has a bit of magic related to '=', but not
      * much else to do.  Note that I do merge together long line
