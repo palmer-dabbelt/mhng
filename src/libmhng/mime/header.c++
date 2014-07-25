@@ -55,7 +55,10 @@ std::string mime::header::single_line(void) const
         while (isspace(bufp[0]))
             bufp++;
 
-        out = out + bufp;
+        if (strlen(out.c_str()) == 0)
+            out = bufp;
+        else
+            out = out + " " + bufp;
     }
 
     return out;
