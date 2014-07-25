@@ -154,3 +154,7 @@ SOURCES     += mhng-folders.c++
 # Lists all the URLs found in a message
 BINARIES    += mhng-urls
 SOURCES     += mhng-urls.c++
+
+# An installation helper script
+BINARIES    += mhng-install
+SOURCES     += mhng-install.bash
