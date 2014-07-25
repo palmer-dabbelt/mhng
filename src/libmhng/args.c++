@@ -22,6 +22,7 @@
 #include "args.h++"
 #include "mailbox.h++"
 #include "sequence_number.h++"
+#include "db/mh_current.h++"
 #include <unordered_map>
 #include <string.h>
 using namespace mhng;
@@ -137,9 +138,8 @@ args_ptr args::parse(int argc, const char **argv, int flags)
      * which folders should be looked at. */
     if (folders_written == false) {
         if (flags & pf_allf) {
-            /* FIXME: This is wrong... :) */
-            folder_names = { "inbox",
-                             "drafts" };
+            auto current = std::make_shared<db::mh_current>(dir);
+            folder_names = current->select();
         } else {
             auto current_folder = dir->current_folder();
             if (current_folder == NULL) {

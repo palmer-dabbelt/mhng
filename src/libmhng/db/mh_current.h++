@@ -42,6 +42,9 @@ namespace mhng {
             mh_current(const mailbox_ptr& mbox);
 
         public:
+            /* Lists every folder known to MHng. */
+            std::vector<std::string> select(void);
+
             /* Returns the current message in the given folder. */
             unsigned select(const std::string& folder_name);
 

@@ -30,6 +30,21 @@ db::mh_current::mh_current(const mailbox_ptr& mbox)
 {
 }
 
+std::vector<std::string> db::mh_current::select(void)
+{
+    auto resp = _mbox->db()->select(_table);
+
+    switch (resp->return_value()) {
+    case sqlite::error_code::SUCCESS:
+            break;
+    }
+
+    std::vector<std::string> out;
+    for (const auto& row: resp->rows())
+        out.push_back(row->get_str("folder"));
+    return out;
+}
+
 unsigned db::mh_current::select(const std::string& folder)
 {
     auto resp = _mbox->db()->select(_table, "folder='%s'",

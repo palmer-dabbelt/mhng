@@ -50,6 +50,12 @@ sqlite::connection::connection(const std::string& db_path)
     }
 }
 
+sqlite::result_ptr sqlite::connection::select(const table_ptr& table)
+{
+    return select(table, "'true'='true'");
+}
+
+
 sqlite::result_ptr sqlite::connection::select(const table_ptr& table,
                                               const char * format, ...)
 {
