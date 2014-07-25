@@ -60,22 +60,22 @@ namespace mhng {
             virtual ~transaction(void);
         };
 
-        class exclusive_transaction: public transaction {
+        class deferred_transaction: public transaction {
         public:
-            exclusive_transaction(connection *conn);
-            ~exclusive_transaction(void);
+            deferred_transaction(connection *conn);
+            ~deferred_transaction(void);
         };
 
-        class immediate_transaction: public exclusive_transaction {
+        class immediate_transaction: public deferred_transaction {
         public:
             immediate_transaction(connection *conn);
             ~immediate_transaction(void);
         };
 
-        class deferred_transaction: public immediate_transaction {
+        class exclusive_transaction: public immediate_transaction {
         public:
-            deferred_transaction(connection *conn);
-            ~deferred_transaction(void);
+            exclusive_transaction(connection *conn);
+            ~exclusive_transaction(void);
         };
     }
 }

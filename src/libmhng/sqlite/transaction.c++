@@ -41,7 +41,7 @@ sqlite::transaction::~transaction(void)
 
 
 sqlite::exclusive_transaction::exclusive_transaction(sqlite::connection *conn)
-    : transaction(conn)
+    : immediate_transaction(conn)
 {
 }
 
@@ -51,7 +51,7 @@ sqlite::exclusive_transaction::~exclusive_transaction(void)
 
 
 sqlite::immediate_transaction::immediate_transaction(sqlite::connection *conn)
-    : exclusive_transaction(conn)
+    : deferred_transaction(conn)
 {
 }
 
@@ -61,7 +61,7 @@ sqlite::immediate_transaction::~immediate_transaction(void)
 
 
 sqlite::deferred_transaction::deferred_transaction(sqlite::connection *conn)
-    : immediate_transaction(conn)
+    : transaction(conn)
 {
 }
 
