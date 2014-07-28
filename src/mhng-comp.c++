@@ -111,8 +111,22 @@ int main(int argc, const char **argv)
                     msg->first_from()->nom().c_str()
                 );
 
-            for (const auto& line: msg->body_utf8())
+            int trailing_newlines = 0;
+            for (const auto& line: msg->body_utf8()) {
+                if (strcmp(line.c_str(), "--") == 0)
+                    break;
+
+                if (strcmp(line.c_str(), "") == 0) {
+                    trailing_newlines++;
+                    continue;
+                }
+
+                for (int i = 0; i < trailing_newlines; ++i)
+                    fprintf(out, "> \n");
+                trailing_newlines = 0;
+
                 fprintf(out, "> %s\n", line.c_str());
+            }
         }
 #elif defined(FORW)
         fprintf(out, "From:    \n");
