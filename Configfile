@@ -68,11 +68,6 @@ BINARIES    += repl
 SOURCES     += repl.c++
 COMPILEOPTS += -DREPL
 
-# Composes a message
-BINARIES    += comp
-SOURCES     += repl.c++
-COMPILEOPTS += -DCOMP
-
 # Forwards a message
 BINARIES    += forw
 SOURCES     += repl.c++
