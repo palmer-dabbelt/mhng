@@ -33,6 +33,7 @@ namespace mhng {
 #include "mailrc.h++"
 #include "message.h++"
 #include "promise.h++"
+#include "mime/message.h++"
 #include "sqlite/connection.h++"
 #include <string>
 
@@ -86,6 +87,10 @@ namespace mhng {
         /* Returns a copy of the mailrc, which is used for all sorts
          * of stuff! */
         mailrc_ptr mrc(void) { return _mailrc; }
+
+        /* Inserts a new message into this mailbox. */
+        message_ptr insert(const std::string& folder_name,
+                           const mime::message_ptr& mime);
 
     private:
         static folder_ptr _current_folder_func(mailbox *mbox)

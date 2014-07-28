@@ -69,6 +69,10 @@ namespace mhng {
 
         /* Prints DD/MM, the day/month format. */
         const std::string ddmm(void) const;
+
+    public:
+        /* Creates a new date that represents the time right now. */
+        static date_ptr now(void);
     };
 }
 

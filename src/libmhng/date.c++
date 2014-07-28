@@ -85,3 +85,17 @@ const std::string date::ddmm(void) const
 
     return buffer;
 }
+
+date_ptr date::now(void)
+{
+    time_t tod;
+    time(&tod);
+
+    struct tm tm;
+    localtime_r(&tod, &tm);
+
+    char rfc_2822_date[BUFFER_SIZE];
+    strftime(rfc_2822_date, BUFFER_SIZE, "%a, %d %b %Y %T %z", &tm);
+
+    return std::make_shared<date>(rfc_2822_date);
+}

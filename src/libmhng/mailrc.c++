@@ -96,6 +96,14 @@ address_ptr mailrc::email(const std::string& email)
     return l->second;
 }
 
+address_ptr mailrc::emailias(const std::string& in)
+{
+    auto l = _alias_map.find(in);
+    if (l != _alias_map.end())
+        return l->second;
+    return email(in);
+}
+
 bool strsta(const std::string haystack, const std::string needle)
 {
     return strncmp(haystack.c_str(),
@@ -107,4 +115,10 @@ void mailrc::add(const address_ptr& addr)
 {
     if (addr->email_known())
         _mail_map[addr->email()] = addr;
+
+    if (addr->alias_known())
+        _alias_map[addr->alias()] = addr;
+
+    if (addr->name_known())
+        _name_map[addr->name()] = addr;
 }

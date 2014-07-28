@@ -95,6 +95,16 @@ namespace mhng {
             /* Searches this MIME subtree for a suitable body part. */
             part_ptr body(void) const;
 
+            /* Adds a new header to the list of headers this message
+             * contains. */
+            void add_header(const header_ptr& header);
+            void add_header(const std::string& key,
+                            const std::string& value);
+
+            /* Returns every raw line in this part. */
+            std::vector<std::string> raw(void) const
+                { return _raw; }
+
         private:
             /* Returns TRUE if the boundary is known and the given
              * line matches the boundary. */

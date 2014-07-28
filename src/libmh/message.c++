@@ -118,6 +118,8 @@ message message::insert(folder folder,
         abort();
     }
 
+                
+
     /* Now that we've actually inserted the row we can fetch the MH
      * UID, which will end up being the filename of the message.  We
      * need to do this by first figureing out the last INSERTed ROW ID
@@ -131,6 +133,9 @@ message message::insert(folder folder,
     for (auto it = uidq.results(); !it.done(); ++it) {
         uid uid((*it).get("uid"));
 
+        query nuidq(db, "UPDATE MH__nextid SET uid='%s';",
+                    uid.string().c_str());
+
         char target_fn[BUFFER_SIZE];
         snprintf(target_fn, BUFFER_SIZE, "%s/%s",
                  folder.full_path().c_str(), uid.string().c_str());
@@ -140,6 +145,7 @@ message message::insert(folder folder,
         db->trans_down();
         return message(uid, o, db);
     }
+
 
     /* Making it here means that we didn't get back a UID response,
      * which shouldn't be possible... */

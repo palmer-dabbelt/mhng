@@ -164,3 +164,8 @@ SOURCES     += mhng-install.bash
 # gaps.
 BINARIES    += mhng-pack
 SOURCES     += mhng-pack.c++
+
+# Allows me to compose a message, with a set of different default
+# templates: blank, a reply, or a forward.
+BINARIES    += mhng-comp
+SOURCES     += mhng-comp.c++

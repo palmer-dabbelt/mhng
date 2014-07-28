@@ -85,6 +85,12 @@ namespace mhng {
                               const char *format,
                               va_list args);
 
+            /* Runs a INSERT query against the given table, returning
+             * a list of results that come back from the SQLite server
+             * (note that I expect this to be none...). */
+            result_ptr insert(const table_ptr& table,
+                              const row_ptr& row);
+
             /* Runs a REPLACE query against the given table, returning
              * a list of results that come back from the SQLite server
              * (note that I expect this to be none...). */

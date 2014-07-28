@@ -375,6 +375,37 @@ mime::part_ptr mime::part::body(void) const
     return NULL;
 }
 
+void mime::part::add_header(const header_ptr& header)
+{
+    _headers.push_back(header);
+
+    std::vector<std::string> new_raw;
+    bool added = false;
+    for (const auto& raw: _raw) {
+        if (added == false && (strlen(raw.c_str()) == 1)) {
+            added = true;
+            for (const auto& hraw: header->raw())
+                new_raw.push_back(hraw);
+        }
+
+        new_raw.push_back(raw);
+    }
+
+    if (added == false) {
+        fprintf(stderr, "No body seperator?\n");
+        abort();
+    }
+
+    _raw = new_raw;
+}
+
+void mime::part::add_header(const std::string& key,
+                            const std::string& value)
+{
+    auto header = std::make_shared<mime::header>(key + ": " + value + "\n");
+    add_header(header);
+}
+
 bool mime::part::matches_boundary(const std::string& line) const
 {
     if (_boundary.known() == false)

@@ -51,6 +51,13 @@ CREATE TABLE IMAP__messages (folder STRING,
                              UNIQUE(folder, uid),
                              UNIQUE(mhid)
        );
+
+CREATE TABLE MH__nextid (single INTEGER NOT NULL CHECK(single > 0 AND single < 2),
+                         uid INTEGER,
+                         UNIQUE(uid),
+                         UNIQUE(single)
+       );
+INSERT INTO MH__nextid (single, uid) VALUES (1, 0);
 EOF
 
 sqlite3 $HOME/.mhng/metadata.sqlite3 < $HOME/.mhng/init.sql

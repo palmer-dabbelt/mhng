@@ -48,8 +48,12 @@ namespace mhng {
         mailrc(const std::string& path);
 
     public:
-        /* Returns an address */
+        /* Returns an address, looked up by an email. */
         address_ptr email(const std::string& email);
+
+        /* Returns an address, looking up either an email or an
+         * alias. */
+        address_ptr emailias(const std::string& in);
 
     private:
         /* Adds a new address to this database.  This will probably

@@ -148,6 +148,32 @@ void db::mh_messages::update(uint64_t uid,
     }
 }
 
+void db::mh_messages::insert(unsigned seq,
+                             std::string folder,
+                             std::string date,
+                             std::string from,
+                             std::string to,
+                             std::string subject,
+                             uint64_t uid)
+{
+    auto map = std::map<std::string, std::string>();
+    map["seq"] = std::to_string(seq);
+    map["folder"] = folder;
+    map["date"] = date;
+    map["fadr"] = from;
+    map["tadr"] = to;
+    map["subject"] = subject;
+    map["uid"] = std::to_string(uid);
+    auto row = std::make_shared<sqlite::row>(map);
+
+    auto resp = _mbox->db()->insert(_table, row);
+
+    switch (resp->return_value()) {
+    case sqlite::error_code::SUCCESS:
+        return;
+    }
+}
+
 void db::mh_messages::remove(uint64_t uid)
 {
     auto resp = _mbox->db()->remove(_table, "uid='%lu'",

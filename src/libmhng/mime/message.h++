@@ -70,6 +70,11 @@ namespace mhng {
             /* Searches for a body for this message, returning what is
              * found. */
             part_ptr body(void) const;
+
+            /* Adds a new header to the root of this message. */
+            void add_header(const header_ptr& header);
+            void add_header(const std::string& key,
+                            const std::string& value);
         };
     }
 }

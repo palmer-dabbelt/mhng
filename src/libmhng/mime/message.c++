@@ -32,10 +32,8 @@ static std::string to_lower(const std::string uppers);
 mime::message::message(const std::vector<std::string>& raw)
     : _root(std::make_shared<part>(raw))
 {
-    for (const auto& header: _root->headers()) {
-        auto key = header->key_downcase();
-        _headers.insert(std::make_pair(key, header));
-    }
+    for (const auto& header: _root->headers())
+        add_header(header);
 }
 
 std::vector<mime::header_ptr>
@@ -58,6 +56,19 @@ mime::part_ptr mime::message::body(void) const
     if (root_body == NULL)
         return _root;
     return root_body;
+}
+
+void mime::message::add_header(const header_ptr& header)
+{
+    auto key = header->key_downcase();
+    _headers.insert(std::make_pair(key, header));
+}
+
+void mime::message::add_header(const std::string& key,
+                               const std::string& value)
+{
+    auto header = std::make_shared<mime::header>(key + ": " + value + "\n");
+    add_header(header);
 }
 
 std::string to_lower(const std::string uppers)

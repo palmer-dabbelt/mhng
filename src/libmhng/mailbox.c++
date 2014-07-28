@@ -23,6 +23,7 @@
 #include "mailrc.h++"
 #include "db/mh_messages.h++"
 #include "db/mh_current.h++"
+#include "db/mh_nextid.h++"
 #include <string.h>
 #include <unistd.h>
 using namespace mhng;
@@ -70,6 +71,73 @@ void mailbox::set_current_folder(const folder_ptr& folder)
     table->clear_current(current_folder()->name());
     table->set_current(folder->name());
     _current_folder = folder;
+}
+
+message_ptr mailbox::insert(const std::string &folder_name,
+                            const mime::message_ptr& mime)
+{
+    /* This whole thing needs to be locked... */
+    auto trans = _db->deferred_transaction();
+
+    /* Find a new unique MH id for this message. */
+    auto idtbl = std::make_shared<db::mh_nextid>(_self_ptr.lock());
+    auto uid = idtbl->select();
+    idtbl->update(uid + 1);
+
+    /* Fin a new sequence number for this message. */
+    auto folder = open_folder(folder_name);
+    unsigned seq = 1;
+    for (const auto& message: folder->messages())
+        if (message->seq()->to_uint() >= seq)
+            seq = message->seq()->to_uint() + 1;
+
+    /* Determine some other relevant information for this message. */
+    std::shared_ptr<date> date = NULL;
+    std::shared_ptr<address> from = NULL;
+    std::shared_ptr<address> to = NULL;
+    std::string subject = "";
+
+    /* Walk through the headers to try and fill out some relevant
+     * fields. */
+    for (const auto& header: mime->header("Date"))
+        date = std::make_shared<mhng::date>(header->single_line());
+    for (const auto& header: mime->header("From"))
+        from = address::parse_rfc(header->single_line());
+    for (const auto& header: mime->header("To"))
+        to = address::parse_rfc(header->single_line());
+    for (const auto& header: mime->header("Subject"))
+        subject = header->single_line();
+
+    auto msg = std::make_shared<message>(_self_ptr.lock(),
+                                         std::make_shared<sequence_number>(seq),
+                                         folder,
+                                         date,
+                                         from,
+                                         to,
+                                         subject,
+                                         std::to_string(uid)
+        );
+
+    auto messages = std::make_shared<db::mh_messages>(_self_ptr.lock());
+    messages->insert(seq,
+                     folder->name(),
+                     std::to_string(date->unix()),
+                     from->email(),
+                     to->email(),
+                     subject,
+                     uid
+        );
+
+    char filename[BUFFER_SIZE];
+    snprintf(filename, BUFFER_SIZE, "%s/%s",
+             folder->full_path().c_str(),
+             std::to_string(uid).c_str());
+             
+    FILE *file = fopen(filename, "w");
+    for (const auto& raw: mime->body()->raw())
+        fprintf(file, "%s", raw.c_str());
+
+    return msg;
 }
 
 folder_ptr mailbox::_current_folder_impl(void)

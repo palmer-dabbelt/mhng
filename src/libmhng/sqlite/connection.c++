@@ -25,6 +25,10 @@
 #include <string.h>
 using namespace mhng;
 
+#ifndef BUFFER_SIZE
+#define BUFFER_SIZE 1024
+#endif
+
 /* SQLite uses a callback for enumerating results, but unfortunately
  * this requires that you use C function pointers instead of C++
  * std::function.  Thus I have to do the whole struct/wrapper thing
@@ -147,6 +151,54 @@ sqlite::result_ptr sqlite::connection::select(const table_ptr& table,
     delete[] query;
     delete[] column_spec;
     delete[] command;
+    return out;
+}
+
+sqlite::result_ptr sqlite::connection::insert(const table_ptr& table,
+                                              const row_ptr& row)
+{
+    std::string command = "INSERT INTO " + table->name() + " (";
+    for (const auto& column: row->columns()) {
+        char format[BUFFER_SIZE];
+        sqlite3_snprintf(BUFFER_SIZE, format, "%s",
+                         column.c_str());
+        command = command + format + ", ";
+    }
+    command.replace(strlen(command.c_str())-2, 1, "\0");
+    command = command + ") VALUES (";
+    for (const auto& column: row->columns()) {
+        char format[BUFFER_SIZE];
+        sqlite3_snprintf(BUFFER_SIZE, format, "'%q'",
+                         row->value(column).c_str());
+        command = command + format + ", ";
+    }
+    command.replace(strlen(command.c_str())-2, 1, "\0");
+    command = command + ")";
+
+#ifdef DEBUG_SQLITE_COMMANDS
+    fprintf(stderr, "command: '%s'\n", command.c_str());
+#endif
+
+    /* SQLite fills out an argument pointer, so we need one
+     * created. */
+    auto out = std::make_shared<result>();
+
+    /* At this point the SQL query can actually be run. */
+    {
+        struct sqlite3_exec_args args;
+        char *error_string = NULL;
+        args.result = out;
+        int error = sqlite3_exec(_db,
+                                 command.c_str(),
+                                 &sqlite3_exec_func,
+                                 &args,
+                                 &error_string);
+        if (error_string == NULL)
+            error_string = (char *)"";
+        out->set_error(error, error_string);
+    }
+
+    /* Finally we can clean up those allocated strings and return! */
     return out;
 }
 

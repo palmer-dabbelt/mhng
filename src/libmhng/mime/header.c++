@@ -99,3 +99,12 @@ bool mime::header::match(const std::string& key)
 
     return true;
 }
+
+bool mime::header::match(const std::vector<std::string>& keys)
+{
+    for (const auto& key: keys)
+        if (match(key))
+            return true;
+
+    return false;
+}
