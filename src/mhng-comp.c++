@@ -66,13 +66,37 @@ int main(int argc, const char **argv)
         fprintf(out, "\n");
 
 #elif defined(REPL)
+        mhng::address_ptr local = NULL;
+        for (const auto& msg: args->messages()) {
+            for (const auto& addr: msg->bcc()) {
+                if (addr->local() == true)
+                    local = addr;
+            }
+            for (const auto& addr: msg->cc()) {
+                if (addr->local() == true)
+                    local = addr;
+            }
+            for (const auto& addr: msg->to()) {
+                if (addr->local() == true)
+                    local = addr;
+            }
+        }
+
+        if (local == NULL)
+            fprintf(out, "From:        \n");
+        else
+            fprintf(out, "From:        %s\n", local->rfc().c_str());
+
         for (const auto& msg: args->messages()) {
             for (const auto& addr: msg->from())
-                fprintf(out, "To:          %s\n", addr->rfc().c_str());
+                if (addr->local() == false)
+                    fprintf(out, "To:          %s\n", addr->rfc().c_str());
             for (const auto& addr: msg->to())
-                fprintf(out, "CC:          %s\n", addr->rfc().c_str());
+                if (addr->local() == false)
+                    fprintf(out, "CC:          %s\n", addr->rfc().c_str());
             for (const auto& addr: msg->cc())
-                fprintf(out, "CC:          %s\n", addr->rfc().c_str());
+                if (addr->local() == false)
+                    fprintf(out, "CC:          %s\n", addr->rfc().c_str());
             for (const auto& str: msg->subject())
                 fprintf(out, "Subject:     %s\n", format_reply(str).c_str());
             for (const auto& date: msg->date())

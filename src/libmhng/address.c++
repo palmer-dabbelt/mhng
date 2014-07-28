@@ -29,10 +29,12 @@ using namespace mhng;
 
 address::address(const unknown<std::string>& email,
                  const unknown<std::string>& name,
-                 const unknown<std::string>& alias)
+                 const unknown<std::string>& alias,
+                 bool local)
     : _email(email),
       _name(name),
-      _alias(alias)
+      _alias(alias),
+      _local(local)
 {
 }
 
@@ -57,23 +59,27 @@ std::string address::rfc(void) const
     return _email.data();
 }
 
-address_ptr address::from_email(const std::string email)
+address_ptr address::from_email(const std::string email,
+                                bool local)
 {
     return std::make_shared<address>(
         unknown<std::string>(email),
         unknown<std::string>(),
-        unknown<std::string>()
+        unknown<std::string>(),
+        local
         );
 }
 
 address_ptr address::parse_alias(const std::string rfc,
-                                 const unknown<std::string>& alias)
+                                 const unknown<std::string>& alias,
+                                 bool local)
 {
     if (strstr(rfc.c_str(), "<") == NULL) {
         return std::make_shared<address>(
             unknown<std::string>(rfc),
             unknown<std::string>(),
-            alias
+            alias,
+            local
             );
     }
 
@@ -108,6 +114,7 @@ address_ptr address::parse_alias(const std::string rfc,
     return std::make_shared<address>(
         unknown<std::string>(mail_start),
         unknown<std::string>(name_start),
-        alias
+        alias,
+        local
         );
 }

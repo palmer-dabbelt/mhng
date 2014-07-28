@@ -41,6 +41,7 @@ namespace mhng {
         unknown<std::string> _email;
         unknown<std::string> _name;
         unknown<std::string> _alias;
+        bool _local;
 
     public:
         /* The only way to create an address is to have the entire
@@ -48,7 +49,8 @@ namespace mhng {
          * need to make shared pointers from this... */
         address(const unknown<std::string>& email,
                 const unknown<std::string>& name,
-                const unknown<std::string>& alias);
+                const unknown<std::string>& alias,
+                bool local);
 
     public:
         /* Allows access to the internal fields (pretty much)
@@ -59,6 +61,7 @@ namespace mhng {
         std::string name(void) const { return _name.data(); }
         bool alias_known(void) const { return _alias.known(); }
         std::string alias(void) const { return _alias.data(); }
+        bool local(void) const { return _local; }
 
         /* Returns either the name or email address for this address.
          * Note that this always succeeds */
@@ -70,18 +73,20 @@ namespace mhng {
     public:
         /* Parses a raw email address.  This doesn't do any checks at
          * all, so you'll probably want to be very sure */
-        static address_ptr from_email(const std::string email);
+        static address_ptr from_email(const std::string email, bool local);
 
         /* Parses the sort of line you might see in a mail header. */
-        static address_ptr parse_rfc(const std::string rfc)
-            { return parse_alias(rfc, unknown<std::string>()); }
+        static address_ptr parse_rfc(const std::string rfc, bool local)
+            { return parse_alias(rfc, unknown<std::string>(), local); }
 
         /* Exactly like parse_rfc(), but might contain an alias. */
         static address_ptr parse_alias(const std::string rfc,
-                                       const unknown<std::string>& alias);
+                                       const unknown<std::string>& alias,
+                                       bool local);
         static address_ptr parse_alias(const std::string rfc,
-                                       const std::string alias)
-            { return parse_alias(rfc, unknown<std::string>(alias)); }
+                                       const std::string alias,
+                                       bool local)
+            { return parse_alias(rfc, unknown<std::string>(alias), local); }
     };
 }
 

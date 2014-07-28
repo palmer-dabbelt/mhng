@@ -78,7 +78,7 @@ std::vector<address_ptr> message::header_addr(const std::string name)
     std::vector<address_ptr> out;
 
     for (const auto& hdr: header(name)) {
-        auto addr = address::parse_rfc(hdr->single_line());
+        auto addr = address::parse_rfc(hdr->single_line(), false);
         auto lookup = _mbox->mrc()->email(addr->email());
         out.push_back(lookup);
     }

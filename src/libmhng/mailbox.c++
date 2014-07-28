@@ -102,11 +102,14 @@ message_ptr mailbox::insert(const std::string &folder_name,
     for (const auto& header: mime->header("Date"))
         date = std::make_shared<mhng::date>(header->single_line());
     for (const auto& header: mime->header("From"))
-        from = address::parse_rfc(header->single_line());
+        from = address::parse_rfc(header->single_line(), false);
     for (const auto& header: mime->header("To"))
-        to = address::parse_rfc(header->single_line());
+        to = address::parse_rfc(header->single_line(), false);
     for (const auto& header: mime->header("Subject"))
         subject = header->single_line();
+
+    from = mrc()->email(from->email());
+    to = mrc()->email(to->email());
 
     auto msg = std::make_shared<message>(_self_ptr.lock(),
                                          std::make_shared<sequence_number>(seq),

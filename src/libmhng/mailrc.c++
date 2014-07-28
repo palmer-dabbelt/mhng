@@ -53,13 +53,15 @@ mailrc::mailrc(const std::string& path)
             continue;
 
         if (strsta(line, "local ") == true) {
-            auto addr = address::parse_rfc(line + strlen("local "));
+            auto addr = address::parse_rfc(line + strlen("local "), true);
             add(addr);
             continue;
         }
 
         if (strsta(line, "address ") == true) {
-            auto addr = address::parse_rfc(line + strlen("address "));
+            auto addr = address::parse_rfc(line + strlen("address "), false);
+            if (email(addr->email())->local() == true)
+                addr = address::parse_rfc(addr->email(), true);
             add(addr);
             continue;
         }
@@ -76,7 +78,9 @@ mailrc::mailrc(const std::string& path)
             address[0] = '\0';
             address++;
 
-            auto addr = address::parse_alias(address, alias);
+            auto addr = address::parse_alias(address, alias, false);
+            if (email(addr->email())->local() == true)
+                addr = address::parse_alias(address, alias, true);
             add(addr);
             continue;
         }
@@ -92,7 +96,8 @@ address_ptr mailrc::email(const std::string& email)
 {
     auto l = _mail_map.find(email);
     if (l == _mail_map.end())
-        return address::from_email(email);
+        return address::from_email(email, false);
+
     return l->second;
 }
 
