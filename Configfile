@@ -60,20 +60,6 @@ CONFIG      += libmhng_sources
 CONFIG      += libmhng_headers
 
 ##############################################################################
-# Local-Access Binaries                                                      #
-##############################################################################
-# Composes a reply to a message, using your editor of choice (hint:
-# it's emacs :)).
-BINARIES    += repl
-SOURCES     += repl.c++
-COMPILEOPTS += -DREPL
-
-# Forwards a message
-BINARIES    += forw
-SOURCES     += repl.c++
-COMPILEOPTS += -DFORW
-
-##############################################################################
 # Remote-Access Binaries                                                     #
 ##############################################################################
 # Watches an GMail account for changes, ensuring that the local .mhdir
