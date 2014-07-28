@@ -28,6 +28,16 @@
 #define BUFFER_SIZE 1024
 #endif
 
+#ifdef REPL
+/* Formats a string as a reply string. */
+static std::string format_reply(const std::string subject);
+#endif
+
+#ifdef FORW
+/* Formats a string as a reply string. */
+static std::string format_forw(const std::string subject);
+#endif
+
 int main(int argc, const char **argv)
 {
     auto args = mhng::args::parse_normal(argc, argv);
@@ -46,11 +56,73 @@ int main(int argc, const char **argv)
         snprintf(tmpl, BUFFER_SIZE, "%s/template.msg", tempdir);
         FILE *out = fopen(tmpl, "w");
 
+#if defined(COMP)
         /* This default template actually consists of pretty much
          * nothing, but that's OK! */
         fprintf(out, "From:    \n");
         fprintf(out, "To:      \n");
         fprintf(out, "Subject: \n");
+
+        fprintf(out, "\n");
+
+#elif defined(REPL)
+        for (const auto& msg: args->messages()) {
+            for (const auto& addr: msg->from())
+                fprintf(out, "To:          %s\n", addr->rfc().c_str());
+            for (const auto& addr: msg->to())
+                fprintf(out, "CC:          %s\n", addr->rfc().c_str());
+            for (const auto& addr: msg->cc())
+                fprintf(out, "CC:          %s\n", addr->rfc().c_str());
+            for (const auto& str: msg->subject())
+                fprintf(out, "Subject:     %s\n", format_reply(str).c_str());
+            for (const auto& date: msg->date())
+                fprintf(out, "Date:        %s\n", date->local().c_str());
+            for (const auto& mid: msg->header_string("Message-ID"))
+                fprintf(out, "In-Reply-To: %s\n", mid.c_str());
+
+            fprintf(out, "\n");
+
+            fprintf(out, "On %s, %s wrote:\n",
+                    msg->first_date()->local().c_str(),
+                    msg->first_from()->nom().c_str()
+                );
+
+            for (const auto& line: msg->body_utf8())
+                fprintf(out, "> %s\n", line.c_str());
+        }
+#elif defined(FORW)
+        fprintf(out, "From:    \n");
+        fprintf(out, "To:      \n");
+
+        for (const auto& msg: args->messages()) {
+            for (const auto& str: msg->subject())
+                fprintf(out, "Subject:     %s\n", format_forw(str).c_str());
+        }
+
+        fprintf(out, "\n");
+
+        fprintf(out, "---------- Forwarded message ----------\n");
+
+        for (const auto& msg: args->messages()) {
+            for (const auto& addr: msg->from())
+                fprintf(out, "To:         %s\n", addr->rfc().c_str());
+            for (const auto& addr: msg->to())
+                fprintf(out, "CC:         %s\n", addr->rfc().c_str());
+            for (const auto& addr: msg->cc())
+                fprintf(out, "CC:         %s\n", addr->rfc().c_str());
+            for (const auto& str: msg->subject())
+                fprintf(out, "Subject:    %s\n", str.c_str());
+            for (const auto& date: msg->date())
+                fprintf(out, "Date:       %s\n", date->local().c_str());
+            for (const auto& mid: msg->header_string("Message-ID"))
+                fprintf(out, "Message-ID: %s\n", mid.c_str());
+
+            fprintf(out, "\n");
+
+            for (const auto& line: msg->body_utf8())
+                fprintf(out, "%s\n", line.c_str());
+        }
+#endif
 
         fclose(out);
     }
@@ -145,3 +217,32 @@ int main(int argc, const char **argv)
 
     return 0;
 }
+
+#ifdef REPL
+std::string format_reply(const std::string subject)
+{
+    char buf[BUFFER_SIZE];
+    snprintf(buf, BUFFER_SIZE, "Re: %s", subject.c_str());
+
+    if (strncasecmp(buf, "Re: Re:", 7) == 0)
+        return subject;
+
+    return buf;
+}
+#endif
+
+#ifdef FORW
+std::string format_forw(const std::string subject)
+{
+    char buf[BUFFER_SIZE];
+    snprintf(buf, BUFFER_SIZE, "FW: %s", subject.c_str());
+
+    if (strncasecmp(buf, "FW: FW:", 7) == 0)
+        return subject;
+
+    if (strncasecmp(buf, "FW: Fwd:", 8) == 0)
+        return subject;
+
+    return buf;
+}
+#endif

@@ -158,3 +158,12 @@ SOURCES     += mhng-pack.c++
 # templates: blank, a reply, or a forward.
 BINARIES    += mhng-comp
 SOURCES     += mhng-comp.c++
+COMPILEOPTS += -DCOMP
+
+BINARIES    += mhng-repl
+SOURCES     += mhng-comp.c++
+COMPILEOPTS += -DREPL
+
+BINARIES    += mhng-forw
+SOURCES     += mhng-comp.c++
+COMPILEOPTS += -DFORW
