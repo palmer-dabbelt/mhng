@@ -60,22 +60,6 @@ CONFIG      += libmhng_sources
 CONFIG      += libmhng_headers
 
 ##############################################################################
-# Remote-Access Binaries                                                     #
-##############################################################################
-# Watches an GMail account for changes, ensuring that the local .mhdir
-# is always kept up-to-date with the contents of the server.
-BINARIES    += mh-gmail-watch
-SOURCES     += mh-gmail-watch.c++
-COMPILEOPTS += -DWATCH
-
-# Fetches changes from a GMail account, just like "-watch" but doesn't
-# issue an IDLE command.
-BINARIES    += mh-gmail-fetch
-SOURCES     += mh-gmail-watch.c++
-COMPILEOPTS += -DFETCH
-
-# Things that use libmhng
-##############################################################################
 # Local-Access Binaries                                                      #
 ##############################################################################
 # Lists the messages in the given folder, defaulting to the currently
