@@ -48,12 +48,6 @@ LIBRARIES   += libmhimap.so
 CONFIG      += libmhimap_sources
 CONFIG      += libmhimap_headers
 
-# Common routines shared by all MHNG programs, provided so external
-# code has essentially the same access as internal code does.
-LIBRARIES   += libmh.so
-CONFIG      += libmh_sources
-CONFIG      += libmh_headers
-
 # The new MH library, which aims to replace the two libraries above.
 LIBRARIES   += libmhng.so
 CONFIG      += libmhng_sources

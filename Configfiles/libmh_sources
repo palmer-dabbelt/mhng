@@ -1,8 +1,0 @@
-#!/bin/bash
-
-cd src
-
-find libmh -iname "*.c++" | while read file
-do
-    echo "SOURCES += $file"
-done
