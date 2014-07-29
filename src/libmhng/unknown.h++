@@ -57,6 +57,13 @@ namespace mhng {
 
                 return _data;
             }
+
+        T operator=(const T& data)
+            {
+                _data = data;
+                _known = true;
+                return data;
+            }
     };
 }
 

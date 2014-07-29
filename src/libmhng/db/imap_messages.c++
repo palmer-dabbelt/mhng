@@ -77,6 +77,29 @@ uint64_t db::imap_messages::select(std::string folder,
     return row->get_uint("mhid");
 }
 
+void db::imap_messages::remove(uint64_t mhid)
+{
+    auto resp = _mbox->db()->remove(_table, "mhid='%lu'",
+                                    mhid);
+
+    switch (resp->return_value()) {
+    case sqlite::error_code::SUCCESS:
+        break;
+    }
+}
+
+void db::imap_messages::remove(std::string folder, uint32_t imapid)
+{
+    auto resp = _mbox->db()->remove(_table, "folder='%s' AND uid=%u",
+                                    folder.c_str(),
+                                    imapid);
+
+    switch (resp->return_value()) {
+    case sqlite::error_code::SUCCESS:
+        break;
+    }
+}
+
 void db::imap_messages::update_purge(uint64_t uid, bool purge)
 {
     auto map = std::map<std::string, std::string>();

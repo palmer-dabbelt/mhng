@@ -54,6 +54,7 @@ namespace mhng {
 
             /* Drops a message from the IMAP store. */
             void remove(uint64_t uid);
+            void remove(std::string folder, uint32_t imapid);
 
             /* Updates a message to contain a new "purge" field. */
             void update_purge(uint64_t uid, bool purge);

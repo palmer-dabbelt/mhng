@@ -75,7 +75,9 @@ message_ptr folder::open_imap(uint32_t imapid)
     auto uid = imap->select(this->name(), imapid);
 
     auto mh = std::make_shared<db::mh_messages>(_mbox);
-    return mh->select(uid);
+    auto message = mh->select(uid);
+    message->set_imapid(imapid);
+    return message;
 }
 
 void folder::set_uid_validity(uint32_t uidv)

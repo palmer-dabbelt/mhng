@@ -96,6 +96,9 @@ namespace mhng {
                            const mime::message_ptr& mime,
                            uint32_t imapid);
 
+        /* Clears the purge status of a message. */
+        void did_purge(const folder_ptr& folder, uint32_t imapid);
+
     private:
         static folder_ptr _current_folder_func(mailbox *mbox)
             { return mbox->_current_folder_impl(); }

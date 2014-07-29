@@ -81,13 +81,13 @@ int main(int argc, const char **argv)
 
         /* Here we build the lists of things we've got to do in order
          * to get the client and server in sync. */
-        std::vector<mhng::message_ptr> purge_messages;
+        std::vector<uint32_t> purge_messages;
         std::map<uint32_t, bool> should_purge;
         std::vector<mhimap::message> fetch_messages;
         std::vector<mhng::message_ptr> drop_messages;
 
         for (const auto& id: lfolder->purge()) {
-            purge_messages.push_back(lfolder->open_imap(id));
+            purge_messages.push_back(id);
             should_purge[id] = true;
         }
 
@@ -111,14 +111,17 @@ int main(int argc, const char **argv)
 
         /* Now we actually go ahead and perform the necessary
          * transactions. */
-        for (const auto& message: purge_messages) {
-            fprintf(stderr, "Purging %s (%s/%u) [%s/%u]\n",
-                    message->uid().c_str(),
-                    message->folder()->name().c_str(),
-                    message->seq()->to_uint(),
-                    message->folder()->name().c_str(),
-                    message->imapid()
+        for (const auto& imapid: purge_messages) {
+            fprintf(stderr, "Purging %s/%u\n",
+                    folder_name.c_str(),
+                    imapid
                 );
+
+            auto imessage = mhimap::message(ifolder, imapid);
+
+            auto trans = args->mbox()->db()->exclusive_transaction();
+            client.mark_as_deleted(imessage);
+            args->mbox()->did_purge(lfolder, imapid);
         }
 
         for (const auto& imessage: fetch_messages) {

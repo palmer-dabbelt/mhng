@@ -165,6 +165,12 @@ message_ptr mailbox::insert(const folder_ptr& folder,
     return folder->open(uid);
 }
 
+void mailbox::did_purge(const folder_ptr& folder, uint32_t imapid)
+{
+    auto table = std::make_shared<db::imap_messages>(_self_ptr.lock());
+    table->remove(folder->name(), imapid);
+}
+
 folder_ptr mailbox::_current_folder_impl(void)
 {
     auto table = std::make_shared<db::mh_current>(_self_ptr.lock());

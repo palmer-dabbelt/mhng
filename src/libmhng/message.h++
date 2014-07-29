@@ -55,7 +55,7 @@ namespace mhng {
         const address_ptr _to;
         const std::string _subject;
         const std::string _uid;
-        const unknown<uint32_t> _imapid;
+        unknown<uint32_t> _imapid;
 
         /* Contains the raw bytes of the message, parsed as strings
          * (one per line). */
@@ -150,6 +150,10 @@ namespace mhng {
          * this is very problematic because it can lead to a bunch of
          * race conditions, so be careful with it! */
         void set_sequence_number(const sequence_number_ptr& seq);
+
+        /* Forcefully sets the IMAP ID for a message, if we know it
+         * from somewhere else. */
+        void set_imapid(uint32_t imapid) { _imapid = imapid; }
 
     private:
         std::string full_path(void) const;
