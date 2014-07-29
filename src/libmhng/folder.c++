@@ -76,7 +76,10 @@ message_ptr folder::open_imap(uint32_t imapid)
 
     auto mh = std::make_shared<db::mh_messages>(_mbox);
     auto message = mh->select(uid);
-    message->set_imapid(imapid);
+
+    if (message != NULL)
+        message->set_imapid(imapid);
+
     return message;
 }
 
