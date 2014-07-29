@@ -81,16 +81,19 @@ int main(int argc, const char **argv)
 
         /* Here we build the lists of things we've got to do in order
          * to get the client and server in sync. */
+#if defined(PURGE) || defined(FETCH)
         std::vector<uint32_t> purge_messages;
         std::map<uint32_t, bool> should_purge;
-        std::vector<mhimap::message> fetch_messages;
-        std::vector<mhng::message_ptr> drop_messages;
+
 
         for (const auto& id: lfolder->purge()) {
             purge_messages.push_back(id);
             should_purge[id] = true;
         }
+#endif
 
+#if defined(FETCH)
+        std::vector<mhimap::message> fetch_messages;
         for (const auto& pair: imessages) {
             auto imessage = pair.second;
 
@@ -102,15 +105,20 @@ int main(int argc, const char **argv)
             if (lmessage == NULL)
                 fetch_messages.push_back(imessage);
         }
+#endif
 
+#if defined(DROP)
+        std::vector<mhng::message_ptr> drop_messages;
         for (const auto& lmessage: lfolder->messages()) {
             auto l = imessages.find(lmessage->imapid());
             if (l == imessages.end())
                 drop_messages.push_back(lmessage);
         }
+#endif
 
         /* Now we actually go ahead and perform the necessary
          * transactions. */
+#if defined(PURGE)
         for (const auto& imapid: purge_messages) {
             fprintf(stderr, "Purging %s/%u\n",
                     folder_name.c_str(),
@@ -123,7 +131,9 @@ int main(int argc, const char **argv)
             client.mark_as_deleted(imessage);
             args->mbox()->did_purge(lfolder, imapid);
         }
+#endif
 
+#if defined(FETCH)
         for (const auto& imessage: fetch_messages) {
             fprintf(stderr, "Fetching %s/%u\n",
                     imessage.folder_name().c_str(),
@@ -140,7 +150,9 @@ int main(int argc, const char **argv)
                                                  imessage.uid()
                 );
         }
+#endif
 
+#if defined(DROP)
         for (const auto& message: drop_messages) {
             fprintf(stderr, "Dropping %s (%s/%u)\n",
                     message->uid().c_str(),
@@ -148,5 +160,6 @@ int main(int argc, const char **argv)
                     message->seq()->to_uint()
                 );
         }
+#endif
     }
 }
