@@ -159,6 +159,10 @@ int main(int argc, const char **argv)
                     message->folder()->name().c_str(),
                     message->seq()->to_uint()
                 );
+
+            auto trans = args->mbox()->db()->exclusive_transaction();
+            args->mbox()->did_purge(lfolder, message->imapid());
+            message->remove();
         }
 #endif
     }
