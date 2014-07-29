@@ -65,6 +65,19 @@ namespace mhng {
                     auto l = _m.find(str);
                     return l->second;
                 }
+
+            /* Returns TRUE if the value exists in the map, and FALSE
+             * otherwise.  Note that this is FALSE for NULL SQL
+             * values, as well as FALSE for values that aren't in the
+             * SQL table at all! */
+            bool has(const std::string& str) const
+                {
+                    auto l = _m.find(str);
+                    if (l == _m.end())
+                        return false;
+                    else
+                        return true;
+                }
         };
     }
 }

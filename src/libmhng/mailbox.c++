@@ -24,6 +24,7 @@
 #include "db/mh_messages.h++"
 #include "db/mh_current.h++"
 #include "db/mh_nextid.h++"
+#include "db/imap_messages.h++"
 #include <string.h>
 #include <unistd.h>
 using namespace mhng;
@@ -108,6 +109,11 @@ message_ptr mailbox::insert(const std::string &folder_name,
     for (const auto& header: mime->header("Subject"))
         subject = header->single_line();
 
+    if (from == NULL)
+        from = address::parse_rfc("", false);
+    if (to == NULL)
+        to = address::parse_rfc("", false);
+
     from = mrc()->email(from->email());
     to = mrc()->email(to->email());
 
@@ -141,6 +147,22 @@ message_ptr mailbox::insert(const std::string &folder_name,
         fprintf(file, "%s", raw.c_str());
 
     return msg;
+}
+
+message_ptr mailbox::insert(const folder_ptr& folder,
+                            const mime::message_ptr& mime,
+                            uint32_t imapid)
+{
+    auto trans = _db->deferred_transaction();
+
+    auto message = insert(folder->name(), mime);
+
+    uint64_t uid = atoi(message->uid().c_str());
+
+    auto table = std::make_shared<db::imap_messages>(_self_ptr.lock());
+    table->insert(message->folder()->name(), imapid, uid);
+
+    return folder->open(uid);
 }
 
 folder_ptr mailbox::_current_folder_impl(void)

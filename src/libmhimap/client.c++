@@ -227,6 +227,72 @@ void client::fetch_to_file(const message m, FILE *f)
     }
 }
 
+std::vector<std::string> client::fetch(const message m)
+{
+    char buffer[BUFFER_SIZE];
+    std::vector<std::string> out;
+
+    select(m);
+
+    command fetch(this, "UID FETCH %u BODY.PEEK[]", m.uid());
+    if (gets(buffer, BUFFER_SIZE) <= 0) {
+        fprintf(stderr, "Some sort of disconnect on FETCH\n");
+        abort();
+    }
+    uint32_t seq, uid;
+    ssize_t size;
+    int r = sscanf(buffer, "* %u FETCH (UID %u BODY[] {%ld}",
+                   &seq, &uid, &size);
+    if (r != 3) {
+        fprintf(stderr, "Unable to parse RFC882 FETCH header\n");
+        fprintf(stderr, "%s\n", buffer);
+        abort();
+    }
+
+    while (size > 0) {
+        ssize_t n_read = gets(buffer, BUFFER_SIZE);
+
+        if (n_read <= 0) {
+            fprintf(stderr, "Invalid read\n");
+            abort();
+        }
+
+        out.push_back(std::string(buffer) + "\n");
+
+        /* Remember, gets() returns the size BEFORE stripping
+         * newlines. */
+        size -= n_read;
+    }
+
+    /* There was a single leading paren at the start... */
+    int parens = 1;
+    while (gets(buffer, BUFFER_SIZE) > 0) {
+        /* The format isn't right until there's no parents left. */
+        bool has_paren = false;
+        if (parens > 0) {
+            for (size_t i = 0; i < strlen(buffer); i++) {
+                if (buffer[i] == '(') {
+                    parens++;
+                    has_paren = true;
+                }
+
+                if (buffer[i] == ')') {
+                    parens--;
+                    has_paren = true;
+                }
+            }
+        }
+
+        if (parens > 0 || has_paren == true)
+            continue;
+
+        if (fetch.is_end(buffer))
+            break;
+    }
+
+    return out;
+}
+
 int client::eat_hello(void)
 {
     logger("client::eat_hello()");

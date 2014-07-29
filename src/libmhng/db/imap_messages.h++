@@ -44,15 +44,25 @@ namespace mhng {
             imap_messages(const mailbox_ptr& mbox);
 
         public:
-            /* We only allow the selection of an IMAP message by
+            /* Lists the IMAP UID for a message that matches the given
              * UID. */
-            message_ptr select(uint64_t uid);
+            int64_t select(uint64_t uid);
+
+            /* Lists the UID for a message that matches the given IMAP
+             * folder/uid pair. */
+            uint64_t select(std::string folder, uint32_t imapid);
 
             /* Drops a message from the IMAP store. */
             void remove(uint64_t uid);
 
             /* Updates a message to contain a new "purge" field. */
             void update_purge(uint64_t uid, bool purge);
+
+            /* Lists all the messages with the purge flag set. */
+            std::vector<uint32_t> select_purge(std::string folder);
+
+            /* Inserts a new message into this table. */
+            void insert(std::string folder, uint32_t imapid, uint64_t mhid);
         };
     }
 }

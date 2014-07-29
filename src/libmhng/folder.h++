@@ -52,6 +52,14 @@ namespace mhng {
         /* Allows access to all messages in this folder. */
         promise<folder, std::vector<message_ptr>> _messages;
 
+        /* Allows us to query to see if the UID validity is known or
+         * not. */
+        promise<folder, int64_t> _uid_validity;
+
+        /* Lists the messages that used to be in this folder but need
+         * to be purged from the IMAP server. */
+        promise<folder, std::vector<uint32_t>> _purge;
+
     public:
         /* Creates a new folder handle.  Note that this database
          * handle will end up filling out information as it's
@@ -96,8 +104,37 @@ namespace mhng {
          * message. */
         message_ptr open(const sequence_number_ptr& seq);
 
+        message_ptr open(uint64_t uid);
+
+        /* Opens a message that's in this folder and matches the given
+         * IMAP sequence number. */
+        message_ptr open_imap(uint32_t imap_uid);
+
         /* Returns the path that's associated with this folder. */
         std::string full_path(void) const;
+
+        /* Allows for the modification of the UID VALIDITY field,
+         * which IMAP uses to tell clients when they throw away their
+         * cache of a mailbox. */
+        std::shared_ptr<int64_t> uid_validity_ptr(void)
+            { return _uid_validity; }
+        bool has_uid_validity(void)
+            { return *(uid_validity_ptr()) >= 0; }
+        uint32_t uid_validity(void)
+            { return (uint32_t)*(uid_validity_ptr()); }
+        void set_uid_validity(uint32_t uidv);
+
+        /* Returns the list of messages that are in this folder that
+         * we need to purge from the IMAP server. */
+        std::shared_ptr<std::vector<uint32_t>> purge_raw(void)
+            { return _purge; }
+        std::vector<uint32_t> purge(void)
+            {
+                std::vector<uint32_t> out;
+                for (const auto& uid: *(purge_raw()))
+                    out.push_back(uid);
+                return out;
+            }
 
     private:
         static message_ptr _current_message_func(folder* f)
@@ -107,6 +144,14 @@ namespace mhng {
         static std::shared_ptr<std::vector<message_ptr>>
         _messages_func(folder* f) { return f->_messages_impl(); }
         std::shared_ptr<std::vector<message_ptr>> _messages_impl(void);
+
+        static std::shared_ptr<int64_t> _uid_validity_func(folder *f)
+            { return f->_uid_validity_impl(); }
+        std::shared_ptr<int64_t> _uid_validity_impl(void);
+
+        static std::shared_ptr<std::vector<uint32_t>> _purge_func(folder *f)
+            { return f->_purge_impl(); }
+        std::shared_ptr<std::vector<uint32_t>> _purge_impl(void);
     };
 }
 

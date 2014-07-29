@@ -30,6 +30,41 @@ db::mh_messages::mh_messages(const mailbox_ptr& mbox)
 {
 }
 
+message_ptr db::mh_messages::select(uint64_t uid)
+{
+    auto resp = _mbox->db()->select(_table, "uid='%s'",
+                                    std::to_string(uid).c_str());
+
+    switch (resp->return_value()) {
+    case sqlite::error_code::SUCCESS:
+        break;
+
+    default:
+        return NULL;
+        break;
+    }
+
+    if (resp->result_count() > 1) {
+        fprintf(stderr, "UNIQUE not respected\n");
+        abort();
+    }
+
+    if (resp->result_count() == 0)
+        return NULL;
+
+    auto row = resp->row(0);
+    return std::make_shared<message>(
+        _mbox,
+        std::make_shared<sequence_number>(row->get_uint("seq")),
+        _mbox->open_folder(row->get_str("folder")),
+        std::make_shared<date>(row->get_str("date")),
+        _mbox->mrc()->email(row->get_str("fadr")),
+        _mbox->mrc()->email(row->get_str("tadr")),
+        row->get_str("subject"),
+        row->get_str("uid")
+        );
+}
+
 message_ptr db::mh_messages::select(const std::string& folder_name,
                                     const sequence_number_ptr& seq)
 {
@@ -198,5 +233,6 @@ sqlite::table_ptr generate_columns(void)
     out.push_back(std::make_shared<sqlite::column_t<std::string>>("fadr"));
     out.push_back(std::make_shared<sqlite::column_t<std::string>>("tadr"));
     out.push_back(std::make_shared<sqlite::column_t<std::string>>("subject"));
+    out.push_back(std::make_shared<sqlite::column_t<std::string>>("folder"));
     return std::make_shared<sqlite::table>("MH__messages", out);
 }

@@ -117,10 +117,6 @@ std::string db::mh_current::select_current(void)
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
             break;
-
-    default:
-        abort();
-        break;
     }
 
     if (resp->result_count() != 1)
@@ -130,11 +126,49 @@ std::string db::mh_current::select_current(void)
     return row->get_str("folder");
 }
 
+int64_t db::mh_current::uid_validity(const std::string& folder_name)
+{
+    auto resp = _mbox->db()->select(_table, "folder='%s'",
+                                    folder_name.c_str());
+
+    switch (resp->return_value()) {
+    case sqlite::error_code::SUCCESS:
+            break;
+    }
+
+    if (resp->result_count() != 1)
+        return -1;
+
+    auto row = resp->row(0);
+
+    if (row->has("uid_validity") == false)
+        return -1;
+
+    return row->get_uint("uid_validity");
+}
+
+void db::mh_current::update_uid_validity(const std::string& folder_name,
+                                         uint32_t uid_validity)
+{
+    auto map = std::map<std::string, std::string>();
+    map["uid_validity"] = std::to_string(uid_validity);
+    auto row = std::make_shared<sqlite::row>(map);
+
+    auto resp = _mbox->db()->replace(_table, row, "folder = '%s'",
+                                     folder_name.c_str());
+
+    switch (resp->return_value()) {
+    case sqlite::error_code::SUCCESS:
+        return;
+    }
+}
+
 sqlite::table_ptr generate_columns(void)
 {
     std::vector<sqlite::column_ptr> out;
     out.push_back(std::make_shared<sqlite::column_t<std::string>>("folder"));
     out.push_back(std::make_shared<sqlite::column_t<std::string>>("seq"));
     out.push_back(std::make_shared<sqlite::column_t<std::string>>("cur"));
+    out.push_back(std::make_shared<sqlite::column_t<std::string>>("uid_validity"));
     return std::make_shared<sqlite::table>("MH__current", out);
 }

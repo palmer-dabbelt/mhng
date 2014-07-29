@@ -92,6 +92,10 @@ namespace mhng {
         message_ptr insert(const std::string& folder_name,
                            const mime::message_ptr& mime);
 
+        message_ptr insert(const folder_ptr& folder,
+                           const mime::message_ptr& mime,
+                           uint32_t imapid);
+
     private:
         static folder_ptr _current_folder_func(mailbox *mbox)
             { return mbox->_current_folder_impl(); }

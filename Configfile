@@ -153,3 +153,24 @@ COMPILEOPTS += -DREPL
 BINARIES    += mhng-forw
 SOURCES     += mhng-comp.c++
 COMPILEOPTS += -DFORW
+
+##############################################################################
+# Remote-Access Binaries                                                     #
+##############################################################################
+BINARIES    += mhimap-fetch
+SOURCES     += mhng-fetch.c++
+COMPILEOPTS += -DFETCH
+
+BINARIES    += mhimap-purge
+SOURCES     += mhng-fetch.c++
+COMPILEOPTS += -DPURGE
+
+BINARIES    += mhimap-drop
+SOURCES     += mhng-fetch.c++
+COMPILEOPTS += -DDROP
+
+BINARIES    += mhimap-sync
+SOURCES     += mhng-fetch.c++
+COMPILEOPTS += -DFETCH
+COMPILEOPTS += -DPURGE
+COMPILEOPTS += -DDROP

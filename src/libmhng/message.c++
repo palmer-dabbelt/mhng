@@ -35,6 +35,8 @@ using namespace mhng;
 static bool check_for_current(const mailbox_ptr& mbox,
                               const folder_ptr& folder,
                               const unsigned& seq);
+static unknown<uint32_t> check_for_imapid(const mailbox_ptr& mbox,
+                                          const std::string& uid);
 
 message::message(const mailbox_ptr& mbox,
                  const sequence_number_ptr& seq,
@@ -53,6 +55,7 @@ message::message(const mailbox_ptr& mbox,
       _to(to),
       _subject(subject),
       _uid(uid),
+      _imapid(check_for_imapid(mbox, uid)),
       _raw(this, _raw_func),
       _mime(this, _mime_func)
 {
@@ -174,4 +177,15 @@ bool check_for_current(const mailbox_ptr& mbox,
 {
     auto table = std::make_shared<db::mh_current>(mbox);
     return table->select(folder->name()) == seq;
+}
+
+unknown<uint32_t> check_for_imapid(const mailbox_ptr& mbox,
+                                   const std::string& uid)
+{
+    auto table = std::make_shared<db::imap_messages>(mbox);
+    auto imapid = table->select(atoi(uid.c_str()));
+    if (imapid >= 0)
+        return unknown<uint32_t>(imapid);
+    else
+        return unknown<uint32_t>();
 }

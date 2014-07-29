@@ -55,6 +55,7 @@ namespace mhng {
         const address_ptr _to;
         const std::string _subject;
         const std::string _uid;
+        const unknown<uint32_t> _imapid;
 
         /* Contains the raw bytes of the message, parsed as strings
          * (one per line). */
@@ -62,6 +63,7 @@ namespace mhng {
 
         /* This contains the message formatted as a MIME message. */
         promise<message, mime::message> _mime;
+
 
     public:
         /* Here's the sole way of creating a new message: with all the
@@ -87,6 +89,9 @@ namespace mhng {
         const address_ptr& first_to(void) const { return _to; }
         const std::string& first_subject(void) const { return _subject; }
         const std::string& uid(void) const { return _uid; }
+
+        bool imapid_known(void) const { return _imapid.known(); }
+        uint32_t imapid(void) const { return _imapid.data(); }
 
         /* Accessors for slower fields. */
         std::shared_ptr<std::vector<std::string>> raw_pointer(void)

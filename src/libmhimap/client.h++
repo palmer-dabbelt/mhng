@@ -98,6 +98,9 @@ namespace mhimap {
         /* Fetches a message, storing it in the given file. */
         virtual void fetch_to_file(const message m, FILE *f);
 
+        /* Fetches a message, storing it in memory. */
+        virtual std::vector<std::string> fetch(const message m);
+
         /* Selects a given folder on the IMAP server, returning the
          * UIDVALIDITY value sent back.  Note that if no UIDVALIDITY
          * is returned then this will abort(). */

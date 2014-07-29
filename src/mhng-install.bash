@@ -23,7 +23,8 @@ cat > $HOME/.mhng/init.sql <<EOF
 CREATE TABLE MH__current (folder STRING CHECK(folder != ''),
                           seq INTEGER CHECK(seq > 0),
                           cur INTEGER CHECK(cur > 0 AND cur <= 1),
-                          UNIQUE(folder)
+                          uid_validity INTEGER CHECK(uid_validity >= 0),
+                          UNIQUE(folder),
                           UNIQUE(cur)
        );
 INSERT INTO MH__current (folder, seq, cur) VALUES ("inbox", 1, 1);
@@ -44,6 +45,13 @@ CREATE TABLE MH__messages (uid INTEGER PRIMARY KEY CHECK(uid > 0),
                            UNIQUE(folder, seq)
        );
 
+CREATE TABLE MH__nextid (single INTEGER NOT NULL CHECK(single > 0 AND single < 2),
+                         uid INTEGER,
+                         UNIQUE(uid),
+                         UNIQUE(single)
+       );
+INSERT INTO MH__nextid (single, uid) VALUES (1, 2);
+
 CREATE TABLE IMAP__messages (folder STRING,
                              uid INTEGER,
                              mhid INTEGER,
@@ -51,13 +59,6 @@ CREATE TABLE IMAP__messages (folder STRING,
                              UNIQUE(folder, uid),
                              UNIQUE(mhid)
        );
-
-CREATE TABLE MH__nextid (single INTEGER NOT NULL CHECK(single > 0 AND single < 2),
-                         uid INTEGER,
-                         UNIQUE(uid),
-                         UNIQUE(single)
-       );
-INSERT INTO MH__nextid (single, uid) VALUES (1, 0);
 EOF
 
 sqlite3 $HOME/.mhng/metadata.sqlite3 < $HOME/.mhng/init.sql
