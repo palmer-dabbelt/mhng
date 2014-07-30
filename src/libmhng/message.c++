@@ -81,9 +81,11 @@ std::vector<address_ptr> message::header_addr(const std::string name)
     std::vector<address_ptr> out;
 
     for (const auto& hdr: header(name)) {
-        auto addr = address::parse_rfc(hdr->single_line(), false);
-        auto lookup = _mbox->mrc()->email(addr->email());
-        out.push_back(lookup);
+        for (const auto& adstr: hdr->split_commas()) {
+            auto addr = address::parse_rfc(adstr, false);
+            auto lookup = _mbox->mrc()->email(addr->email());
+            out.push_back(lookup);
+        }
     }
 
     return out;
@@ -106,10 +108,9 @@ std::vector<date_ptr> message::header_date(const std::string name)
     std::vector<date_ptr> out;
 
     for (const auto& hdr: header(name)) {
-        for (const auto& addr: hdr->split_commas()) {
-            auto d = std::make_shared<mhng::date>(addr);
-            out.push_back(d);
-        }
+        auto dstr = hdr->single_line();
+        auto d = std::make_shared<mhng::date>(dstr);
+        out.push_back(d);
     }
 
     return out;
