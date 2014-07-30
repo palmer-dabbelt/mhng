@@ -99,8 +99,6 @@ int main(int argc, const char **argv)
                     fprintf(out, "CC:          %s\n", addr->rfc().c_str());
             for (const auto& str: msg->subject())
                 fprintf(out, "Subject:     %s\n", format_reply(str).c_str());
-            for (const auto& date: msg->date())
-                fprintf(out, "Date:        %s\n", date->local().c_str());
             for (const auto& mid: msg->header_string("Message-ID"))
                 fprintf(out, "In-Reply-To: %s\n", mid.c_str());
 
