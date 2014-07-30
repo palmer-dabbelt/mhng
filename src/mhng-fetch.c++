@@ -141,9 +141,6 @@ int main(int argc, const char **argv)
                 );
 
             auto raw = client.fetch(imessage);
-            for (const auto& line: raw)
-                fprintf(stderr, "line: %s", line.c_str());
-
             auto mime = std::make_shared<mhng::mime::message>(raw);
             auto lmessage = args->mbox()->insert(lfolder,
                                                  mime,
