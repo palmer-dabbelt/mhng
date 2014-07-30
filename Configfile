@@ -48,7 +48,8 @@ LIBRARIES   += libmhimap.so
 CONFIG      += libmhimap_sources
 CONFIG      += libmhimap_headers
 
-# The new MH library, which aims to replace the two libraries above.
+# The MHNG library, which handles messing around within MH folders on
+# disk.
 LIBRARIES   += libmhng.so
 CONFIG      += libmhng_sources
 CONFIG      += libmhng_headers
