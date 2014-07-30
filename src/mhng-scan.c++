@@ -38,6 +38,8 @@ int main(int argc, const char **argv)
     }
 
     size_t from_width = (terminal_width * 25) / 80;
+    if (from_width > 35)
+        from_width = 35;
     size_t seq_width = (terminal_width > 120) ? 3 : 2;
     size_t subject_width = terminal_width - from_width - seq_width - 11;
 
