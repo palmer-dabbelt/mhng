@@ -106,8 +106,10 @@ std::vector<date_ptr> message::header_date(const std::string name)
     std::vector<date_ptr> out;
 
     for (const auto& hdr: header(name)) {
-        auto d = std::make_shared<mhng::date>(hdr->single_line());
-        out.push_back(d);
+        for (const auto& addr: hdr->split_commas()) {
+            auto d = std::make_shared<mhng::date>(addr);
+            out.push_back(d);
+        }
     }
 
     return out;

@@ -64,6 +64,34 @@ std::string mime::header::single_line(void) const
     return out;
 }
 
+std::vector<std::string> mime::header::split_commas(void) const
+{
+    std::vector<std::string> out;
+
+    auto line = single_line();
+    const char *start = line.c_str();
+    while (strstr(start, ",") != NULL) {
+        char buffer[BUFFER_SIZE];
+        snprintf(buffer, BUFFER_SIZE, "%s", start);
+
+        char *end = strstr(buffer, ",");
+        *end = '\0';
+        while ((end > buffer) && isspace(end[-1])) {
+            end--;
+            *end = '\0';
+        }
+
+        out.push_back(buffer);
+
+        start = strstr(start, ",") + 1;
+        while (isspace(*start))
+            start++;
+    }
+    out.push_back(start);
+
+    return out;
+}
+
 std::string mime::header::key(void) const
 {
     char buffer[BUFFER_SIZE];

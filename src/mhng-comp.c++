@@ -198,10 +198,11 @@ int main(int argc, const char **argv)
         for (const auto& header: raw_mime->body()->headers()) {
             if (header->match({"From", "To", "CC", "BCC"})) {
                 auto k = header->key();
-                auto v = header->single_line();
-                auto a = args->mbox()->mrc()->emailias(v);
-                auto aa = a->rfc();
-                lookup.push_back(k + ": " + aa + "\n");
+                for (const auto v: header->split_commas()) {
+                    auto a = args->mbox()->mrc()->emailias(v);
+                    auto aa = a->rfc();
+                    lookup.push_back(k + ": " + aa + "\n");
+                }
             } else {
                 for (const auto& hraw: header->raw())
                     lookup.push_back(hraw + "\n");
