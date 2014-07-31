@@ -61,6 +61,12 @@ int main(int argc, const char **argv)
 #elif defined(PREV)
     auto next = messages[0]->next_message(-1);
 #endif
+    if (next == NULL) {
+        fprintf(stderr, "Unable to move message pointer\n");
+        fprintf(stderr, "  Is there a message in that direction?\n");
+        abort();
+    }
+
     args->folders()[0]->set_current_message(next);
     messages = {args->folders()[0]->current_message()};
 #else
