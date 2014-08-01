@@ -153,3 +153,14 @@ SOURCES     += mhng-fetch.c++
 COMPILEOPTS += -DFETCH
 COMPILEOPTS += -DPURGE
 COMPILEOPTS += -DDROP
+
+##############################################################################
+# Scripting Binaries                                                         #
+##############################################################################
+# Lists all the folder names on stdout
+BINARIES    += mhng-pipe-folder_names
+SOURCES     += mhng-pipe-folder_names.c++
+
+# Lists all the sequence numbers on stdout
+BINARIES    += mhng-pipe-sequence_numbers
+SOURCES     += mhng-pipe-sequence_numbers.c++
