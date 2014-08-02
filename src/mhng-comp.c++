@@ -83,20 +83,20 @@ int main(int argc, const char **argv)
         }
 
         if (local == NULL)
-            fprintf(out, "From:        \n");
+            fprintf(out, "From:     \n");
         else
-            fprintf(out, "From:        %s\n", local->rfc().c_str());
+            fprintf(out, "From:     %s\n", local->rfc().c_str());
 
         for (const auto& msg: args->messages()) {
             for (const auto& addr: msg->from())
                 if (addr->local() == false)
-                    fprintf(out, "To:          %s\n", addr->rfc().c_str());
+                    fprintf(out, "To:      %s\n", addr->rfc().c_str());
             for (const auto& addr: msg->to())
                 if (addr->local() == false)
-                    fprintf(out, "CC:          %s\n", addr->rfc().c_str());
+                    fprintf(out, "CC:      %s\n", addr->rfc().c_str());
             for (const auto& addr: msg->cc())
                 if (addr->local() == false)
-                    fprintf(out, "CC:          %s\n", addr->rfc().c_str());
+                    fprintf(out, "CC:      %s\n", addr->rfc().c_str());
             for (const auto& str: msg->subject())
                 fprintf(out, "Subject:     %s\n", format_reply(str).c_str());
             for (const auto& mid: msg->header_string("Message-ID"))
@@ -132,7 +132,7 @@ int main(int argc, const char **argv)
 
         for (const auto& msg: args->messages()) {
             for (const auto& str: msg->subject())
-                fprintf(out, "Subject:     %s\n", format_forw(str).c_str());
+                fprintf(out, "Subject: %s\n", format_forw(str).c_str());
         }
 
         fprintf(out, "\n");
