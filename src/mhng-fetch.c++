@@ -110,6 +110,14 @@ int main(int argc, const char **argv)
 #if defined(DROP)
         std::vector<mhng::message_ptr> drop_messages;
         for (const auto& lmessage: lfolder->messages()) {
+            if (lmessage->imapid_known() == false) {
+                fprintf(stderr, "Warning: Skipping '%s'/%u\n",
+                        lfolder->name().c_str(),
+                        lmessage->seq()->to_uint()
+                    );
+                continue;
+            }
+
             auto l = imessages.find(lmessage->imapid());
             if (l == imessages.end())
                 drop_messages.push_back(lmessage);
