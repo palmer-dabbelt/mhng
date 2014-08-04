@@ -238,6 +238,16 @@ int main(int argc, const char **argv)
         mime->body()->add_header("Message-ID", message_id);
     }
 
+    /* Generate the relevant MIME headers. */
+    {
+        mime->add_header("Content-Transfer-Encoding", "8bit");
+        mime->add_header("Content-Type", "text/plain; charset=utf-8");
+        mime->add_header("Mime-Version", "1.0 (MHng)");
+        mime->body()->add_header("Content-Transfer-Encoding", "8bit");
+        mime->body()->add_header("Content-Type", "text/plain; charset=utf-8");
+        mime->body()->add_header("Mime-Version", "1.0 (MHng)");
+    }
+
     /* Go ahead and insert this message into the database. */
     auto message = args->mbox()->insert("drafts", mime);
 
