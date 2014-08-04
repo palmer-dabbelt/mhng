@@ -108,6 +108,26 @@ mime::part::part(const std::vector<std::string>& raw)
 
                     _charset = std::string(bp);
                 }
+
+                /* Checks to see if a charset was provided, and if
+                 * so stores it. */
+                if (strstr(value.c_str(), "name=") != NULL) {
+                    char charset[BUFFER_SIZE];
+                    snprintf(charset, BUFFER_SIZE, "%s",
+                             strstr(value.c_str(), "name=")
+                        );
+
+                    char *bp = charset + strlen("name=");
+                    while (isterm(bp[0]))
+                        bp++;
+
+                    char *be = bp;
+                    while (!isterm(be[0]))
+                        be++;
+                    be[0] = '\0';
+
+                    _name = std::string(bp);
+                }
             }
 
             if (header->match("Content-Transfer-Encoding"))

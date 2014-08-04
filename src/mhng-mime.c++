@@ -83,10 +83,16 @@ int main(int argc, const char **argv)
         for (size_t depth = 0; depth < part2depth[part]; ++depth)
             printf("  ");
 
-        printf("%s (%s)\n",
-               part->name().c_str(),
-               part->content_type().c_str()
-            );
+        if (part->name_known() == true) {
+            printf("%s: %s\n",
+                   part->content_type().c_str(),
+                   part->name().c_str()
+                );
+        } else {
+            printf("%s\n",
+                   part->content_type().c_str()
+                );
+        }
     }
 
     return 0;

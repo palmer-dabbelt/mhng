@@ -52,6 +52,7 @@ namespace mhng {
             unknown<std::string> _boundary;
             unknown<std::string> _end_boundary;
             unknown<std::string> _charset;
+            unknown<std::string> _name;
 
             /* Determines how we should convert this MIME part to
              * plain UTF-8. */
@@ -82,7 +83,8 @@ namespace mhng {
             std::string content_type(void) const
                 { return _content_type.data(); }
 
-            std::string name(void) const { return "unknown"; }
+            bool name_known(void) const { return _name.known(); }
+            std::string name(void) const { return _name.data(); }
 
             const std::vector<std::string>& body_raw(void) const
                 { return _body_raw; }
