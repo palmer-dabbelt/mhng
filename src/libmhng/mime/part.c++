@@ -21,6 +21,7 @@
 
 #include "part.h++"
 #include "base64.h++"
+#include <iconv.h>
 #include <stdlib.h>
 #include <string.h>
 using namespace mhng;
@@ -86,6 +87,26 @@ mime::part::part(const std::vector<std::string>& raw)
                     snprintf(strip, BUFFER_SIZE, "%s", value.c_str());
                     strstr(strip, ";")[0] = '\0';
                     _content_type = std::string(strip);
+                }
+
+                /* Checks to see if a charset was provided, and if
+                 * so stores it. */
+                if (strstr(value.c_str(), "charset=") != NULL) {
+                    char charset[BUFFER_SIZE];
+                    snprintf(charset, BUFFER_SIZE, "%s",
+                             strstr(value.c_str(), "charset=")
+                        );
+
+                    char *bp = charset + strlen("charset=");
+                    while (isterm(bp[0]))
+                        bp++;
+
+                    char *be = bp;
+                    while (!isterm(be[0]))
+                        be++;
+                    be[0] = '\0';
+
+                    _charset = std::string(bp);
                 }
             }
 
@@ -188,6 +209,57 @@ mime::part::part(const std::vector<std::string>& raw)
 }
 
 std::vector<std::string> mime::part::utf8(void) const
+{
+    if (_charset.known() == false)
+        return decoded();
+
+    std::string charset = _charset.data();
+
+    std::vector<std::string> out;
+
+    iconv_t icd = iconv_open("UTF-8", charset.c_str());
+    if (icd == NULL) {
+        fprintf(stderr, "Unable to decode charset '%s'\n",
+                _charset.data().c_str());
+        abort();
+    }
+
+    for (const auto& line: decoded()) {
+        size_t utf_len = strlen(line.c_str()) * 4 + 1;
+        char *utf = new char[utf_len + 1];
+        char *utf_orig = utf;
+
+        char *cline = strdup(line.c_str());
+        char *cline_orig = cline;
+        size_t cline_len = strlen(cline);
+
+        {
+            size_t err = iconv(icd,
+                               &cline,
+                               &cline_len,
+                               &utf,
+                               &utf_len);
+            if ((ssize_t)err == -1) {
+                perror("Unable to decode line");
+                fprintf(stderr, "  line '%s'\n", line.c_str());
+                fprintf(stderr, "  charset: '%s'\n", _charset.data().c_str());
+                fprintf(stderr, "  maps to: '%s'\n", charset.c_str());
+                abort();
+            }
+        }
+        utf[0] = '\0';
+
+        out.push_back(utf_orig);
+        free(cline_orig);
+        delete[] utf_orig;
+    }
+
+    iconv_close(icd);
+
+    return out;
+}
+
+std::vector<std::string> mime::part::decoded(void) const
 {
     std::vector<std::string> out;
 

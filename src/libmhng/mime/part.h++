@@ -51,6 +51,7 @@ namespace mhng {
             unknown<std::string> _content_type;
             unknown<std::string> _boundary;
             unknown<std::string> _end_boundary;
+            unknown<std::string> _charset;
 
             /* Determines how we should convert this MIME part to
              * plain UTF-8. */
@@ -91,6 +92,11 @@ namespace mhng {
 
             /* Formats the body of this MIME part as UTF-8. */
             std::vector<std::string> utf8(void) const;
+
+            /* Formats the body of this MIME part as whatever text
+             * encoding it is, but eliminating things like
+             * quoted-printable and base64. */
+            std::vector<std::string> decoded(void) const;
 
             /* Searches this MIME subtree for a suitable body part. */
             part_ptr body(void) const;
