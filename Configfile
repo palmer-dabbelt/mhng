@@ -164,3 +164,8 @@ SOURCES     += mhng-pipe-folder_names.c++
 # Lists all the sequence numbers on stdout
 BINARIES    += mhng-pipe-sequence_numbers
 SOURCES     += mhng-pipe-sequence_numbers.c++
+
+# Takes a single message as stdin and places it into the drafts
+# folder.
+BINARIES    += mhng-pipe-comp_stdin
+SOURCES     += mhng-pipe-comp_stdin.c++
