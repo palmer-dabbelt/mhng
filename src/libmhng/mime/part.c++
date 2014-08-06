@@ -283,7 +283,6 @@ std::vector<std::string> mime::part::decoded(void) const
 {
     std::vector<std::string> out;
 
-#if 0
     /* I handle base64 very simply: I just decode it, break newlines,
      * and store it out. */
     if (matches_encoding("base64") == true) {
@@ -306,7 +305,6 @@ std::vector<std::string> mime::part::decoded(void) const
         out.push_back(last_line);
         return out;
     }
-#endif
 
     /* Quoted-printable has a bit of magic related to '=', but not
      * much else to do.  Note that I do merge together long line
