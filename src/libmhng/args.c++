@@ -179,7 +179,13 @@ args_ptr args::parse(int argc, const char **argv, int flags)
             return std::make_shared<args>(messages, folders, numbers, dir);
         } else {
             std::vector<message_ptr> messages;
-            messages.push_back(last_folder_ptr->current_message());
+            auto cur = last_folder_ptr->current_message();
+            if (cur == NULL) {
+                fprintf(stderr, "Unable to open current message\n");
+                fprintf(stderr, "  Probably you just removed it\n");
+                abort();
+            }
+            messages.push_back(cur);
             return std::make_shared<args>(messages, folders, numbers, dir);
         }
     }
