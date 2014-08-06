@@ -118,6 +118,8 @@ namespace mhng {
         static const int pf_numbers  = 0x08;
         static const int pf_allf     = 0x10;
         static const int pf_allm     = 0x20;
+        static const int pf_nof      = 0x40;
+        static const int pf_nom      = 0x80;
     };
 }
 

@@ -73,6 +73,7 @@ args_ptr args::parse_all_folders(int argc, const char **argv)
     flags |= pf_folders;
     flags |= pf_messages;
     flags |= pf_allf;
+    flags |= pf_nom;
 
     return parse(argc, argv, flags);
 }
@@ -176,6 +177,9 @@ args_ptr args::parse(int argc, const char **argv, int flags)
             for (const auto& folder: folders)
                 for (const auto& message: folder->messages())
                     messages.push_back(message);
+            return std::make_shared<args>(messages, folders, numbers, dir);
+        } else if (flags & pf_nom) {
+            std::vector<message_ptr> messages;
             return std::make_shared<args>(messages, folders, numbers, dir);
         } else {
             std::vector<message_ptr> messages;
