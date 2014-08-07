@@ -199,6 +199,7 @@ void db::mh_messages::insert(unsigned seq,
     map["tadr"] = to;
     map["subject"] = subject;
     map["uid"] = std::to_string(uid);
+    map["unread"] = "0";
     auto row = std::make_shared<sqlite::row>(map);
 
     auto resp = _mbox->db()->insert(_table, row);
@@ -234,5 +235,6 @@ sqlite::table_ptr generate_columns(void)
     out.push_back(std::make_shared<sqlite::column_t<std::string>>("tadr"));
     out.push_back(std::make_shared<sqlite::column_t<std::string>>("subject"));
     out.push_back(std::make_shared<sqlite::column_t<std::string>>("folder"));
+    out.push_back(std::make_shared<sqlite::column_t<std::string>>("unread"));
     return std::make_shared<sqlite::table>("MH__messages", out);
 }
