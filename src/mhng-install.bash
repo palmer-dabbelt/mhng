@@ -20,8 +20,8 @@ mkdir -p $HOME/.mhng/mail/lists
 # MHng implementation, as I don't have to have a bunch of create-table
 # commands all over the place...
 cat > $HOME/.mhng/init.sql <<EOF
-CREATE TABLE MH__current (folder STRING CHECK(folder != ''),
-                          seq INTEGER CHECK(seq > 0),
+CREATE TABLE MH__current (folder STRING NOT NULL CHECK(folder != ''),
+                          seq INTEGER NOT NULL CHECK(seq > 0),
                           cur INTEGER CHECK(cur > 0 AND cur <= 1),
                           uid_validity INTEGER CHECK(uid_validity >= 0),
                           UNIQUE(folder),
@@ -34,27 +34,27 @@ INSERT INTO MH__current (folder, seq) VALUES ("promo", 1);
 INSERT INTO MH__current (folder, seq) VALUES ("lists", 1);
 
 CREATE TABLE MH__messages (uid INTEGER PRIMARY KEY CHECK(uid > 0),
-                           seq INTEGER CHECK(seq > 0),
-                           folder STRING CHECK(folder != ''),
-                           unread INTEGER CHECK(unread >= 0 AND unread <= 2),
-                           subject STRING,
-                           date INTEGER CHECK(date > 0),
-                           fadr STRING,
-                           tadr STRING,
+                           seq INTEGER NOT NULL CHECK(seq > 0),
+                           folder STRING NOT NULL CHECK(folder != ''),
+                           unread INTEGER NOT NULL CHECK(unread >= 0 AND unread <= 2),
+                           subject STRING NOT NULL,
+                           date INTEGER NOT NULL CHECK(date > 0),
+                           fadr STRING NOT NULL,
+                           tadr STRING NOT NULL,
                            UNIQUE(uid),
                            UNIQUE(folder, seq)
        );
 
 CREATE TABLE MH__nextid (single INTEGER NOT NULL CHECK(single > 0 AND single < 2),
-                         uid INTEGER,
+                         uid INTEGER NOT NULL,
                          UNIQUE(uid),
                          UNIQUE(single)
        );
 INSERT INTO MH__nextid (single, uid) VALUES (1, 2);
 
-CREATE TABLE IMAP__messages (folder STRING,
-                             uid INTEGER,
-                             mhid INTEGER,
+CREATE TABLE IMAP__messages (folder STRING NOT NULL,
+                             uid INTEGER NOT NULL,
+                             mhid INTEGER NOT NULL,
                              purge INTEGER CHECK(purge >= 0 AND purge <= 1),
                              UNIQUE(folder, uid),
                              UNIQUE(mhid)
