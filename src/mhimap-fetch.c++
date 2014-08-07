@@ -24,7 +24,7 @@
 
 int main(int argc, const char **argv)
 {
-    auto args = mhng::args::parse_normal(argc, argv);
+    auto args = mhng::args::parse_all_folders(argc, argv);
 
     /* Opens a connection to GMail. */
     mhimap::gmail_client client(GMAIL_USERNAME, GMAIL_PASSWORD);
