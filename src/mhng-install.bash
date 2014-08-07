@@ -36,7 +36,7 @@ INSERT INTO MH__current (folder, seq) VALUES ("lists", 1);
 CREATE TABLE MH__messages (uid INTEGER PRIMARY KEY CHECK(uid > 0),
                            seq INTEGER CHECK(seq > 0),
                            folder STRING CHECK(folder != ''),
-                           unread INTEGER CHECK(unread >= 0 AND unread <= 1),
+                           unread INTEGER CHECK(unread >= 0 AND unread <= 2),
                            subject STRING,
                            date INTEGER CHECK(date > 0),
                            fadr STRING,
