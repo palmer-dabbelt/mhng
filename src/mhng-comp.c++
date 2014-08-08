@@ -40,7 +40,11 @@ static std::string format_forw(const std::string subject);
 
 int main(int argc, const char **argv)
 {
+#if defined(COMP)
+    auto args = mhng::args::parse_all_folders(argc, argv);
+#else
     auto args = mhng::args::parse_normal(argc, argv);
+#endif
 
     /* We need a temporary file to fire up an editor against.  This is
      * kind of unfortunate, but I guess that's just life... :(. */
