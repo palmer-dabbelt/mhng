@@ -117,7 +117,7 @@ void mime::header::add_line(const std::string& line)
     _raw.push_back(line);
 }
 
-bool mime::header::match(const std::string& key)
+bool mime::header::match(const std::string& key) const
 {
     if (strncasecmp(key.c_str(), _raw[0].c_str(), strlen(key.c_str())) != 0)
         return false;
@@ -128,7 +128,7 @@ bool mime::header::match(const std::string& key)
     return true;
 }
 
-bool mime::header::match(const std::vector<std::string>& keys)
+bool mime::header::match(const std::vector<std::string>& keys) const
 {
     for (const auto& key: keys)
         if (match(key))

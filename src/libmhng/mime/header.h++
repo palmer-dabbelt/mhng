@@ -68,8 +68,8 @@ namespace mhng {
 
             /* Checks to see if the key of this header matches the
              * given key. */
-            bool match(const std::string& key);
-            bool match(const std::vector<std::string>& key);
+            bool match(const std::string& key) const;
+            bool match(const std::vector<std::string>& key) const;
 
             /* Returns the raw bytes of this header. */
             const std::vector<std::string>& raw(void) const
