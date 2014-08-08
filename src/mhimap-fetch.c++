@@ -136,6 +136,7 @@ int main(int argc, const char **argv)
             auto imessage = mhimap::message(ifolder, imapid);
 
             auto trans = args->mbox()->db()->exclusive_transaction();
+            client.mark_as_read(imessage);
             client.mark_as_deleted(imessage);
             args->mbox()->did_purge(lfolder, imapid);
         }

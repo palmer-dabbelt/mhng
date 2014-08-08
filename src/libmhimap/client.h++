@@ -112,6 +112,9 @@ namespace mhimap {
          * message. */
         void mark_as_deleted(const message &m);
 
+        /* Sets the read flag on the server for the given message. */
+        void mark_as_read(const message &m);
+
     protected:
         /* A pair of functions that do raw readinig and writing
          * from/to the IMAP socket.  These need to be implemented by

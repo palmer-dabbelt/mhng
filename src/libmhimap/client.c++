@@ -385,6 +385,22 @@ uint32_t client::select(const std::string name)
     return uidvalidity;
 }
 
+void client::mark_as_read(const message &m)
+{
+    char buffer[BUFFER_SIZE];
+
+    auto uidv = select(m);
+    if (uidv != m.owning_folder().uidvalidity()) {
+        fprintf(stderr, "UIDVALIDITY Changed!\n");
+        abort();
+    }
+
+    command store(this, "UID STORE %u +FLAGS (\\Seen)", m.uid());
+    do {
+        gets(buffer, BUFFER_SIZE);
+    } while (!store.is_end(buffer));
+}
+
 void client::mark_as_deleted(const message &m)
 {
     char buffer[BUFFER_SIZE];
