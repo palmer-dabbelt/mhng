@@ -174,3 +174,11 @@ SOURCES     += mhng-pipe-sequence_numbers.c++
 # folder.
 BINARIES    += mhng-pipe-comp_stdin
 SOURCES     += mhng-pipe-comp_stdin.c++
+
+# Produces the raw contents of the given set of messages on stdout.
+# This is pretty similar to "mhng-show", but it has two important
+# differences: it doesn't change anything about the mailbox
+# (importantly the current message pointer or any status bits), and it
+# doesn't attempt to do any formatting at all.
+BINARIES    += mhng-pipe-show_stdout
+SOURCES     += mhng-pipe-show_stdout.c++
