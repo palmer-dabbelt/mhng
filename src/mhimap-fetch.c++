@@ -81,10 +81,9 @@ int main(int argc, const char **argv)
 
         /* Here we build the lists of things we've got to do in order
          * to get the client and server in sync. */
-#if defined(PURGE) || defined(FETCH)
+#if defined(PURGE) || defined(FETCH) || defined(FLAGS)
         std::vector<uint32_t> purge_messages;
         std::map<uint32_t, bool> should_purge;
-
 
         for (const auto& id: lfolder->purge()) {
             purge_messages.push_back(id);
@@ -124,6 +123,28 @@ int main(int argc, const char **argv)
         }
 #endif
 
+#if defined(FLAGS)
+        std::vector<mhng::message_ptr> set_seen;
+        for (const auto& lmessage: lfolder->messages()) {
+            if (lmessage->imapid_known() == false) {
+                fprintf(stderr, "Warning: Skipping '%s'/%u\n",
+                        lfolder->name().c_str(),
+                        lmessage->seq()->to_uint()
+                    );
+                continue;
+            }
+
+            auto l = should_purge.find(lmessage->imapid());
+            if (l != should_purge.end())
+                continue;
+
+            if (lmessage->read_and_unsynced() == false)
+                continue;
+
+            set_seen.push_back(lmessage);
+        }
+#endif
+
         /* Now we actually go ahead and perform the necessary
          * transactions. */
 #if defined(PURGE)
@@ -160,15 +181,31 @@ int main(int argc, const char **argv)
 
 #if defined(DROP)
         for (const auto& message: drop_messages) {
-            fprintf(stderr, "Dropping %s (%s/%u)\n",
-                    message->uid().c_str(),
+            fprintf(stderr, "Dropping %s/%u (uid: %s)\n",
                     message->folder()->name().c_str(),
-                    message->seq()->to_uint()
+                    message->seq()->to_uint(),
+                    message->uid().c_str()
                 );
 
             auto trans = args->mbox()->db()->exclusive_transaction();
             args->mbox()->did_purge(lfolder, message->imapid());
             message->remove();
+        }
+#endif
+
+#if defined(FLAGS)
+        for (const auto& message: set_seen) {
+            fprintf(stderr, "Setting read %s/%u (uid: %s)\n",
+                    message->folder()->name().c_str(),
+                    message->seq()->to_uint(),
+                    message->uid().c_str()
+                );
+
+            auto imessage = mhimap::message(ifolder, message->imapid());
+
+            auto trans = args->mbox()->db()->exclusive_transaction();
+            client.mark_as_read(imessage);
+            message->mark_read_and_synced();
         }
 #endif
     }

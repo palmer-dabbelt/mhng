@@ -148,11 +148,16 @@ BINARIES    += mhimap-drop
 SOURCES     += mhimap-fetch.c++
 COMPILEOPTS += -DDROP
 
+BINARIES    += mhimap-flags
+SOURCES     += mhimap-fetch.c++
+COMPILEOPTS += -DFLAGS
+
 BINARIES    += mhimap-sync
 SOURCES     += mhimap-fetch.c++
 COMPILEOPTS += -DFETCH
 COMPILEOPTS += -DPURGE
 COMPILEOPTS += -DDROP
+COMPILEOPTS += -DFLAGS
 
 ##############################################################################
 # Scripting Binaries                                                         #
