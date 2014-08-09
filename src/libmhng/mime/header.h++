@@ -53,6 +53,12 @@ namespace mhng {
             /* Adds a new line of header to this header. */
             void add_line(const std::string& line);
 
+            /* This is probably what you want to use to parse a
+             * header: it merges the whole header onto a single line
+             * and decodes any quoted-printable sort of stuff to
+             * UTF-8. */
+            std::string utf8(void) const;
+
             /* Forms the header (only the value part, not the key) as
              * a single line, stripping all but one space when the
              * line changes over. */

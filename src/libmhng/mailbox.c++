@@ -101,13 +101,13 @@ message_ptr mailbox::insert(const std::string &folder_name,
     /* Walk through the headers to try and fill out some relevant
      * fields. */
     for (const auto& header: mime->header("Date"))
-        date = std::make_shared<mhng::date>(header->single_line());
+        date = std::make_shared<mhng::date>(header->utf8());
     for (const auto& header: mime->header("From"))
-        from = address::parse_rfc(header->single_line(), false);
+        from = address::parse_rfc(header->utf8(), false);
     for (const auto& header: mime->header("To"))
-        to = address::parse_rfc(header->single_line(), false);
+        to = address::parse_rfc(header->utf8(), false);
     for (const auto& header: mime->header("Subject"))
-        subject = header->single_line();
+        subject = header->utf8();
 
     if (from == NULL)
         from = address::parse_rfc("", false);

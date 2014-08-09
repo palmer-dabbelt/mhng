@@ -96,7 +96,7 @@ std::vector<std::string> message::header_string(const std::string name)
     std::vector<std::string> out;
 
     for (const auto& hdr: header(name)) {
-        auto str = hdr->single_line();
+        auto str = hdr->utf8();
         out.push_back(str);
     }
 
@@ -108,7 +108,7 @@ std::vector<date_ptr> message::header_date(const std::string name)
     std::vector<date_ptr> out;
 
     for (const auto& hdr: header(name)) {
-        auto dstr = hdr->single_line();
+        auto dstr = hdr->utf8();
         auto d = std::make_shared<mhng::date>(dstr);
         out.push_back(d);
     }

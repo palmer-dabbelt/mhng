@@ -51,7 +51,7 @@ mime::part::part(const std::vector<std::string>& raw)
     auto commit_header = [&](const header_ptr& header)
         {
             if (header->match("Content-Type")) {
-                auto value = header->single_line();
+                auto value = header->utf8();
 
                 /* We have a boundary line, attempt to split things up
                  * accordingly. */
@@ -131,7 +131,7 @@ mime::part::part(const std::vector<std::string>& raw)
             }
 
             if (header->match("Content-Transfer-Encoding"))
-                _content_transfer_encoding = header->single_line();
+                _content_transfer_encoding = header->utf8();
 
             _headers.push_back(header);
         };

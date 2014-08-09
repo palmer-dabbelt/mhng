@@ -20,6 +20,7 @@
  */
 
 #include "message.h++"
+#include <iconv.h>
 #include <string.h>
 using namespace mhng;
 
@@ -30,6 +31,114 @@ using namespace mhng;
 mime::header::header(const std::string& first_line)
     : _raw({first_line})
 {
+}
+
+std::string mime::header::utf8(void) const
+{
+    char line[BUFFER_SIZE];
+    snprintf(line, BUFFER_SIZE, "%s", single_line().c_str());
+
+    char out[BUFFER_SIZE * 4 + 1];
+
+    size_t i = 0, oi = 0;
+    while (i < strlen(line)) {
+        /* Check to see if we've got something that should be decoded
+         * as a special charset, otherwise just copy over the
+         * character. */
+        if (strncmp(line + i, "=?", 2) == 0) {
+            char charset[BUFFER_SIZE];
+            snprintf(charset, BUFFER_SIZE, "%s", line + i + 2);
+            if (strstr(charset, "?") == NULL) {
+                fprintf(stderr, "Unable to find charset in '%s'\n", line + i);
+                abort();
+            }
+            strstr(charset, "?")[0] = '\0';
+
+            if (strncmp(line + i + strlen(charset) + 2, "?Q?", 3) != 0) {
+                fprintf(stderr, "Not quoted printable!\n");
+                fprintf(stderr, "  line: '%s'\n", line + i);
+                abort();
+            }
+
+            char qp[BUFFER_SIZE];
+            snprintf(qp, BUFFER_SIZE, "%s", line + i + strlen(charset) + 5);
+            if (strstr(qp, "?=") == NULL) {
+                fprintf(stderr, "Unable to terminate QP section\n");
+                fprintf(stderr, "  line: '%s'\n", line + i);
+                abort();
+            }
+            strstr(qp, "?=")[0] = '\0';
+
+            char raw[BUFFER_SIZE];
+            size_t qi = 0, ri = 0;
+            while (qi < strlen(qp)) {
+                if (qp[qi] == '=') {
+                    char hex[3];
+                    hex[0] = qp[qi + 1];
+                    hex[1] = qp[qi + 2];
+                    hex[2] = '\0';
+
+                    raw[ri] = strtol(hex, NULL, 16);
+                    ri++;
+                    qi += 3;
+                } else if (qp[qi] == '_') {
+                    raw[ri] = ' ';
+                    ri++;
+                    qi++;
+                } else {
+                    raw[ri] = qp[qi];
+                    ri++;
+                    qi++;
+                }
+            }
+            raw[ri] = '\0';
+
+            iconv_t icd = iconv_open("UTF-8", charset);
+
+            char *raw_p = raw;
+            size_t raw_l = strlen(raw_p);
+            char utf[BUFFER_SIZE * 4 + 1];
+            char *utf_p = utf;
+            size_t utf_l = BUFFER_SIZE * 4;
+
+            size_t err = iconv(icd,
+                               &raw_p,
+                               &raw_l,
+                               &utf_p,
+                               &utf_l);
+            if ((ssize_t)err == -1) {
+                perror("Unable to decode line");
+                fprintf(stderr, "  line '%s'\n", raw);
+                fprintf(stderr, "  charset: '%s'\n", charset);
+                abort();
+            }
+
+            *utf_p = '\0';
+
+            iconv_close(icd);
+
+            strcpy(out + oi, utf);
+            oi += strlen(utf);
+            out[oi] = '\0';
+            i += 2;
+            i += strlen(charset);
+            i += 3;
+            i += strlen(qp);
+            i += 2;
+
+            /* FIXME: Is this correct?  I can't tell if I'm supposed
+             * to do this or if Google is */
+            if (isspace(line[i]))
+                i++;
+        } else {
+            out[oi] = line[i];
+            oi++;
+            i++;
+        }
+    }
+
+    out[oi] = '\0';
+    return out;
 }
 
 std::string mime::header::single_line(void) const
@@ -68,7 +177,7 @@ std::vector<std::string> mime::header::split_commas(void) const
 {
     std::vector<std::string> out;
 
-    auto line = single_line();
+    auto line = utf8();
     const char *start = line.c_str();
     while (strstr(start, ",") != NULL) {
         char buffer[BUFFER_SIZE];
