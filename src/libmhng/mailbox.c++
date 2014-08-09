@@ -124,7 +124,8 @@ message_ptr mailbox::insert(const std::string &folder_name,
                                          from,
                                          to,
                                          subject,
-                                         std::to_string(uid)
+                                         std::to_string(uid),
+                                         0
         );
 
     auto messages = std::make_shared<db::mh_messages>(_self_ptr.lock());

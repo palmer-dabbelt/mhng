@@ -63,6 +63,10 @@ namespace mhng {
             void update(uint64_t uid,
                         const sequence_number_ptr& seq);
 
+            /* updates a message with a new unread flag. */
+            void update_unread(uint64_t uid,
+                               int unread);
+
             /* This selects all the messages in a given folder. */
             std::vector<message_ptr> select(const std::string& folder_name);
 

@@ -61,7 +61,8 @@ message_ptr db::mh_messages::select(uint64_t uid)
         _mbox->mrc()->email(row->get_str("fadr")),
         _mbox->mrc()->email(row->get_str("tadr")),
         row->get_str("subject"),
-        row->get_str("uid")
+        row->get_str("uid"),
+        row->get_uint("unread")
         );
 }
 
@@ -97,7 +98,8 @@ message_ptr db::mh_messages::select(const std::string& folder_name,
         _mbox->mrc()->email(row->get_str("fadr")),
         _mbox->mrc()->email(row->get_str("tadr")),
         row->get_str("subject"),
-        row->get_str("uid")
+        row->get_str("uid"),
+        row->get_uint("unread")
         );
 }
 
@@ -121,7 +123,8 @@ std::vector<message_ptr> db::mh_messages::select(const std::string& folder)
             _mbox->mrc()->email(row->get_str("fadr")),
             _mbox->mrc()->email(row->get_str("tadr")),
             row->get_str("subject"),
-            row->get_str("uid")
+            row->get_str("uid"),
+            row->get_uint("unread")
             );
         out.push_back(m);
     }
@@ -163,7 +166,8 @@ message_ptr db::mh_messages::select(const std::string& folder,
         _mbox->mrc()->email(row->get_str("fadr")),
         _mbox->mrc()->email(row->get_str("tadr")),
         row->get_str("subject"),
-        row->get_str("uid")
+        row->get_str("uid"),
+        row->get_uint("unread")
         );
 }
 
@@ -172,6 +176,22 @@ void db::mh_messages::update(uint64_t uid,
 {
     auto map = std::map<std::string, std::string>();
     map["seq"] = std::to_string(seq->to_uint());
+    auto row = std::make_shared<sqlite::row>(map);
+
+    auto resp = _mbox->db()->replace(_table, row, "uid='%s'",
+                                     std::to_string(uid).c_str());
+
+    switch (resp->return_value()) {
+    case sqlite::error_code::SUCCESS:
+        return;
+    }
+}
+
+void db::mh_messages::update_unread(uint64_t uid,
+                                    int unread)
+{
+    auto map = std::map<std::string, std::string>();
+    map["unread"] = std::to_string(unread);
     auto row = std::make_shared<sqlite::row>(map);
 
     auto resp = _mbox->db()->replace(_table, row, "uid='%s'",

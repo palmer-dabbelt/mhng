@@ -55,6 +55,7 @@ namespace mhng {
         const address_ptr _to;
         const std::string _subject;
         const std::string _uid;
+        int _unread;
         unknown<uint32_t> _imapid;
 
         /* Contains the raw bytes of the message, parsed as strings
@@ -76,7 +77,8 @@ namespace mhng {
                 const address_ptr& from,
                 const address_ptr& to,
                 const std::string& subject,
-                const std::string& uid);
+                const std::string& uid,
+                int unread);
 
     public:
         /* Accessors for the various database fields, these are all
@@ -154,6 +156,18 @@ namespace mhng {
         /* Forcefully sets the IMAP ID for a message, if we know it
          * from somewhere else. */
         void set_imapid(uint32_t imapid) { _imapid = imapid; }
+
+        /* Marks this message as read.  Note that there's two read
+         * levels: "read_and_unsynced" means we've read the message on
+         * our local machine but not necessarily told the server yet,
+         * while synced means the server has been informed. */
+        void mark_read_and_unsynced(void);
+        void mark_read_and_synced(void);
+
+        /* Allows us to query the unread status of this message. */
+        bool unread(void) const { return _unread == 0; }
+        bool read_and_unsynced(void) const { return _unread == 1; }
+        bool read_and_synced(void) const { return _unread == 2; }
 
     private:
         std::string full_path(void) const;

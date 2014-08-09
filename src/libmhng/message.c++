@@ -45,7 +45,8 @@ message::message(const mailbox_ptr& mbox,
                  const address_ptr& from,
                  const address_ptr& to,
                  const std::string& subject,
-                 const std::string& uid)
+                 const std::string& uid,
+                 int unread)
     : _mbox(mbox),
       _cur(check_for_current(mbox, folder, seq->to_uint())),
       _seq(seq),
@@ -55,6 +56,7 @@ message::message(const mailbox_ptr& mbox,
       _to(to),
       _subject(subject),
       _uid(uid),
+      _unread(unread),
       _imapid(check_for_imapid(mbox, uid)),
       _raw(this, _raw_func),
       _mime(this, _mime_func)
@@ -149,6 +151,22 @@ void message::set_sequence_number(const sequence_number_ptr& seq)
 
     auto current = std::make_shared<db::mh_current>(_mbox);
     current->update(_folder->name(), seq->to_uint());
+}
+
+void message::mark_read_and_unsynced(void)
+{
+    _unread = 1;
+
+    auto messages = std::make_shared<db::mh_messages>(_mbox);
+    messages->update_unread(atoi(_uid.c_str()), _unread);
+}
+
+void message::mark_read_and_synced(void)
+{
+    _unread = 2;
+
+    auto messages = std::make_shared<db::mh_messages>(_mbox);
+    messages->update_unread(atoi(_uid.c_str()), _unread);
 }
 
 std::shared_ptr<std::vector<std::string>> message::_raw_impl(void)

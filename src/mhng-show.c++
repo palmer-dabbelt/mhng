@@ -86,6 +86,9 @@ int main(int argc, const char **argv)
      * re-formatting From lines in the original messages, as this is
      * designed for human consumption. */
     for (const auto& msg: messages) {
+        if (msg->unread())
+            msg->mark_read_and_unsynced();
+
         for (const auto& addr: msg->from())
             fprintf(out, "From:    %s\n", addr->rfc().c_str());
         for (const auto& addr: msg->to())
