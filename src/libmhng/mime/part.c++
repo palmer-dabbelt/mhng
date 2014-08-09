@@ -37,7 +37,7 @@ enum state {
 };
 
 /* Returns TRUE if this seperates a MIME header boundary. */
-static bool isterm(char c);
+static bool isterm(char c, bool space_p);
 
 mime::part::part(const std::vector<std::string>& raw)
     : _raw(raw)
@@ -62,11 +62,12 @@ mime::part::part(const std::vector<std::string>& raw)
                         );
 
                     char *bp = boundary + strlen("boundary=");
-                    while (isterm(bp[0]))
+                    bool spaces = !(bp[0] == '"');
+                    while (isterm(bp[0], spaces))
                         bp++;
 
                     char *be = bp;
-                    while (!isterm(be[0]))
+                    while (!isterm(be[0], spaces))
                         be++;
                     be[0] = '\0';
 
@@ -98,11 +99,12 @@ mime::part::part(const std::vector<std::string>& raw)
                         );
 
                     char *bp = charset + strlen("charset=");
-                    while (isterm(bp[0]))
+                    bool spaces = !(bp[0] == '"');
+                    while (isterm(bp[0], spaces))
                         bp++;
 
                     char *be = bp;
-                    while (!isterm(be[0]))
+                    while (!isterm(be[0], spaces))
                         be++;
                     be[0] = '\0';
 
@@ -118,11 +120,12 @@ mime::part::part(const std::vector<std::string>& raw)
                         );
 
                     char *bp = charset + strlen("name=");
-                    while (isterm(bp[0]))
+                    bool spaces = !(bp[0] == '"');
+                    while (isterm(bp[0], spaces))
                         bp++;
 
                     char *be = bp;
-                    while (!isterm(be[0]))
+                    while (!isterm(be[0], spaces))
                         be++;
                     be[0] = '\0';
 
@@ -544,10 +547,10 @@ bool mime::part::matches_encoding(const std::string& type) const
     return false;
 }
 
-bool isterm(char c)
+bool isterm(char c, bool space_p)
 {
     if (isspace(c))
-        return true;
+        return space_p;
 
     if (c == '"')
         return true;
