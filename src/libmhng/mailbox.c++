@@ -37,7 +37,8 @@ mailbox::mailbox(const std::string& path)
     : _path(path),
       _db(std::make_shared<sqlite::connection>(path + "/metadata.sqlite3")),
       _current_folder(this, _current_folder_func),
-      _mailrc(this, _mailrc_func)
+      _mailrc(this, _mailrc_func),
+      _daemon(this, _daemon_func)
 {
 }
 
@@ -184,4 +185,9 @@ mailrc_ptr mailbox::_mailrc_impl(void)
     snprintf(path, BUFFER_SIZE, "%s/.local/share/pim/mailrc",
              getenv("HOME"));
     return std::make_shared<typename mhng::mailrc>(path);
+}
+
+daemon::connection_ptr mailbox::_daemon_impl(void)
+{
+    return std::make_shared<daemon::connection>(_path + "/daemon.socket");
 }

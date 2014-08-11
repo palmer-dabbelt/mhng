@@ -159,6 +159,9 @@ COMPILEOPTS += -DPURGE
 COMPILEOPTS += -DDROP
 COMPILEOPTS += -DFLAGS
 
+BINARIES    += mhng-daemon
+SOURCES     += mhng-daemon.c++
+
 ##############################################################################
 # Scripting Binaries                                                         #
 ##############################################################################

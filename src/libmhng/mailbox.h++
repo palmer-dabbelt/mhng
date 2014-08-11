@@ -33,6 +33,7 @@ namespace mhng {
 #include "mailrc.h++"
 #include "message.h++"
 #include "promise.h++"
+#include "daemon/connection.h++"
 #include "mime/message.h++"
 #include "sqlite/connection.h++"
 #include <string>
@@ -58,6 +59,12 @@ namespace mhng {
          * someone asks for it. */
         promise<mailbox, mailrc> _mailrc;
 
+        /* Contains a pointer to the daemon connection.  Note that
+         * this must only be filled out when someone asks for it,
+         * because the daemon itself can use this class!  That means
+         * you CANNOT use this anywhere from the daemon... */
+        promise<mailbox, daemon::connection> _daemon;
+
         /* Sometimes we need a back-pointer to ourselves. */
         std::weak_ptr<mailbox> _self_ptr;
 
@@ -69,6 +76,10 @@ namespace mhng {
             { _self_ptr = self; }
 
     public:
+        /* Returns the path to the directory that contains this
+         * maildir.  You probably shouldn't use this... */
+        const std::string& path(void) { return _path; }
+
         /* Returns the current folder, which involves a database
          * lookup. */
         folder_ptr current_folder(void) { return _current_folder; }
@@ -99,6 +110,10 @@ namespace mhng {
         /* Clears the purge status of a message. */
         void did_purge(const folder_ptr& folder, uint32_t imapid);
 
+        /* Returns the single daemon connection that everything is
+         * multiplexed over. */
+        daemon::connection_ptr daemon(void) { return _daemon; }
+
     private:
         static folder_ptr _current_folder_func(mailbox *mbox)
             { return mbox->_current_folder_impl(); }
@@ -107,6 +122,10 @@ namespace mhng {
         static mailrc_ptr _mailrc_func(mailbox *mbox)
             { return mbox->_mailrc_impl(); }
         mailrc_ptr _mailrc_impl(void);
+
+        static daemon::connection_ptr _daemon_func(mailbox *mbox)
+            { return mbox->_daemon_impl(); }
+        daemon::connection_ptr _daemon_impl(void);
     };
 }
 
