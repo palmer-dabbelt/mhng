@@ -22,7 +22,11 @@
 #include <libmhimap/gmail_client.h++>
 #include <libmhng/args.h++>
 
-int main(int argc, const char **argv)
+#ifndef MHIMAP_MAIN
+#define MHIMAP_MAIN main
+#endif
+
+int MHIMAP_MAIN(int argc, const char **argv)
 {
     auto args = mhng::args::parse_all_folders(argc, argv);
 
@@ -149,10 +153,12 @@ int main(int argc, const char **argv)
          * transactions. */
 #if defined(PURGE)
         for (const auto& imapid: purge_messages) {
-            fprintf(stderr, "Purging %s/%u\n",
+#ifndef QUIET
+            printf("Purging %s/%u\n",
                     folder_name.c_str(),
                     imapid
                 );
+#endif
 
             auto imessage = mhimap::message(ifolder, imapid);
 
@@ -165,10 +171,12 @@ int main(int argc, const char **argv)
 
 #if defined(FETCH)
         for (const auto& imessage: fetch_messages) {
-            fprintf(stderr, "Fetching %s/%u\n",
-                    imessage.folder_name().c_str(),
-                    imessage.uid()
+#ifndef QUIET
+            printf("Fetching %s/%u\n",
+                   imessage.folder_name().c_str(),
+                   imessage.uid()
                 );
+#endif
 
             auto raw = client.fetch(imessage);
             auto mime = std::make_shared<mhng::mime::message>(raw);
@@ -181,11 +189,13 @@ int main(int argc, const char **argv)
 
 #if defined(DROP)
         for (const auto& message: drop_messages) {
-            fprintf(stderr, "Dropping %s/%u (uid: %s)\n",
-                    message->folder()->name().c_str(),
-                    message->seq()->to_uint(),
-                    message->uid().c_str()
+#ifndef QUIET
+            printf("Dropping %s/%u (uid: %s)\n",
+                   message->folder()->name().c_str(),
+                   message->seq()->to_uint(),
+                   message->uid().c_str()
                 );
+#endif
 
             auto trans = args->mbox()->db()->exclusive_transaction();
             args->mbox()->did_purge(lfolder, message->imapid());
@@ -195,11 +205,13 @@ int main(int argc, const char **argv)
 
 #if defined(FLAGS)
         for (const auto& message: set_seen) {
-            fprintf(stderr, "Setting read %s/%u (uid: %s)\n",
-                    message->folder()->name().c_str(),
-                    message->seq()->to_uint(),
-                    message->uid().c_str()
+#ifndef QUIET
+            printf("Setting read %s/%u (uid: %s)\n",
+                   message->folder()->name().c_str(),
+                   message->seq()->to_uint(),
+                   message->uid().c_str()
                 );
+#endif
 
             auto imessage = mhimap::message(ifolder, message->imapid());
 
@@ -209,4 +221,6 @@ int main(int argc, const char **argv)
         }
 #endif
     }
+
+    return 0;
 }
