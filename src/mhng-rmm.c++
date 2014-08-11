@@ -28,5 +28,11 @@ int main(int argc, const char **argv)
     for (const auto& msg: args->messages())
         msg->remove();
 
+    {
+        auto daemon = args->mbox()->daemon();
+        auto message = mhng::daemon::message::sync();
+        daemon->send(message);
+    }
+
     return 0;
 }
