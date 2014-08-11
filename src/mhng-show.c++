@@ -29,6 +29,10 @@ int main(int argc, const char **argv)
     auto folders = args->folders();
     auto messages = args->messages();
 
+    /* To avoid having to trigger too many synchronization requests,
+     * so instead we go ahead and batch them all up together. */
+    bool should_sync = false;
+
     /* It's possible we need to remove the current message.  Note that
      * this really only makes any form of sense when given a
      * NEXT/PREV, as otherwise it would be impossible to show the
@@ -41,6 +45,7 @@ int main(int argc, const char **argv)
     }
 
     messages[0]->remove();
+    should_sync = true;
 #else
 #error "Can't RMM without NEXT || PREV"
 #endif
@@ -86,8 +91,10 @@ int main(int argc, const char **argv)
      * re-formatting From lines in the original messages, as this is
      * designed for human consumption. */
     for (const auto& msg: messages) {
-        if (msg->unread())
+        if (msg->unread()) {
             msg->mark_read_and_unsynced();
+            should_sync = true;
+        }
 
         for (const auto& addr: msg->from())
             fprintf(out, "From:    %s\n", addr->rfc().c_str());
@@ -114,6 +121,13 @@ int main(int argc, const char **argv)
     if (pclose(out) != 0) {
         fprintf(stderr, "Somehow 'less' failed... :(\n");
         abort();
+    }
+
+    /* If something has changed trigger a sync! */
+    if (should_sync == true) {
+        auto daemon = args->mbox()->daemon();
+        auto message = mhng::daemon::message::sync();
+        daemon->send(message);
     }
 
     return 0;
