@@ -137,13 +137,12 @@ void client_main(int client)
         switch (msg->type()) {
         case mhng::daemon::message_type::SYNC:
         {
-            /* Take a lock and actually synchronize now. */
-            {
-                std::unique_lock<std::mutex> lock(sync_lock);
-                auto ticket = ++sync_req;
-                sync_signal.notify_all();
-                sync_signal.wait(lock, [&]{ return ticket <= sync_rep; });
-            }
+            /* Trigger the sync thread to go to the server and
+             * actually do something. */
+            std::unique_lock<std::mutex> lock(sync_lock);
+            auto ticket = ++sync_req;
+            sync_signal.notify_all();
+            sync_signal.wait(lock, [&]{ return ticket <= sync_rep; });
 
             break;
         }
