@@ -266,6 +266,21 @@ std::vector<std::string> client::fetch(const message m)
 
     /* There was a single leading paren at the start... */
     int parens = 1;
+
+    /* Check to see if there's something attached to the end of that
+     * last line, which apparently is what happens if you forget to
+     * put a newline at the end of a message? */
+    if (size < 0) {
+        for (size_t i = strlen(buffer) + size; i < strlen(buffer); ++i) {
+            if (buffer[i] == '(')
+                parens++;
+            else if (buffer[i] == ')')
+                parens--;
+        }
+    }
+
+    /* Now try and parse stuff until we get a proper end of message
+     * sequence. */
     while (gets(buffer, BUFFER_SIZE) > 0) {
         /* The format isn't right until there's no parents left. */
         bool has_paren = false;
