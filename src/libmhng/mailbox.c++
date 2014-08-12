@@ -147,6 +147,9 @@ message_ptr mailbox::insert(const std::string &folder_name,
     FILE *file = fopen(filename, "w");
     for (const auto& raw: mime->root()->raw())
         fprintf(file, "%s", raw.c_str());
+    fflush(file);
+    fsync(fileno(file));
+    fclose(file);
 
     return msg;
 }
