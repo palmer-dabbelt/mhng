@@ -257,11 +257,15 @@ std::vector<std::string> client::fetch(const message m)
             abort();
         }
 
-        out.push_back(std::string(buffer) + "\n");
-
         /* Remember, gets() returns the size BEFORE stripping
          * newlines. */
         size -= n_read;
+
+        char nbuf[BUFFER_SIZE];
+        snprintf(nbuf, BUFFER_SIZE, "%s", buffer);
+        if (size < 0)
+            nbuf[strlen(nbuf)+size] = '\0';
+        out.push_back(std::string(nbuf) + "\n");
     }
 
     /* There was a single leading paren at the start... */
