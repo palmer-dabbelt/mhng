@@ -136,23 +136,23 @@ COMPILEOPTS += -DFORW
 ##############################################################################
 # Remote-Access Binaries                                                     #
 ##############################################################################
-BINARIES    += mhimap-fetch
+LIBEXECS    += mhng/mhimap-fetch
 SOURCES     += mhimap-fetch.c++
 COMPILEOPTS += -DFETCH
 
-BINARIES    += mhimap-purge
+LIBEXECS    += mhng/mhimap-purge
 SOURCES     += mhimap-fetch.c++
 COMPILEOPTS += -DPURGE
 
-BINARIES    += mhimap-drop
+LIBEXECS    += mhng/mhimap-drop
 SOURCES     += mhimap-fetch.c++
 COMPILEOPTS += -DDROP
 
-BINARIES    += mhimap-flags
+LIBEXECS    += mhng/mhimap-flags
 SOURCES     += mhimap-fetch.c++
 COMPILEOPTS += -DFLAGS
 
-BINARIES    += mhimap-sync
+LIBEXECS    += mhng/mhimap-sync
 SOURCES     += mhimap-fetch.c++
 COMPILEOPTS += -DFETCH
 COMPILEOPTS += -DPURGE

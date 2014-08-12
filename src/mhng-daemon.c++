@@ -192,7 +192,7 @@ void sync_main(void)
 
         auto pid = fork();
         if (pid == 0) {
-            execl(__PCONFIGURE__PREFIX "/bin/mhimap-sync",
+            execl(__PCONFIGURE__PREFIX "/libexec/mhng/mhimap-sync",
                   "mhimap-sync",
                   NULL);
             perror("Unable to exec");
