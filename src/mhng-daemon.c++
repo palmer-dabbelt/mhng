@@ -205,6 +205,16 @@ void sync_main(void)
             abort();
         }
 
+        /* If the synchronization didn't succeed then for now just
+         * pretend it didn't happen at all and instead just go ahead
+         * and try again.  Note that there's a simple rate limit in
+         * here... */
+        if (status != 0) {
+            fprintf(stderr, "Synchronization failed, retrying\n");
+            sleep(60);
+            continue;
+        }
+
         /* Now that we've actually synchronized it's time to go ahead
          * and inform all the clients that we've done so. */
         std::unique_lock<std::mutex> lock(sync_lock);
