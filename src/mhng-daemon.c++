@@ -184,6 +184,8 @@ void client_main(int client)
 
 void sync_main(void)
 {
+    bool failed = false;
+
     while (true) {
         /* The first thing to do is to atomicly wait for someone to
          * request a synchronization while obtaining a response
@@ -223,7 +225,9 @@ void sync_main(void)
          * here... */
         if (status != 0) {
             fprintf(stderr, "Synchronization failed, retrying\n");
-            sleep(60);
+            if (failed == true)
+                sleep(60);
+            failed = true;
             continue;
         }
 
@@ -236,11 +240,15 @@ void sync_main(void)
         }
         sync_rep = ticket;
         sync_signal.notify_all();
+
+        failed = false;
     }
 }
 
 void idle_main(void)
 {
+    bool failed = false;
+
     while (true) {
         auto pid = fork();
         if (pid == 0) {
@@ -259,8 +267,12 @@ void idle_main(void)
 
         if (status != 0) {
             fprintf(stderr, "IDLE failed, retrying\n");
-            sleep(60);
+            if (failed == true)
+                sleep(60);
+            failed = true;
             continue;
         }
+
+        failed = false;
     }
 }
