@@ -187,12 +187,14 @@ void sync_main(void)
                  * before we start will be satisfied! */
                 return sync_req;
             };
+
         auto ticket = get_ticket();
 
         auto pid = fork();
         if (pid == 0) {
             execl(__PCONFIGURE__PREFIX "/bin/mhimap-sync",
-                  "mhimap-sync");
+                  "mhimap-sync",
+                  NULL);
             perror("Unable to exec");
             abort();
         }
