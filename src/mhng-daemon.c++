@@ -58,12 +58,6 @@ static std::atomic<long> sync_rep;
 static std::mutex sync_lock;
 static std::condition_variable sync_signal;
 
-#define DROP
-#define FETCH
-#define FLAGS
-#define MHIMAP_MAIN mhimap_main
-#include "mhimap-fetch.c++"
-
 int main(int argc, const char **argv)
 {
     sync_req = 0;
@@ -197,12 +191,11 @@ void sync_main(void)
 
         auto pid = fork();
         if (pid == 0) {
-            int argc = 1;
-            const char *argv[2];
-            argv[0] = "mhimap-sync";
-            argv[1] = NULL;
-            auto out = mhimap_main(argc, argv);
-            exit(out);
+            fprintf(stderr, "fork PID: '%d'\n", getpid());
+            execl(__PCONFIGURE__PREFIX "/bin/mhimap-sync",
+                  "mhimap-sync");
+            perror("Unable to exec");
+            abort();
         }
 
         int status;
