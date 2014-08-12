@@ -159,6 +159,9 @@ COMPILEOPTS += -DPURGE
 COMPILEOPTS += -DDROP
 COMPILEOPTS += -DFLAGS
 
+LIBEXECS    += mhng/mhimap-idle
+SOURCES     += mhimap-idle.c++
+
 BINARIES    += mhng-daemon
 SOURCES     += mhng-daemon.c++
 
