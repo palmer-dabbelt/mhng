@@ -113,6 +113,11 @@ namespace mhng {
             std::vector<std::string> raw(void) const
                 { return _raw; }
 
+            /* Decodes and writes this message directly to a file,
+             * which is useful if (for example) I want to save an
+             * attachment. */
+            void write(FILE *out) const;
+
         private:
             /* Returns TRUE if the boundary is known and the given
              * line matches the boundary. */

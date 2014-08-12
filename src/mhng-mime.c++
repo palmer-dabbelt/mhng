@@ -67,8 +67,14 @@ int main(int argc, const char **argv)
 
         /* This decodes the message and writes it. */
         auto part = parts[num - 1];
+#if defined(MIME)
         for (const auto& line: part->utf8())
             printf("%s\n", line.c_str());
+#elif defined(DETACH)
+        part->write(stdout);
+#else
+#error "Define MIME or DETACH"
+#endif
     }
     if (args->numbers().size() != 0)
         return 0;

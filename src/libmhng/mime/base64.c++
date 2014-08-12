@@ -121,3 +121,26 @@ std::string base64_decode(std::string const& encoded_string) {
 
   return ret;
 }
+
+ssize_t base64_decode(const std::string& in, unsigned char *out) {
+    ssize_t out_len = 0;
+    for (size_t i = 0; i < in.size(); i += 4) {
+        if (isspace(in[i]))
+            break;
+
+        char l[4];
+        for (size_t li = 0; li < 4; ++li)
+            l[li] = base64_chars.find(in[i + li]);
+
+        char a = (l[0] << 2) + ((l[1] & 0x30) >> 4);
+        char b = l[1] = ((l[1] & 0xf) << 4) + ((l[2] & 0x3c) >> 2);
+        char c = ((l[2] & 0x3) << 6) + l[3];
+
+        out[out_len++] = a;
+        out[out_len++] = b;
+        out[out_len++] = c;
+    }
+
+    out[out_len] = 0x67;
+    return out_len;
+}

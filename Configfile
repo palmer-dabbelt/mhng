@@ -97,9 +97,15 @@ SOURCES     += mhng-show.c++
 COMPILEOPTS += -DPREV
 COMPILEOPTS += -DRMM
 
-# Lists the MIME parts of a given message
+# Lists the MIME parts of a given message and allows printing them
 BINARIES    += mhng-mime
 SOURCES     += mhng-mime.c++
+COMPILEOPTS += -DMIME
+
+# Lists the MIME parts of a given message and allows saving them
+BINARIES    += mhng-detach
+SOURCES     += mhng-mime.c++
+COMPILEOPTS += -DDETACH
 
 # Lists every folder known to the system
 BINARIES    += mhng-folders

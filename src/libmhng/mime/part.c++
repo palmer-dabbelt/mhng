@@ -378,6 +378,25 @@ std::vector<std::string> mime::part::decoded(void) const
     return out;
 }
 
+void mime::part::write(FILE *out) const
+{
+
+    /* I handle base64 very simply: I just decode it, break newlines,
+     * and store it out. */
+    if (matches_encoding("base64") == true) {
+        for (const auto& linestr: _body_raw) {
+            unsigned char decoded[BUFFER_SIZE*2];
+            auto declen = base64_decode(linestr, decoded);
+            auto written = fwrite(decoded, declen, 1, out);
+            if (written != 1) {
+                perror("Unable to write");
+                abort();
+            }
+        }
+        return;
+    }
+}
+
 mime::part_ptr mime::part::body(void) const
 {
     /* If there isn't a MIME type then this isn't a MIME message at
