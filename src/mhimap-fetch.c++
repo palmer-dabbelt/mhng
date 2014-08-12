@@ -182,10 +182,13 @@ int MHIMAP_MAIN(int argc, const char **argv)
 
             auto raw = client.fetch(imessage);
             auto mime = std::make_shared<mhng::mime::message>(raw);
+            auto trans = args->mbox()->db()->exclusive_transaction();
             auto lmessage = args->mbox()->insert(lfolder,
                                                  mime,
                                                  imessage.uid()
                 );
+
+            printf("Done fetching\n");
         }
 #endif
 
