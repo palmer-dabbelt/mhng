@@ -157,13 +157,13 @@ void client_main(int client)
         }
         }
 
-
         auto resp = msg->response();
         auto len = mhng::daemon::message::serialize(msg, buf, BUFFER_SIZE);
         auto ss = send(client, buf, len, 0);
         if (ss < 0) {
-            fprintf(stderr, "Error while sending\n");
-            abort();
+            perror("Error while sending");
+            close(client);
+            return;
         }
     }
 
