@@ -192,7 +192,6 @@ void sync_main(void)
 
         auto pid = fork();
         if (pid == 0) {
-            fprintf(stderr, "fork PID: '%d'\n", getpid());
             execl(__PCONFIGURE__PREFIX "/bin/mhimap-sync",
                   "mhimap-sync");
             perror("Unable to exec");
