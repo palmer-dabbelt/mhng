@@ -256,5 +256,11 @@ void idle_main(void)
             perror("Unable to waitpid() mhimap-idle");
             abort();
         }
+
+        if (status != 0) {
+            fprintf(stderr, "IDLE failed, retrying\n");
+            sleep(60);
+            continue;
+        }
     }
 }
