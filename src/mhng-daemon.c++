@@ -142,7 +142,7 @@ void client_main(int client)
                 std::unique_lock<std::mutex> lock(sync_lock);
                 auto ticket = ++sync_req;
                 sync_signal.notify_all();
-                sync_signal.wait(lock, [&]{ return ticket > sync_rep; });
+                sync_signal.wait(lock, [&]{ return ticket <= sync_rep; });
             }
 
             break;
