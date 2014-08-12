@@ -47,6 +47,9 @@ static void client_main(int client);
  * waiting for a synchronization. */
 static void sync_main(void);
 
+/* Keeps running the IDLE process forever. */
+static void idle_main(void);
+
 /* Here we have two counters: one that contains the latest requested
  * synchronization, and another that contains the latest responded
  * synchronization.  Essentially the idea here is that client threads
@@ -74,6 +77,15 @@ int main(int argc, const char **argv)
     /* Begin listening for client connections from other programs
      * running on this system. */
     int server = create_socket(args->mbox()->path() + "/daemon.socket");
+
+    /* Fires up the IDLE thread, which needs that server connection to
+     * have been created so it can send us messages. */
+    {
+        std::thread idle_thread(idle_main);
+        idle_thread.detach();
+    }
+
+    /* Accepts every client connection forever! */
     while (true) {
         struct sockaddr_un addr;
         socklen_t len = sizeof(addr);
@@ -195,13 +207,13 @@ void sync_main(void)
             execl(__PCONFIGURE__PREFIX "/libexec/mhng/mhimap-sync",
                   "mhimap-sync",
                   NULL);
-            perror("Unable to exec");
+            perror("Unable to exec mhimap-sync");
             abort();
         }
 
         int status;
         if (waitpid(pid, &status, 0) < 0) {
-            perror("Unable to waitpid()\n");
+            perror("Unable to waitpid() mhimap-sync");
             abort();
         }
 
@@ -224,5 +236,25 @@ void sync_main(void)
         }
         sync_rep = ticket;
         sync_signal.notify_all();
+    }
+}
+
+void idle_main(void)
+{
+    while (true) {
+        auto pid = fork();
+        if (pid == 0) {
+            execl(__PCONFIGURE__PREFIX "/libexec/mhng/mhimap-idle",
+                  "mhimap-idle",
+                  NULL);
+            perror("Unable to exec mhimap-idle");
+            abort();
+        }
+
+        int status;
+        if (waitpid(pid, &status, 0) < 0) {
+            perror("Unable to waitpid() mhimap-idle");
+            abort();
+        }
     }
 }
