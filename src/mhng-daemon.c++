@@ -161,7 +161,8 @@ void client_main(int client)
         auto len = mhng::daemon::message::serialize(msg, buf, BUFFER_SIZE);
         auto ss = send(client, buf, len, 0);
         if (ss < 0) {
-            perror("Error while sending");
+            if (errno != EPIPE)
+                perror("Error while sending");
             close(client);
             return;
         }
