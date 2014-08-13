@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <thread>
 #include <libmhng/daemon/message.h++>
+#include <libmhng/daemon/process.h++>
 #include <libmhng/args.h++>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -60,6 +61,17 @@ static std::atomic<long> sync_req;
 static std::atomic<long> sync_rep;
 static std::mutex sync_lock;
 static std::condition_variable sync_signal;
+
+/* These two processes are global so everyone can just go ahead and
+ * kill them whenever they want! */
+static mhng::daemon::process sync_process(
+        __PCONFIGURE__PREFIX "/libexec/mhng/mhimap-sync",
+        "mhimap-sync"
+    );
+static mhng::daemon::process idle_process(
+        __PCONFIGURE__PREFIX "/libexec/mhng/mhimap-idle",
+        "mhimap-sync"
+    );
 
 int main(int argc, const char **argv)
 {
@@ -204,20 +216,8 @@ void sync_main(void)
 
         auto ticket = get_ticket();
 
-        auto pid = fork();
-        if (pid == 0) {
-            execl(__PCONFIGURE__PREFIX "/libexec/mhng/mhimap-sync",
-                  "mhimap-sync",
-                  NULL);
-            perror("Unable to exec mhimap-sync");
-            abort();
-        }
-
-        int status;
-        if (waitpid(pid, &status, 0) < 0) {
-            perror("Unable to waitpid() mhimap-sync");
-            abort();
-        }
+        sync_process.fork();
+        int status = sync_process.join();
 
         /* If the synchronization didn't succeed then for now just
          * pretend it didn't happen at all and instead just go ahead
@@ -250,20 +250,8 @@ void idle_main(void)
     bool failed = false;
 
     while (true) {
-        auto pid = fork();
-        if (pid == 0) {
-            execl(__PCONFIGURE__PREFIX "/libexec/mhng/mhimap-idle",
-                  "mhimap-idle",
-                  NULL);
-            perror("Unable to exec mhimap-idle");
-            abort();
-        }
-
-        int status;
-        if (waitpid(pid, &status, 0) < 0) {
-            perror("Unable to waitpid() mhimap-idle");
-            abort();
-        }
+        idle_process.fork();
+        int status = idle_process.join();
 
         if (status != 0) {
             fprintf(stderr, "IDLE failed, retrying\n");
