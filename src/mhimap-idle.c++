@@ -30,7 +30,8 @@ int MHIMAP_MAIN(int argc, const char **argv)
 {
     auto args = mhng::args::parse_all_folders(argc, argv);
 
-    fprintf(stderr, "IDLE Logging In\n");
+    fprintf(stderr, "IDLE Logging In: %s\n",
+            mhng::date::now()->local().c_str());
     mhimap::gmail_client client(GMAIL_USERNAME, GMAIL_PASSWORD);
     while (true) {
         fprintf(stderr, "Sending IDLE\n");

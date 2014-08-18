@@ -30,7 +30,8 @@ int MHIMAP_MAIN(int argc, const char **argv)
 {
     auto args = mhng::args::parse_all_folders(argc, argv);
 
-    fprintf(stderr, "Logging In\n");
+    fprintf(stderr, "IMAP Logging In: %s\n",
+            mhng::date::now()->local().c_str());
 
     /* Opens a connection to GMail. */
     mhimap::gmail_client client(GMAIL_USERNAME, GMAIL_PASSWORD);
