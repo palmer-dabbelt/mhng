@@ -19,6 +19,8 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "header.h++"
+#include "base64.h++"
 #include "message.h++"
 #include <iconv.h>
 #include <string.h>
@@ -54,44 +56,58 @@ std::string mime::header::utf8(void) const
             }
             strstr(charset, "?")[0] = '\0';
 
-            if (strncmp(line + i + strlen(charset) + 2, "?Q?", 3) != 0) {
-                fprintf(stderr, "Not quoted printable!\n");
-                fprintf(stderr, "  line: '%s'\n", line + i);
-                abort();
-            }
-
-            char qp[BUFFER_SIZE];
-            snprintf(qp, BUFFER_SIZE, "%s", line + i + strlen(charset) + 5);
-            if (strstr(qp, "?=") == NULL) {
-                fprintf(stderr, "Unable to terminate QP section\n");
-                fprintf(stderr, "  line: '%s'\n", line + i);
-                abort();
-            }
-            strstr(qp, "?=")[0] = '\0';
-
             char raw[BUFFER_SIZE];
-            size_t qi = 0, ri = 0;
-            while (qi < strlen(qp)) {
-                if (qp[qi] == '=') {
-                    char hex[3];
-                    hex[0] = qp[qi + 1];
-                    hex[1] = qp[qi + 2];
-                    hex[2] = '\0';
+            size_t out_offset = 0;
+            if (strncmp(line + i + strlen(charset) + 2, "?B?", 3) == 0) {
+                char base64[BUFFER_SIZE];
+                snprintf(base64, BUFFER_SIZE,
+                         "%s", line + i + strlen(charset) + 5);
 
-                    raw[ri] = strtol(hex, NULL, 16);
-                    ri++;
-                    qi += 3;
-                } else if (qp[qi] == '_') {
-                    raw[ri] = ' ';
-                    ri++;
-                    qi++;
-                } else {
-                    raw[ri] = qp[qi];
-                    ri++;
-                    qi++;
+                if (strstr(base64, "?=") == NULL) {
+                    fprintf(stderr, "Unable to terminate base64 section\n");
+                    fprintf(stderr, "  line: '%s'\n", line + i);
+                    abort();
                 }
+                strstr(base64, "?=")[0] = '\0';
+
+                auto dec = base64_decode(base64);
+                strcpy(raw, dec.c_str());
+                out_offset = strlen(base64);
+            } else if (strncmp(line + i + strlen(charset) + 2, "?Q?", 3) == 0) {
+                char qp[BUFFER_SIZE];
+                snprintf(qp, BUFFER_SIZE, "%s", line + i + strlen(charset) + 5);
+                if (strstr(qp, "?=") == NULL) {
+                    fprintf(stderr, "Unable to terminate QP section\n");
+                    fprintf(stderr, "  line: '%s'\n", line + i);
+                    abort();
+                }
+                strstr(qp, "?=")[0] = '\0';
+
+                size_t qi = 0, ri = 0;
+                while (qi < strlen(qp)) {
+                    if (qp[qi] == '=') {
+                        char hex[3];
+                        hex[0] = qp[qi + 1];
+                        hex[1] = qp[qi + 2];
+                        hex[2] = '\0';
+
+                        raw[ri] = strtol(hex, NULL, 16);
+                        ri++;
+                        qi += 3;
+                    } else if (qp[qi] == '_') {
+                        raw[ri] = ' ';
+                        ri++;
+                        qi++;
+                    } else {
+                        raw[ri] = qp[qi];
+                        ri++;
+                        qi++;
+                    }
+                }
+                raw[ri] = '\0';
+
+                out_offset = strlen(qp);
             }
-            raw[ri] = '\0';
 
             iconv_t icd = iconv_open("UTF-8", charset);
 
@@ -123,7 +139,7 @@ std::string mime::header::utf8(void) const
             i += 2;
             i += strlen(charset);
             i += 3;
-            i += strlen(qp);
+            i += out_offset;
             i += 2;
 
             /* FIXME: Is this correct?  I can't tell if I'm supposed

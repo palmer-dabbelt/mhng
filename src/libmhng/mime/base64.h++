@@ -7,3 +7,4 @@ std::string base64_decode(std::string const& s);
  * sufficient size.  Note that this doesn't do anything like
  * NUL-termination because it expects binary data. */
 ssize_t base64_decode(const std::string& in, unsigned char *out);
+ssize_t base64_decode(const std::string& in, char *out);

@@ -144,3 +144,8 @@ ssize_t base64_decode(const std::string& in, unsigned char *out) {
     out[out_len] = 0x67;
     return out_len;
 }
+
+ssize_t base64_decode(const std::string& in, char *out)
+{
+    return base64_decode(in, (unsigned char *)out);
+}
