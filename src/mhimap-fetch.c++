@@ -164,9 +164,9 @@ int MHIMAP_MAIN(int argc, const char **argv)
 
             auto imessage = mhimap::message(ifolder, imapid);
 
-            auto trans = args->mbox()->db()->exclusive_transaction();
             client.mark_as_read(imessage);
             client.mark_as_deleted(imessage);
+            auto trans = args->mbox()->db()->exclusive_transaction();
             args->mbox()->did_purge(lfolder, imapid);
         }
 #endif
@@ -202,9 +202,9 @@ int MHIMAP_MAIN(int argc, const char **argv)
                 );
 #endif
 
+            message->remove();
             auto trans = args->mbox()->db()->exclusive_transaction();
             args->mbox()->did_purge(lfolder, message->imapid());
-            message->remove();
         }
 #endif
 
@@ -220,8 +220,8 @@ int MHIMAP_MAIN(int argc, const char **argv)
 
             auto imessage = mhimap::message(ifolder, message->imapid());
 
-            auto trans = args->mbox()->db()->exclusive_transaction();
             client.mark_as_read(imessage);
+            auto trans = args->mbox()->db()->exclusive_transaction();
             message->mark_read_and_synced();
         }
 #endif
