@@ -71,7 +71,14 @@ int main(int argc, const char **argv)
         for (const auto& line: part->utf8())
             printf("%s\n", line.c_str());
 #elif defined(DETACH)
-        part->write(stdout);
+        std::string out_filename = "mhng-attachment";
+        if (part->name_known() == true)
+            out_filename = part->name();
+        fprintf(stderr, "Writing to '%s'\n", out_filename.c_str());
+
+        FILE *out_file = fopen(part->name().c_str(), "w");
+        part->write(out_file);
+        fclose(out_file);
 #else
 #error "Define MIME or DETACH"
 #endif
