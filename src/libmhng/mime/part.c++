@@ -387,6 +387,9 @@ void mime::part::write(FILE *out) const
         for (const auto& linestr: _body_raw) {
             unsigned char decoded[BUFFER_SIZE*2];
             auto declen = base64_decode(linestr, decoded);
+            if (declen == 0)
+                continue;
+
             auto written = fwrite(decoded, declen, 1, out);
             if (written != 1) {
                 perror("Unable to write");
