@@ -577,5 +577,8 @@ bool isterm(char c, bool space_p)
     if (c == ';')
         return true;
 
+    if (c == '\0')
+        return true;
+
     return false;
 }
