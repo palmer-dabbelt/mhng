@@ -52,6 +52,8 @@ sqlite::connection::connection(const std::string& db_path)
         fprintf(stderr, "  error: %d\n", err);
         abort();
     }
+
+    sqlite3_busy_timeout(_db, 1000);
 }
 
 sqlite::result_ptr sqlite::connection::select(const table_ptr& table)
