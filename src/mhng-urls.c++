@@ -61,9 +61,14 @@ int main(int argc, const char **argv)
         }
 
         auto url = urls[num - 1];
-        char command[BUFFER_SIZE];
-        snprintf(command, BUFFER_SIZE, "firefox \"%s\"", url.c_str());
-        system(command);
+
+        if (args->stdout().known() && args->stdout().data()) {
+            printf("%s\n", url.c_str());
+        } else {
+            char command[BUFFER_SIZE];
+            snprintf(command, BUFFER_SIZE, "firefox \"%s\"", url.c_str());
+            system(command);
+        }
     }
     if (args->numbers().size() != 0)
         return 0;

@@ -37,11 +37,13 @@ static std::string default_mhng_folder_path(void);
 args::args(const std::vector<message_ptr>& messages,
            const std::vector<folder_ptr>& folders,
            const std::vector<int>& numbers,
-           const mailbox_ptr& mbox)
+           const mailbox_ptr& mbox,
+           const unknown<bool>& stdout)
     : _messages(messages),
       _folders(folders),
       _numbers(numbers),
-      _mbox(mbox)
+      _mbox(mbox),
+      _stdout(stdout)
 {
 }
 
@@ -99,6 +101,8 @@ args_ptr args::parse(int argc, const char **argv, int flags)
 
     std::vector<int> numbers;
 
+    unknown<bool> stdout;
+
     auto mhng_folder = default_mhng_folder_path();
 
     for (int i = 1; i < argc; ++i) {
@@ -125,6 +129,8 @@ args_ptr args::parse(int argc, const char **argv, int flags)
             folders_written = true;
             folder_names.push_back(argv[i]+1);
             last_folder = argv[i]+1;
+        } else if (strcmp(argv[i], "--stdout") == 0) {
+            stdout = true;
         } else {
             folders_written = true;
             folder_names.push_back(argv[i]);
@@ -177,10 +183,18 @@ args_ptr args::parse(int argc, const char **argv, int flags)
             for (const auto& folder: folders)
                 for (const auto& message: folder->messages())
                     messages.push_back(message);
-            return std::make_shared<args>(messages, folders, numbers, dir);
+            return std::make_shared<args>(messages,
+                                          folders,
+                                          numbers,
+                                          dir,
+                                          stdout);
         } else if (flags & pf_nom) {
             std::vector<message_ptr> messages;
-            return std::make_shared<args>(messages, folders, numbers, dir);
+            return std::make_shared<args>(messages,
+                                          folders,
+                                          numbers,
+                                          dir,
+                                          stdout);
         } else {
             std::vector<message_ptr> messages;
             auto cur = last_folder_ptr->current_message();
@@ -190,7 +204,11 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                 abort();
             }
             messages.push_back(cur);
-            return std::make_shared<args>(messages, folders, numbers, dir);
+            return std::make_shared<args>(messages,
+                                          folders,
+                                          numbers,
+                                          dir,
+                                          stdout);
         }
     }
 
@@ -230,7 +248,11 @@ args_ptr args::parse(int argc, const char **argv, int flags)
 
     /* At this point everything should be fixed up so we can just go
      * ahead and construct the relevant argument structure. */
-    return std::make_shared<args>(messages, folders, numbers, dir);
+    return std::make_shared<args>(messages,
+                                  folders,
+                                  numbers,
+                                  dir,
+                                  stdout);
 }
 
 std::string default_mhng_folder_path(void)

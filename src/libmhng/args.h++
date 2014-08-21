@@ -59,6 +59,10 @@ namespace mhng {
         /* Stores the mailbox associated with this run. */
         mailbox_ptr _mbox;
 
+        /* Arguments that can be passed with "--" on the
+         * command-line. */
+        unknown<bool> _stdout;
+
     public:
         /* This constructor is private because you should be using one
          * of the public static methods below to ensure you parse your
@@ -66,7 +70,8 @@ namespace mhng {
         args(const std::vector<message_ptr>& messages,
              const std::vector<folder_ptr>& folders,
              const std::vector<int>& numbers,
-             const mailbox_ptr& mbox);
+             const mailbox_ptr& mbox,
+             const unknown<bool>& stdout);
 
     public:
         /* Accessor functions. */
@@ -77,6 +82,8 @@ namespace mhng {
         const std::vector<int>& numbers(void) const
             { return _numbers; }
         const mailbox_ptr& mbox(void) const { return _mbox; }
+
+        const unknown<bool>& stdout(void) const { return _stdout; }
 
     public:
         /* Parses normal command-line arguments, which means arguments
