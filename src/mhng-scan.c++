@@ -41,6 +41,17 @@ int main(int argc, const char **argv)
     if (from_width > 35)
         from_width = 35;
     size_t seq_width = (terminal_width > 120) ? 3 : 2;
+    if (args->messages().size() >= 100)
+        seq_width = 3;
+    if (args->messages().size() >= 1000)
+        seq_width = 4;
+    if (args->messages().size() >= 10000)
+        seq_width = 5;
+    if (args->messages().size() >= 100000)
+        seq_width = 6;
+    if (args->messages().size() >= 1000000)
+        seq_width = 7;
+
     size_t subject_width = terminal_width - from_width - seq_width - 11;
 
     /* At this point that argument list contains the entire set of
