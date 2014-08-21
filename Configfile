@@ -194,3 +194,12 @@ SOURCES     += mhng-pipe-comp_stdin.c++
 # doesn't attempt to do any formatting at all.
 BINARIES    += mhng-pipe-show_stdout
 SOURCES     += mhng-pipe-show_stdout.c++
+
+# Sends a network up/down message to the server
+BINARIES    += mhng-pipe-network_up
+SOURCES     += mhng-pipe-network_up.c++
+COMPILEOPTS += -DUP
+
+BINARIES    += mhng-pipe-network_down
+SOURCES     += mhng-pipe-network_up.c++
+COMPILEOPTS += -DDOWN
