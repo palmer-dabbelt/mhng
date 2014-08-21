@@ -47,7 +47,11 @@ int main(int argc, const char **argv)
      * messages that should be examined as part of the scan. */
     for (const auto& msg: args->messages()) {
         auto subj = msg->first_subject();
+
         auto from = msg->first_from();
+        if (strcmp(msg->folder()->name().c_str(), "sent") == 0)
+            from = msg->first_to();
+
         printf("%c %*u %s %-*.*s %-*.*s%c\n",
                msg->cur() ? '*' : ' ',
                (int)seq_width, msg->seq()->to_uint(),
