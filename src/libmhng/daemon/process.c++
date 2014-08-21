@@ -57,6 +57,15 @@ int daemon::process::join(void)
     return _status;
 }
 
+void daemon::process::kill(void)
+{
+    std::unique_lock<std::mutex> lock(_running_lock);
+    if (_running == false)
+        return;
+
+    ::kill(_pid, SIGTERM);
+}
+
 void daemon::process::_do_fork(void)
 {
     _pid = ::fork();
