@@ -49,10 +49,6 @@ void sqlite::result::set_error(int code, std::string str)
         _return_value = error_code::SUCCESS;
         break;
 
-    case 5:
-        _return_value = error_code::LOCKED;
-        break;
-
     default:
         fprintf(stderr, "Unknown SQLite error code %d\n", code);
         fprintf(stderr, "  Associated string: '%s'\n", str.c_str());
