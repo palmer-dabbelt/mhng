@@ -58,6 +58,10 @@ namespace mhimap {
         /* FALSE until logout() has been called, TRUE after that. */
         bool logged_out;
 
+        /* Set to the currently-selected folder. */
+        std::string current_folder;
+        uint32_t current_uidvalidity;
+
     public:
         /* Creates a new connection to an IMAP server, given the
          * connection object that will be used to create it.  You

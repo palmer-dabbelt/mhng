@@ -32,7 +32,8 @@ using namespace mhimap;
 
 client::client(void)
     : sequence(0),
-      logged_out(false)
+      logged_out(false),
+      current_folder("")
 {
 }
 
@@ -386,6 +387,9 @@ uint32_t client::select(const std::string name)
     bool uidvalidity_valid = false;
     uint32_t uidvalidity;
 
+    if (strcmp(current_folder.c_str(), name.c_str()) == 0)
+        return current_uidvalidity;
+
     command select(this, "SELECT \"%s\"", name.c_str());
 
     while (gets(buffer, BUFFER_SIZE) > 0) {
@@ -400,6 +404,9 @@ uint32_t client::select(const std::string name)
         fprintf(stderr, "No UIDVALIDITY response obtained\n");
         abort();
     }
+
+    current_folder = name;
+    current_uidvalidity = uidvalidity;
 
     return uidvalidity;
 }
