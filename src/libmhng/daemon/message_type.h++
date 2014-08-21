@@ -28,6 +28,8 @@ namespace mhng {
     namespace daemon {
         enum class message_type {
             SYNC,
+            NET_UP,
+            NET_DOWN,
             RESPONSE
         };
 

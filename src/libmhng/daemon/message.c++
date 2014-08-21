@@ -53,6 +53,20 @@ daemon::message_ptr daemon::message::sync(int32_t seconds_since)
     return out;
 }
 
+daemon::message_ptr daemon::message::net_up(void)
+{
+    auto out = std::make_shared<daemon::message>(daemon::message_type::NET_UP);
+
+    return out;
+}
+
+daemon::message_ptr daemon::message::net_down(void)
+{
+    auto out = std::make_shared<daemon::message>(daemon::message_type::NET_DOWN);
+
+    return out;
+}
+
 size_t daemon::message::serialize(const message_ptr& m, char *b, size_t l)
 {
     if (sizeof(m->wire) > l) {

@@ -85,6 +85,11 @@ namespace mhng {
              * always forces a sync. */ 
             static message_ptr sync(int32_t seconds_since = -1);
 
+            /* Creates a new message that informs the server that the
+             * network has turned either off or on. */
+            static message_ptr net_up(void);
+            static message_ptr net_down(void);
+
         public:
             /* Converts between raw buffers and parsed messages. */
             static size_t serialize(const message_ptr& msg,

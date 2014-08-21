@@ -62,6 +62,12 @@ static std::atomic<long> sync_rep;
 static std::mutex sync_lock;
 static std::condition_variable sync_signal;
 
+/* Here is a little health bit for the network -- essentially what
+ * happens here is that sometimes the network can go down, which means
+ * that we don't want to continue to check for mail.  Note that this
+ * lock is locked by the sync lock! */
+static std::atomic<bool> net_up;
+
 /* These two processes are global so everyone can just go ahead and
  * kill them whenever they want! */
 static mhng::daemon::process sync_process(
@@ -77,6 +83,7 @@ int main(int argc, const char **argv)
 {
     sync_req = 0;
     sync_rep = 0;
+    net_up = true;
 
     auto args = mhng::args::parse_all_folders(argc, argv);
 
@@ -171,6 +178,38 @@ void client_main(int client)
             break;
         }
 
+        case mhng::daemon::message_type::NET_UP:
+        {
+            fprintf(stderr, "Enabling Networking\n");
+
+            std::unique_lock<std::mutex> lock(sync_lock);
+
+            net_up = true;
+
+            idle_process.kill();
+            sync_process.kill();
+
+            sync_signal.notify_all();
+
+            break;
+        }
+
+        case mhng::daemon::message_type::NET_DOWN:
+        {
+            fprintf(stderr, "Disabling Networking\n");
+
+            std::unique_lock<std::mutex> lock(sync_lock);
+
+            net_up = false;
+
+            idle_process.kill();
+            sync_process.kill();
+
+            sync_signal.notify_all();
+
+            break;
+        }
+
         case mhng::daemon::message_type::RESPONSE:
         {
             fprintf(stderr, "Unable to handle RESPONSE packet\n");
@@ -178,6 +217,7 @@ void client_main(int client)
             abort();
             break;
         }
+
         }
 
         auto resp = msg->response();
@@ -196,17 +236,35 @@ void client_main(int client)
 
 void sync_main(void)
 {
-    bool failed = false;
-
     while (true) {
         /* The first thing to do is to atomicly wait for someone to
          * request a synchronization while obtaining a response
          * ticket. */
-        auto get_ticket = [&](void) -> long
+        auto get_ticket_and_fork = [&](void) -> long
             {
                 /* First wait for someone to request a synchronization. */
                 std::unique_lock<std::mutex> lock(sync_lock);
-                sync_signal.wait(lock, [&]{ return sync_rep != sync_req; });
+                sync_signal.wait(
+                    lock,
+                    [&]{
+                        /* If the network is down then it doesn't
+                         * matter if a sync has been requested, we
+                         * can't do that anyway. */
+                        if (net_up == false)
+                            return false;
+
+                        /* If nobody has requested a sync then don't
+                         * proceed. */
+                        if (sync_rep == sync_req)
+                            return false;
+
+                        return true;
+                    });
+
+                /* We need to fork with the lock held because if we
+                 * don't then there's a race condition later killing
+                 * the process. */
+                sync_process.fork();
 
                 /* Our ticket is just the ticket that the latest
                  * requester gave us.  This means that every request
@@ -214,9 +272,7 @@ void sync_main(void)
                 return sync_req;
             };
 
-        auto ticket = get_ticket();
-
-        sync_process.fork();
+        auto ticket = get_ticket_and_fork();
         int status = sync_process.join();
 
         /* If the synchronization didn't succeed then for now just
@@ -225,9 +281,7 @@ void sync_main(void)
          * here... */
         if (status != 0) {
             fprintf(stderr, "Synchronization failed, retrying\n");
-            if (failed == true)
-                sleep(60);
-            failed = true;
+            sleep(5);
             continue;
         }
 
@@ -240,27 +294,35 @@ void sync_main(void)
         }
         sync_rep = ticket;
         sync_signal.notify_all();
-
-        failed = false;
     }
 }
 
 void idle_main(void)
 {
-    bool failed = false;
-
     while (true) {
-        idle_process.fork();
+        /* We only want to bother trying to idle when we already know
+         * the network is up.  This waits for the network to go up
+         * before continuing. */
+        {
+            std::unique_lock<std::mutex> lock(sync_lock);
+            sync_signal.wait(
+                lock,
+                [&]{
+                    if (net_up == false)
+                        return false;
+
+                    return true;
+                });
+
+            idle_process.fork();
+        }
+
         int status = idle_process.join();
 
         if (status != 0) {
             fprintf(stderr, "IDLE failed, retrying\n");
-            if (failed == true)
-                sleep(60);
-            failed = true;
+            sleep(5);
             continue;
         }
-
-        failed = false;
     }
 }
