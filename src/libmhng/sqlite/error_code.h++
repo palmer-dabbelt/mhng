@@ -29,6 +29,7 @@ namespace mhng {
     namespace sqlite {
         enum class error_code {
             SUCCESS = 0,
+            LOCKED = 5,
         };
     }
 }

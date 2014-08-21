@@ -500,6 +500,9 @@ sqlite::connection::exclusive_transaction(void)
         switch (out->return_value()) {
         case sqlite::error_code::SUCCESS:
             break;
+        case sqlite::error_code::LOCKED:
+            return exclusive_transaction();
+            break;
         }
     }
 
@@ -546,6 +549,9 @@ sqlite::connection::immediate_transaction(void)
         switch (out->return_value()) {
         case sqlite::error_code::SUCCESS:
             break;
+        case sqlite::error_code::LOCKED:
+            return immediate_transaction();
+            break;
         }
     }
 
@@ -591,6 +597,9 @@ sqlite::connection::deferred_transaction(void)
 
         switch (out->return_value()) {
         case sqlite::error_code::SUCCESS:
+            break;
+        case sqlite::error_code::LOCKED:
+            return deferred_transaction();
             break;
         }
     }

@@ -36,7 +36,10 @@ uint64_t db::mh_nextid::select(void)
 
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
-            break;
+        break;
+    case sqlite::error_code::LOCKED:
+        return db::mh_nextid::select();
+        break;
     }
 
     if (resp->result_count() != 1)
@@ -57,6 +60,9 @@ void db::mh_nextid::update(uint64_t id)
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
         return;
+    case sqlite::error_code::LOCKED:
+        return db::mh_nextid::update(id);
+        break;
     }
 }
 

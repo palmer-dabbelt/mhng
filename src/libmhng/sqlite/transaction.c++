@@ -36,6 +36,12 @@ sqlite::transaction::~transaction(void)
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
         break;
+    case sqlite::error_code::LOCKED:
+    {
+        fprintf(stderr, "Attempted to auto-commit transaction, but locked database\n");
+        fprintf(stderr, "  You should really be committing this yourself to check\n");
+        abort();
+    }
     }
 }
 
