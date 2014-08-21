@@ -15,6 +15,7 @@ mkdir -p $HOME/.mhng/mail/rss
 mkdir -p $HOME/.mhng/mail/promo
 mkdir -p $HOME/.mhng/mail/lists
 mkdir -p $HOME/.mhng/mail/sent
+mkdir -p $HOME/.mhng/mail/trash
 
 # Initialize the SQLite database that's necessary to make anything
 # work with some default options.  Doing this greatly simplifies the
@@ -34,6 +35,7 @@ INSERT INTO MH__current (folder, seq) VALUES ("rss", 1);
 INSERT INTO MH__current (folder, seq) VALUES ("promo", 1);
 INSERT INTO MH__current (folder, seq) VALUES ("lists", 1);
 INSERT INTO MH__current (folder, seq) VALUES ("sent", 1);
+INSERT INTO MH__current (folder, seq) VALUES ("trash", 1);
 
 CREATE TABLE MH__messages (uid INTEGER PRIMARY KEY CHECK(uid > 0),
                            seq INTEGER NOT NULL CHECK(seq > 0),
