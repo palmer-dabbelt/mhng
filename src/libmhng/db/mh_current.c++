@@ -36,10 +36,7 @@ std::vector<std::string> db::mh_current::select(void)
 
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
-        break;
-    case sqlite::error_code::LOCKED:
-        return select();
-        break;
+            break;
     }
 
     std::vector<std::string> out;
@@ -55,9 +52,10 @@ unsigned db::mh_current::select(const std::string& folder)
 
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
-        break;
-    case sqlite::error_code::LOCKED:
-        return select(folder);
+            break;
+
+    default:
+        return -1;
         break;
     }
 
@@ -81,9 +79,6 @@ void db::mh_current::update(const std::string& folder,
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
         return;
-    case sqlite::error_code::LOCKED:
-        return update(folder, seq);
-        break;
     }
 }
 
@@ -97,9 +92,6 @@ void db::mh_current::clear_current(const std::string& folder_name)
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
         return;
-    case sqlite::error_code::LOCKED:
-        return clear_current(folder_name);
-        break;
     }
 }
 
@@ -115,9 +107,6 @@ void db::mh_current::set_current(const std::string& folder_name)
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
         return;
-    case sqlite::error_code::LOCKED:
-        return set_current(folder_name);
-        break;
     }
 }
 
@@ -127,10 +116,7 @@ std::string db::mh_current::select_current(void)
 
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
-        break;
-    case sqlite::error_code::LOCKED:
-        return select_current();
-        break;
+            break;
     }
 
     if (resp->result_count() != 1)
@@ -147,10 +133,7 @@ int64_t db::mh_current::uid_validity(const std::string& folder_name)
 
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
-        break;
-    case sqlite::error_code::LOCKED:
-        return uid_validity(folder_name);
-        break;
+            break;
     }
 
     if (resp->result_count() != 1)
@@ -177,9 +160,6 @@ void db::mh_current::update_uid_validity(const std::string& folder_name,
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
         return;
-    case sqlite::error_code::LOCKED:
-        return update_uid_validity(folder_name, uid_validity);
-        break;
     }
 }
 

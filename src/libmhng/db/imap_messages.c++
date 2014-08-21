@@ -38,9 +38,6 @@ int64_t db::imap_messages::select(uint64_t uid)
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
         break;
-    case sqlite::error_code::LOCKED:
-        return select(uid);
-        break;
     }
 
     if (resp->result_count() > 1) {
@@ -66,9 +63,6 @@ uint64_t db::imap_messages::select(std::string folder,
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
         break;
-    case sqlite::error_code::LOCKED:
-        return select(folder, imapid);
-        break;
     }
 
     if (resp->result_count() > 1) {
@@ -91,9 +85,6 @@ void db::imap_messages::remove(uint64_t mhid)
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
         break;
-    case sqlite::error_code::LOCKED:
-        return remove(mhid);
-        break;
     }
 }
 
@@ -105,9 +96,6 @@ void db::imap_messages::remove(std::string folder, uint32_t imapid)
 
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
-        break;
-    case sqlite::error_code::LOCKED:
-        return remove(folder, imapid);
         break;
     }
 }
@@ -123,9 +111,6 @@ void db::imap_messages::update_purge(uint64_t uid, bool purge)
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
         return;
-    case sqlite::error_code::LOCKED:
-        return update_purge(uid, purge);
-        break;
     }
 }
 
@@ -136,9 +121,6 @@ std::vector<uint32_t> db::imap_messages::select_purge(std::string folder)
 
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
-        break;
-    case sqlite::error_code::LOCKED:
-        return select_purge(folder);
         break;
     }
 
@@ -164,9 +146,6 @@ void db::imap_messages::insert(std::string folder,
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
         return;
-    case sqlite::error_code::LOCKED:
-        return insert(folder, imapid, mhid);
-        break;
     }
 }
 

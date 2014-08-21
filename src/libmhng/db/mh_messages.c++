@@ -38,8 +38,9 @@ message_ptr db::mh_messages::select(uint64_t uid)
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
         break;
-    case sqlite::error_code::LOCKED:
-        return select(uid);
+
+    default:
+        return NULL;
         break;
     }
 
@@ -74,8 +75,9 @@ message_ptr db::mh_messages::select(const std::string& folder_name,
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
         break;
-    case sqlite::error_code::LOCKED:
-        return select(folder_name, seq);
+
+    default:
+        return NULL;
         break;
     }
 
@@ -110,9 +112,6 @@ std::vector<message_ptr> db::mh_messages::select(const std::string& folder)
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
             break;
-    case sqlite::error_code::LOCKED:
-        return select(folder);
-        break;
     }
 
     for (const auto& row: resp->rows()) {
@@ -149,8 +148,9 @@ message_ptr db::mh_messages::select(const std::string& folder,
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
         break;
-    case sqlite::error_code::LOCKED:
-        return select(folder, seq, offset);
+
+    default:
+        return NULL;
         break;
     }
 
@@ -184,9 +184,6 @@ void db::mh_messages::update(uint64_t uid,
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
         return;
-    case sqlite::error_code::LOCKED:
-        return update(uid, seq);
-        break;
     }
 }
 
@@ -203,9 +200,6 @@ void db::mh_messages::update_unread(uint64_t uid,
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
         return;
-    case sqlite::error_code::LOCKED:
-        return update_unread(uid, unread);
-        break;
     }
 }
 
@@ -233,15 +227,6 @@ void db::mh_messages::insert(unsigned seq,
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
         return;
-    case sqlite::error_code::LOCKED:
-        return insert(seq,
-                      folder,
-                      date,
-                      from,
-                      to,
-                      subject,
-                      uid);
-        break;
     }
 }
 
@@ -252,9 +237,6 @@ void db::mh_messages::remove(uint64_t uid)
 
     switch (resp->return_value()) {
     case sqlite::error_code::SUCCESS:
-        break;
-    case sqlite::error_code::LOCKED:
-        return remove(uid);
         break;
     }
 }
