@@ -86,7 +86,9 @@ namespace mhng {
             static message_ptr sync(int32_t seconds_since = -1);
 
             /* Creates a new message that informs the server that the
-             * network has turned either off or on. */
+             * network has turned either off or on.  Sending these
+             * messages to the server will cause it to kill whatever
+             * subprocesses may have hung due to this condition. */
             static message_ptr net_up(void);
             static message_ptr net_down(void);
 
