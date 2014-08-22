@@ -35,14 +35,14 @@ int main(int argc, const char **argv)
     /* Walks through every folder in this directory. */
     for (const auto& folder: args->folders()) {
         auto cur = folder->current_message();
-        int seq = -1;
+        std::string seq = "(none)";
         if (cur != NULL)
-            seq = cur->seq()->to_int();
+            seq = std::to_string(cur->seq()->to_int());
 
-        printf("%20s %10lu %10d\n",
+        printf("%20s %10lu %10s\n",
                folder->name().c_str(),
                folder->message_count(),
-               seq
+               seq.c_str()
             );
     }
 
