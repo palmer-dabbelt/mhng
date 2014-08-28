@@ -35,7 +35,7 @@ int main(int argc, const char **argv)
     int san_argc = 1;
     san_argv[san_argc] = NULL;
 
-    auto args = mhng::args::parse_normal(san_argc, san_argv);
+    auto args = mhng::args::parse_all_folders(san_argc, san_argv);
 
     /* We need a temporary file to fire up an editor against.  This is
      * kind of unfortunate, but I guess that's just life... :(. */
