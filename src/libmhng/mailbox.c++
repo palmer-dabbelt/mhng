@@ -151,6 +151,9 @@ message_ptr mailbox::insert(const std::string &folder_name,
     fsync(fileno(file));
     fclose(file);
 
+    if (folder->current_message() == NULL)
+        folder->set_current_message(msg);
+
     return msg;
 }
 
