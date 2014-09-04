@@ -76,7 +76,7 @@ static mhng::daemon::process sync_process(
     );
 static mhng::daemon::process idle_process(
         __PCONFIGURE__PREFIX "/libexec/mhng/mhimap-idle",
-        "mhimap-sync"
+        "mhimap-idle"
     );
 
 int main(int argc, const char **argv)
