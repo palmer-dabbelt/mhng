@@ -1,0 +1,13 @@
+Copyright 2014 Palmer Dabbelt <palmer@dabbelt.com>
+
+mhng: My 4th {,N}MH clone
+
+To build and install MHng, run the following commands
+
+$ pconfigure
+$ make
+$ make install
+
+There is no documentation...  but it's pretty much just NMH.  Run
+"mhng-install" to set things up, and then mail me because it won't
+work!
