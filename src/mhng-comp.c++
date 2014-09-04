@@ -210,9 +210,20 @@ int main(int argc, const char **argv)
                     lookup.push_back(hraw + "\n");
             }
         }
+
+        /* Make this a MIME message. */
+        lookup.push_back("Content-Transfer-Encoding: 8bit\n");
+        lookup.push_back("Content-Type: text/plain; charset=utf-8\n");
+        lookup.push_back("Mime-Version: 1.0 (MHng)\n");
+
+        /* Specify the end of the headers. */
         lookup.push_back("\n");
+
+        /* Copy over the whole body section. */
         for (const auto& body: raw_mime->body()->body_raw())
             lookup.push_back(body);
+
+        /* Now actually re-parse the message. */
         mime = std::make_shared<mhng::mime::message>(lookup);
     }
 
@@ -240,16 +251,6 @@ int main(int argc, const char **argv)
 
         mime->add_header("Message-ID", message_id);
         mime->body()->add_header("Message-ID", message_id);
-    }
-
-    /* Generate the relevant MIME headers. */
-    {
-        mime->add_header("Content-Transfer-Encoding", "8bit");
-        mime->add_header("Content-Type", "text/plain; charset=utf-8");
-        mime->add_header("Mime-Version", "1.0 (MHng)");
-        mime->body()->add_header("Content-Transfer-Encoding", "8bit");
-        mime->body()->add_header("Content-Type", "text/plain; charset=utf-8");
-        mime->body()->add_header("Mime-Version", "1.0 (MHng)");
     }
 
     /* Go ahead and insert this message into the database. */
