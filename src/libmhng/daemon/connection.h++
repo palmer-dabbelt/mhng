@@ -32,7 +32,9 @@ namespace mhng {
 }
 
 #include <map>
+#include <mutex>
 #include <string>
+#include <thread>
 #include "message.h++"
 #include "response.h++"
 
@@ -47,6 +49,10 @@ namespace mhng {
             /* A map that holds the outstanding responses that could
              * come back from the server. */
             std::map<uint32_t, response_wptr> _outstanding;
+            std::mutex _outstanding_lock;
+
+            /* A thread that waits for */
+            std::thread _recv_thread;
 
         public:
             /* Creates a new connection to the server. */
@@ -61,6 +67,11 @@ namespace mhng {
              * Note that this doesn't block, if you want it to block
              * you'll need to query the response object directly. */
             response_ptr send(const message_ptr& message);
+
+        private:
+            static void recv_thread_wrapper(connection *c)
+                { c->recv_thread_main(); }
+            void recv_thread_main(void);
         };
     }
 }

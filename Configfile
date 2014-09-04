@@ -139,6 +139,11 @@ BINARIES    += mhng-forw
 SOURCES     += mhng-comp.c++
 COMPILEOPTS += -DFORW
 
+# Forces a sync right now, and blocks until everything has fully
+# synced.
+BINARIES    += mhng-sync
+SOURCES     += mhng-sync.c++
+
 ##############################################################################
 # Remote-Access Binaries                                                     #
 ##############################################################################

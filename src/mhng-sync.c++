@@ -19,25 +19,16 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "response.h++"
-#include <unistd.h>
-using namespace mhng;
+#include <libmhng/args.h++>
 
-daemon::response::response(uint32_t id)
-    : _id(id),
-      _finished(false)
+int main(int argc, const char **argv)
 {
-}
+    auto args = mhng::args::parse_all_folders(argc, argv);
+    auto daemon = args->mbox()->daemon();
 
-void daemon::response::wait(void)
-{
-    std::unique_lock<std::mutex> lock(_lock);
-    _signal.wait(lock, [this]{ return _finished; });
-}
-
-void daemon::response::fill(void)
-{
-    std::lock_guard<std::mutex> lock(_lock);
-    _finished = true;
-    _signal.notify_all();
+    auto message = mhng::daemon::message::sync();
+    auto resp = daemon->send(message);
+    resp->wait();
+        
+    return 0;
 }

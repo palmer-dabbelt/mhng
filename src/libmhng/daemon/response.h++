@@ -32,6 +32,8 @@ namespace mhng {
     }
 }
 
+#include <condition_variable>
+#include <mutex>
 #include <stdint.h>
 #include <string>
 
@@ -45,12 +47,24 @@ namespace mhng {
         private:
             uint32_t _id;
 
+            bool _finished;
+            std::mutex _lock;
+            std::condition_variable _signal;
+
         public:
             response(uint32_t id);
 
         public:
             /* Accessor functions. */
             uint32_t id(void) const { return _id; }
+
+        public:
+            /* Waits for the server to actually return this response
+             * code. */
+            void wait(void);
+
+            /* Fills out this return code. */
+            void fill(void);
         };
     }
 }
