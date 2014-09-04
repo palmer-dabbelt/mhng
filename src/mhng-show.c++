@@ -84,7 +84,11 @@ int main(int argc, const char **argv)
 #if 0
     FILE *out = popen("fold -s | less -FRSX", "w");
 #else
-    FILE *out = popen("fold -s | less", "w");
+    FILE *out = NULL;
+    if (isatty(STDOUT_FILENO) == 1)
+        out = popen("fold -s | less", "w");
+    else
+        out = popen("cat", "w");
 #endif
 
     /* Show every message out to the pager.  Note that this is
