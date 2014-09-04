@@ -188,8 +188,6 @@ int MHIMAP_MAIN(int argc, const char **argv)
                                                  mime,
                                                  imessage.uid()
                 );
-
-            printf("Done fetching\n");
         }
 #endif
 
