@@ -20,6 +20,7 @@
  */
 
 #include <libmhng/args.h++>
+#include <libmhng/gpg_sign.h++>
 #include <string.h>
 #include <unistd.h>
 #include <uuid.h>
@@ -197,6 +198,7 @@ int main(int argc, const char **argv)
         /* Now walk back through that MIME message and attempt to
          * perform any sort of necessary address book lookups. */
         std::vector<std::string> lookup;
+        std::string from;
         for (const auto& header: raw_mime->body()->headers()) {
             if (header->match({"From", "To", "CC", "BCC"})) {
                 auto k = header->key();
@@ -204,6 +206,9 @@ int main(int argc, const char **argv)
                     auto a = args->mbox()->mrc()->emailias(v);
                     auto aa = a->rfc();
                     lookup.push_back(k + ": " + aa + "\n");
+
+                    if (strcasecmp(k.c_str(), "from") == 0)
+                        from = a->email();
                 }
             } else {
                 for (const auto& hraw: header->raw())
@@ -212,17 +217,43 @@ int main(int argc, const char **argv)
         }
 
         /* Make this a MIME message. */
-        lookup.push_back("Content-Transfer-Encoding: 8bit\n");
-        lookup.push_back("Content-Type: text/plain; charset=utf-8\n");
         lookup.push_back("Mime-Version: 1.0 (MHng)\n");
+#if defined(HAVE_GPGME)
+        lookup.push_back("Content-Type: multipart/signed; ; micalg=PGP-SHA1;\n");
+        lookup.push_back(" boundary=MHngMIME;\n");
+        lookup.push_back(" protocol=application/pgp-signature\n");
+        
 
         /* Specify the end of the headers. */
         lookup.push_back("\n");
 
         /* Copy over the whole body section. */
+        lookup.push_back("--MHngMIME\n");
+#endif
+        std::vector<std::string> to_sign;
+        to_sign.push_back("Content-Transfer-Encoding: 8bit\n");
+        to_sign.push_back("Content-Type: text/plain; charset=utf-8\n");
+        to_sign.push_back("\n");
         for (const auto& body: raw_mime->body()->body_raw())
-            lookup.push_back(body);
+            to_sign.push_back(body);
+        to_sign.push_back("\n");
 
+        for (const auto& line: to_sign)
+            lookup.push_back(line);
+
+#if defined(HAVE_GPGME)
+        /* Create a signature */
+        lookup.push_back("--MHngMIME\n");
+        lookup.push_back("Content-Type: application/pgp-signature;\n");
+        lookup.push_back("  name=signature.asc\n");
+        lookup.push_back("\n");
+
+        for (const auto& line: mhng::gpg_sign(to_sign, from))
+            lookup.push_back(line);
+
+        /* Terminate the multi-part MIME section. */
+        lookup.push_back("--MHngMIME--\n");
+#endif
         /* Now actually re-parse the message. */
         mime = std::make_shared<mhng::mime::message>(lookup);
     }
