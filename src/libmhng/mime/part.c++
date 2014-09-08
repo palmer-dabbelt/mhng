@@ -420,7 +420,8 @@ mime::part_ptr mime::part::body(void) const
     /* Attempt to select the correct multipart, alternative means we
      * pick one of them. */
     if ((matches_content_type("multipart/alternative") == true)
-        || (matches_content_type("multipart/related") == true)) {
+        || (matches_content_type("multipart/related") == true)
+        || (matches_content_type("multipart/signed") == true)) {
         /* First, prefer anything that's just plain text. */
         for (const auto& child: _children)
             if (child->matches_content_type("text/plain"))
