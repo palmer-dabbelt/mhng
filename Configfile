@@ -144,6 +144,10 @@ COMPILEOPTS += -DFORW
 BINARIES    += mhng-sync
 SOURCES     += mhng-sync.c++
 
+# Displays every message in every folder.
+BINARIES    += mhng-hud
+SOURCES     += mhng-hud.c++
+
 ##############################################################################
 # Remote-Access Binaries                                                     #
 ##############################################################################
