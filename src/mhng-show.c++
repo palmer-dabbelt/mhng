@@ -20,6 +20,7 @@
  */
 
 #include <libmhng/args.h++>
+#include <libmhng/gpg_sign.h++>
 #include <string.h>
 #include <unistd.h>
 
@@ -29,6 +30,22 @@
 static std::vector<std::string>
 make_box(const std::vector<std::string>& lines,
          size_t width);
+
+/* Produces a ASCII terminal string that produces the correct color
+ * for this verification code. */
+static std::string color_on(mhng::gpg_verification ver);
+static std::string color_off(mhng::gpg_verification ver);
+
+/* Writes the given list of strings inside a box.*/
+static void write_in_box(FILE *out,
+                         const std::vector<std::string>& lines,
+                         mhng::gpg_verification ver,
+                         size_t width);
+
+/* Writes a line of the given character, in the given color. */
+static void write_line(FILE *o, char c,
+                       const char *on, const char *off,
+                       size_t n);
 
 int main(int argc, const char **argv)
 {
@@ -125,8 +142,25 @@ int main(int argc, const char **argv)
 
         fprintf(out, "\n");
 
-        for (const auto& line: make_box(msg->body_utf8(), terminal_width))
-            fprintf(out, "%s\n", line.c_str());
+        /* Check if there's a signature field, in which case we want
+         * to verify the signutare -- otherwise just don't worry about
+         * the verification at all! */
+        auto sig = msg->mime()->signature();
+        auto body = msg->mime()->body();
+        auto sigres = mhng::gpg_verification::ERROR;
+        if (sig != NULL) {
+            sigres = mhng::gpg_verify(body->raw(),
+                                      sig->utf8(),
+                                      msg->first_from()->email()
+                );
+        }
+
+        if (sig != NULL) {
+            write_in_box(out, body->utf8(), sigres, terminal_width);
+        } else {
+            for (const auto& line: make_box(body->utf8(), terminal_width))
+                fprintf(out, "%s\n", line.c_str());
+        }
     }
 
     /* Attempt to close the pager.  I have no idea how this can
@@ -193,4 +227,67 @@ make_box(const std::vector<std::string>& lines,
 
     out.push_back(remainder);
     return out;
+}
+
+std::string color_on(mhng::gpg_verification ver)
+{
+    switch (ver) {
+    case mhng::gpg_verification::FAIL:
+        return "\x1b[31;1m";
+    case mhng::gpg_verification::ERROR:
+        return "\x1b[33;1m";
+    case mhng::gpg_verification::SUCCESS:
+        return "\x1b[32;1m";
+    }
+
+    abort();
+    return "";
+}
+
+std::string color_off(mhng::gpg_verification ver __attribute__((unused)))
+{
+    return "\x1b[30;0m";
+}
+
+void write_in_box(FILE *out,
+                  const std::vector<std::string>& lines,
+                  mhng::gpg_verification ver,
+                  size_t width)
+{
+    write_line(out,
+               '*',
+               color_on(ver).c_str(),
+               color_off(ver).c_str(),
+               width);
+
+    for (const auto& line: make_box(lines, width - 4)) {
+        fprintf(out, "%s*%s %-*s %s*%s\n",
+                color_on(ver).c_str(),
+                color_off(ver).c_str(),
+                (int)(width - 4),
+                line.c_str(),
+                color_on(ver).c_str(),
+                color_off(ver).c_str()
+            );
+    }
+
+    write_line(out,
+               '*',
+               color_on(ver).c_str(),
+               color_off(ver).c_str(),
+               width);
+}
+
+void write_line(FILE *o, char c,
+                const char *on, const char *off,
+                size_t n)
+{
+    fprintf(o, "%s", on);
+
+    for (size_t i = 0; i < n; ++i)
+        fprintf(o, "%c", c);
+
+    fprintf(o, "%s", off);
+
+    fprintf(o, "\n");
 }

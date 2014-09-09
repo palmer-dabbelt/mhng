@@ -139,4 +139,75 @@ std::vector<std::string> mhng::gpg_sign(const std::vector<std::string>& in,
 
     return real_out;
 }
+
+
+mhng::gpg_verification mhng::gpg_verify(const std::vector<std::string>& msg,
+                                        const std::vector<std::string>& sig,
+                                        std::string email __attribute__((unused)))
+{
+    gpgme_check_version(NULL);
+
+    gpgme_ctx_t ctx;
+    if (gpgme_new(&ctx) != 0) {
+        perror("Unable to init GPG\n");
+        abort();
+    }
+
+    /* These take the input as text, and produce the output as
+     * ASCII-armored text. */
+    gpgme_set_textmode(ctx, 1);
+    gpgme_set_armor(ctx, 1);
+
+    gpgme_data_t gpgme_msg;
+    if (gpgme_data_new(&gpgme_msg) != 0) {
+        perror("Unable to initialize GPGME data buffer\n");
+        abort();
+    }
+    for (const auto& line: msg) {
+        gpgme_data_write(gpgme_msg, line.c_str(), strlen(line.c_str())-1);
+        gpgme_data_write(gpgme_msg, "\r\n", 2);
+    }
+
+    gpgme_data_t gpgme_sig;
+    if (gpgme_data_new(&gpgme_sig) != 0) {
+        perror("Unable to initialize GPGME data buffer\n");
+        abort();
+    }
+    for (const auto& line: sig) {
+        gpgme_data_write(gpgme_sig, line.c_str(), strlen(line.c_str()));
+        gpgme_data_write(gpgme_sig, "\r\n", 2);
+    }
+
+    gpgme_data_seek(gpgme_msg, 0, SEEK_SET);
+    gpgme_data_seek(gpgme_sig, 0, SEEK_SET);
+
+    if (gpgme_op_verify(ctx, gpgme_sig, gpgme_msg, NULL) != 0) {
+        fprintf(stderr, "Unable to run verification\n");
+        abort();
+    }
+
+    auto verres = gpgme_op_verify_result(ctx);
+    for (auto sig = verres->signatures; sig != NULL; sig = sig->next) {
+        switch (sig->summary) {
+        case GPGME_SIGSUM_VALID:
+        case GPGME_SIGSUM_GREEN:
+            break;
+
+        case GPGME_SIGSUM_RED:
+            return mhng::gpg_verification::FAIL;
+
+        case GPGME_SIGSUM_KEY_REVOKED:
+        case GPGME_SIGSUM_KEY_EXPIRED:
+        case GPGME_SIGSUM_SIG_EXPIRED:
+        case GPGME_SIGSUM_KEY_MISSING:
+        case GPGME_SIGSUM_CRL_MISSING:
+        case GPGME_SIGSUM_CRL_TOO_OLD:
+        case GPGME_SIGSUM_BAD_POLICY:
+        case GPGME_SIGSUM_SYS_ERROR:
+            break;
+        }
+    }
+
+    return mhng::gpg_verification::SUCCESS;
+}
 #endif

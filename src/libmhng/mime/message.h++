@@ -71,6 +71,9 @@ namespace mhng {
              * found. */
             part_ptr body(void) const;
 
+            /* Searches for the signature attached to a message. */
+            part_ptr signature(void) const;
+
             /* Adds a new header to the root of this message. */
             void add_header(const header_ptr& header);
             void add_header(const std::string& key,

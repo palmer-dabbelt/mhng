@@ -29,6 +29,16 @@
 namespace mhng {
     std::vector<std::string> gpg_sign(const std::vector<std::string>& in,
                                       std::string email);
+
+    enum class gpg_verification {
+        FAIL,
+        ERROR,
+        SUCCESS,
+    };
+
+    gpg_verification gpg_verify(const std::vector<std::string>& msg,
+                                const std::vector<std::string>& sig,
+                                std::string email);
 }
 #endif
 

@@ -103,6 +103,10 @@ namespace mhng {
             /* Searches this MIME subtree for a suitable body part. */
             part_ptr body(void) const;
 
+            /* Searches this MIME subtree for a suitable signature
+             * block. */
+            part_ptr signature(void) const;
+
             /* Adds a new header to the list of headers this message
              * contains. */
             void add_header(const header_ptr& header);

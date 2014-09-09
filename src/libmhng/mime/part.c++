@@ -496,6 +496,23 @@ mime::part_ptr mime::part::body(void) const
     return NULL;
 }
 
+mime::part_ptr mime::part::signature(void) const
+{
+    /* If there isn't a MIME type then this isn't a MIME message at
+     * all! */
+    if (_content_type.known() == false)
+        return NULL;
+
+    if (matches_content_type("multipart/signed") == false)
+        return NULL;
+
+    for (const auto& child: _children)
+        if (child->matches_content_type("application/pgp-signature") == true)
+            return child;
+
+    return NULL;
+}
+
 void mime::part::add_header(const header_ptr& header)
 {
     _headers.push_back(header);

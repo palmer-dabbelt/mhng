@@ -58,6 +58,11 @@ mime::part_ptr mime::message::body(void) const
     return root_body;
 }
 
+mime::part_ptr mime::message::signature(void) const
+{
+    return _root->signature();
+}
+
 void mime::message::add_header(const header_ptr& header)
 {
     auto key = header->key_downcase();
