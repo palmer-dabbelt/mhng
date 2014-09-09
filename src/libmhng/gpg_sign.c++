@@ -81,7 +81,6 @@ std::vector<std::string> mhng::gpg_sign(const std::vector<std::string>& in,
             abort();
         }
     }
-    
 
     gpgme_data_t gpgme_in;
     if (gpgme_data_new(&gpgme_in) != 0) {
