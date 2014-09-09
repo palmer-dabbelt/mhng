@@ -215,7 +215,10 @@ make_box(const std::vector<std::string>& lines,
                                   lines.begin() + lines.size());
 
     for (const auto& line: tail) {
-        remainder = remainder + line;
+        auto line_start = line.c_str();
+        while (isspace(*line_start))
+            line_start++;
+        remainder = remainder + line_start;
 
         while (remainder.size() > width) {
             auto f = remainder.rfind(" ", width);
