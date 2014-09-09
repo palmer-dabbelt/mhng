@@ -23,6 +23,13 @@
 #include <string.h>
 #include <unistd.h>
 
+/* Reformats a vector of strings to fit within a box -- essentially
+ * this is the "fold" command, but fixed so it can work with stuff
+ * like ASCII escape codes. */
+static std::vector<std::string>
+make_box(const std::vector<std::string>& lines,
+         size_t width);
+
 int main(int argc, const char **argv)
 {
     auto args = mhng::args::parse_normal(argc, argv);
@@ -82,14 +89,16 @@ int main(int argc, const char **argv)
     /* Here's the command we want to run in order to produce some
      * formatted output. */
 #if 0
-    FILE *out = popen("fold -s | less -FRSX", "w");
+    FILE *out = popen("less -FRSX", "w");
 #else
     FILE *out = NULL;
     if (isatty(STDOUT_FILENO) == 1)
-        out = popen("fold -s | less", "w");
+        out = popen("less", "w");
     else
         out = popen("cat", "w");
 #endif
+
+    size_t terminal_width = 80;
 
     /* Show every message out to the pager.  Note that this is
      * essentially the mbox format, but by default I don't bother
@@ -116,7 +125,7 @@ int main(int argc, const char **argv)
 
         fprintf(out, "\n");
 
-        for (const auto& line: msg->body_utf8())
+        for (const auto& line: make_box(msg->body_utf8(), terminal_width))
             fprintf(out, "%s\n", line.c_str());
     }
 
@@ -136,4 +145,52 @@ int main(int argc, const char **argv)
     }
 
     return 0;
+}
+
+std::vector<std::string>
+make_box(const std::vector<std::string>& lines,
+         size_t width)
+{
+    {
+        bool all_small = true;
+
+        for (const auto& line: lines)
+            if (line.size() >= width)
+                all_small = false;
+
+        if (all_small == true)
+            return lines;
+    }
+
+    std::vector<std::string> out;
+
+    if (lines.size() == 0)
+        return lines;
+
+    auto remainder = lines[0];
+    std::vector<std::string> tail(lines.begin() + 1,
+                                  lines.begin() + lines.size());
+
+    for (const auto& line: tail) {
+        remainder = remainder + line;
+
+        while (remainder.size() > width) {
+            auto f = remainder.rfind(" ", width);
+            if (f == std::string::npos)
+                break;
+
+            out.push_back(std::string(remainder, 0, f));
+            remainder = std::string(remainder, f + 1);
+        }
+
+        if (line.size() == 0) {
+            out.push_back(remainder);
+            out.push_back("");
+            remainder = "";
+            continue;
+        }
+    }
+
+    out.push_back(remainder);
+    return out;
 }
