@@ -39,6 +39,11 @@ enum state {
 /* Returns TRUE if this seperates a MIME header boundary. */
 static bool isterm(char c, bool space_p);
 
+/* Filter a raw list to remove a potentially malformatted last
+ * line. */
+static std::vector<std::string>
+filter_raw(const std::vector<std::string>& raw);
+
 mime::part::part(const std::vector<std::string>& raw)
     : _raw(raw)
 {
@@ -199,7 +204,7 @@ mime::part::part(const std::vector<std::string>& raw)
              * new child list. */
             if (matches_boundary(line)) {
                 state = STATE_CHILD;
-                auto child = std::make_shared<part>(child_raw);
+                auto child = std::make_shared<part>(filter_raw(child_raw));
                 _children.push_back(child);
                 child_raw = {};
                 continue;
@@ -209,7 +214,7 @@ mime::part::part(const std::vector<std::string>& raw)
              * go back to parsing the body. */
             if (matches_end_boundary(line)) {
                 state = STATE_BODY;
-                auto child = std::make_shared<part>(child_raw);
+                auto child = std::make_shared<part>(filter_raw(child_raw));
                 _children.push_back(child);
                 child_raw = {};
                 continue;
@@ -585,4 +590,21 @@ bool isterm(char c, bool space_p)
         return true;
 
     return false;
+}
+
+std::vector<std::string>
+filter_raw(const std::vector<std::string>& raw)
+{
+    auto size = raw.size();
+    if (size == 0)
+        return raw;
+
+    auto last = raw[size-1];
+    if (strcmp(last.c_str(), "\n") == 0) {
+        return std::vector<std::string>(raw.begin(),
+                                        raw.begin() + size - 1
+            );
+    }
+
+    return raw;
 }
