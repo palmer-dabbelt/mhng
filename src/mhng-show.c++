@@ -23,6 +23,9 @@
 #include <libmhng/gpg_sign.h++>
 #include <string.h>
 #include <unistd.h>
+#include <termcap.h>
+
+static char termbuf[2048];
 
 /* Reformats a vector of strings to fit within a box -- essentially
  * this is the "fold" command, but fixed so it can work with stuff
@@ -116,6 +119,12 @@ int main(int argc, const char **argv)
 #endif
 
     size_t terminal_width = 80;
+    char *termtype = getenv("TERM");
+    if (tgetent(termbuf, termtype) >= 0) {
+        terminal_width = tgetnum("co");
+    }
+    if (terminal_width > 80)
+        terminal_width = 80;
 
     /* Show every message out to the pager.  Note that this is
      * essentially the mbox format, but by default I don't bother
