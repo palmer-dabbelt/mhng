@@ -220,6 +220,9 @@ make_box(const std::vector<std::string>& lines,
             line_start++;
         remainder = remainder + line_start;
 
+        if (strlen(line_start) > 0)
+            remainder = remainder + " ";
+
         while (remainder.size() > width) {
             auto f = remainder.rfind(" ", width);
             if (f == std::string::npos)
