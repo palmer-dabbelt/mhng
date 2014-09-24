@@ -66,7 +66,10 @@ int main(int argc, const char **argv)
             printf("%s\n", url.c_str());
         } else {
             char command[BUFFER_SIZE];
-            snprintf(command, BUFFER_SIZE, "firefox \"%s\"", url.c_str());
+            snprintf(command, BUFFER_SIZE, "%s \"%s\"",
+                     getenv("BROWSER"),
+                     url.c_str()
+                );
             system(command);
         }
     }
