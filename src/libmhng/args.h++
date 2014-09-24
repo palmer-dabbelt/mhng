@@ -62,6 +62,7 @@ namespace mhng {
         /* Arguments that can be passed with "--" on the
          * command-line. */
         unknown<bool> _stdout;
+        unknown<bool> _nowrap;
 
     public:
         /* This constructor is private because you should be using one
@@ -71,7 +72,8 @@ namespace mhng {
              const std::vector<folder_ptr>& folders,
              const std::vector<int>& numbers,
              const mailbox_ptr& mbox,
-             const unknown<bool>& stdout);
+             const unknown<bool>& stdout,
+             const unknown<bool>& nowrap);
 
     public:
         /* Accessor functions. */
@@ -84,6 +86,8 @@ namespace mhng {
         const mailbox_ptr& mbox(void) const { return _mbox; }
 
         const unknown<bool>& stdout(void) const { return _stdout; }
+        bool nowrap(void) const
+            { return _nowrap.known() == true && _nowrap.data() == true; }
 
     public:
         /* Parses normal command-line arguments, which means arguments

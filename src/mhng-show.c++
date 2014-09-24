@@ -166,8 +166,11 @@ int main(int argc, const char **argv)
 
         if (sig != NULL) {
             write_in_box(out, body->utf8(), sigres, terminal_width);
-        } else {
+        } else if (args->nowrap() == false) {
             for (const auto& line: make_box(body->utf8(), terminal_width))
+                fprintf(out, "%s\n", line.c_str());
+        } else {
+            for (const auto& line: body->utf8())
                 fprintf(out, "%s\n", line.c_str());
         }
     }
