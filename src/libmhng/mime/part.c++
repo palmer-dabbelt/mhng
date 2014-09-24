@@ -348,6 +348,8 @@ std::vector<std::string> mime::part::decoded(void) const
                         char str[] = {ci1, ci2, '\0'};
 
                         char co = strtol(str, NULL, 16);
+                        if (co == '\0')
+                            co = ' ';
                         linebuf[io] = co;
                         io++;
                         ii += 3;
