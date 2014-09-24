@@ -150,6 +150,10 @@ SOURCES     += mhng-sync.c++
 BINARIES    += mhng-hud
 SOURCES     += mhng-hud.c++
 
+# Shows a _tiny_ HUD for your BASH prompt
+BINARIES    += mhng-bud
+SOURCES     += mhng-bud.c++
+
 ##############################################################################
 # Remote-Access Binaries                                                     #
 ##############################################################################
