@@ -197,53 +197,103 @@ std::vector<std::string>
 make_box(const std::vector<std::string>& lines,
          size_t width)
 {
+    /* First split the mail up into the paragraphs that make up
+     * this document. */
+    std::vector<std::vector<std::string>> paragraphs;
     {
-        bool all_small = true;
+        std::vector<std::string> paragraph;
 
-        for (const auto& line: lines)
-            if (line.size() >= width)
-                all_small = false;
-
-        if (all_small == true)
-            return lines;
-    }
-
-    std::vector<std::string> out;
-
-    if (lines.size() == 0)
-        return lines;
-
-    auto remainder = lines[0];
-    std::vector<std::string> tail(lines.begin() + 1,
-                                  lines.begin() + lines.size());
-
-    for (const auto& line: tail) {
-        auto line_start = line.c_str();
-        while (isspace(*line_start))
-            line_start++;
-        remainder = remainder + line_start;
-
-        if (strlen(line_start) > 0)
-            remainder = remainder + " ";
-
-        while (remainder.size() > width) {
-            auto f = remainder.rfind(" ", width);
-            if (f == std::string::npos)
-                break;
-
-            out.push_back(std::string(remainder, 0, f));
-            remainder = std::string(remainder, f + 1);
+        for (const auto& line: lines) {
+            if (line.size() == 0) {
+                paragraphs.push_back(paragraph);
+                paragraph = std::vector<std::string>();
+            } else {
+                paragraph.push_back(line);
+            }
         }
 
-        if (line.size() == 0) {
-            out.push_back(remainder);
+        paragraphs.push_back(paragraph);
+    }
+
+    /* Now that we're got a list of paragraphs, walk through each of
+     * those, line-breaking them seperately in order to form the
+     * desired output format. */
+    std::vector<std::string> out;
+    for (const auto& paragraph: paragraphs) {
+        /* Empty paragraphs don't need to be processed at all! */
+        if (paragraph.size() == 0) {
             out.push_back("");
-            remainder = "";
             continue;
         }
+
+        /* First we check if this is a special sort of paragraph: it
+         * might be one of those with a whole bunch of small,
+         * already-broken lines or it might be one with a large shared
+         * prefix. */
+        bool all_small = true;
+        auto prefix = paragraph[0];
+
+        for (const auto& line: paragraph) {
+            if (line.size() > width)
+                all_small = false;
+
+            size_t i;
+            for (i = 0; i < prefix.size() && i < line.size(); ++i)
+                if (prefix[i] != line[i])
+                    break;
+
+            prefix = std::string(prefix, 0, i);
+        }
+
+        /* Paragraphs with only one line don't have prefix support at
+         * all. */
+        if (paragraph.size() == 1)
+            prefix = "";
+
+        /* If it's one of those special cases then just don't break it
+         * at all. */
+        if ((all_small == true) || (prefix.size() >= 1)) {
+            for (const auto& line: paragraph)
+                out.push_back(line);
+
+            out.push_back("");
+
+            continue;
+        }
+
+        /* Otherwise attempt to line break the paragraph at word
+         * boundries, leaving very long words un-touched. */
+        std::string remainder;
+        for (const auto& line: paragraph) {
+            auto line_start = line.c_str();
+            while (isspace(*line_start))
+                line_start++;
+            remainder = remainder + line_start;
+
+            if (strlen(line_start) > 0)
+                remainder = remainder + " ";
+
+            while (remainder.size() > width) {
+                auto f = remainder.rfind(" ", width);
+                if (f == std::string::npos)
+                    break;
+
+                out.push_back(std::string(remainder, 0, f));
+                remainder = std::string(remainder, f + 1);
+            }
+
+            if (line.size() == 0) {
+                out.push_back(remainder);
+                out.push_back("");
+                remainder = "";
+                continue;
+            }
+        }
+
+        out.push_back(remainder);
+        out.push_back("");
     }
 
-    out.push_back(remainder);
     return out;
 }
 
