@@ -145,6 +145,7 @@ mhng::gpg_verification mhng::gpg_verify(const std::vector<std::string>& msg,
                                         const std::vector<std::string>& sig,
                                         std::string email __attribute__((unused)))
 {
+    gpgme_error_t err;
     gpgme_check_version(NULL);
 
     gpgme_ctx_t ctx;
@@ -181,9 +182,10 @@ mhng::gpg_verification mhng::gpg_verify(const std::vector<std::string>& msg,
     gpgme_data_seek(gpgme_msg, 0, SEEK_SET);
     gpgme_data_seek(gpgme_sig, 0, SEEK_SET);
 
-    if (gpgme_op_verify(ctx, gpgme_sig, gpgme_msg, NULL) != 0) {
-        fprintf(stderr, "Unable to run verification\n");
-        abort();
+    if ((err = gpgme_op_verify(ctx, gpgme_sig, gpgme_msg, NULL)) != 0) {
+        fprintf(stderr, "WARNING: Unable to run verification\n");
+        fprintf(stderr, "         GPGme Error: '%s'\n", gpgme_strerror(err));
+        return mhng::gpg_verification::ERROR;
     }
 
     auto verres = gpgme_op_verify_result(ctx);
