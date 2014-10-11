@@ -219,10 +219,26 @@ int main(int argc, const char **argv)
         /* Make this a MIME message. */
         lookup.push_back("Mime-Version: 1.0 (MHng)\n");
 #if defined(HAVE_GPGME)
+        /* Kosta's mail client doesn't understand PGP, so also attach
+         * him another copy in plain-text. */
+        lookup.push_back("Content-Type: multipart/alternative;\n");
+        lookup.push_back(" boundary=MHngMIME-NoPGP\n");
+        lookup.push_back("\n");
+        lookup.push_back("--MHngMIME-NoPGP\n");
+
+        lookup.push_back("Content-Type: text/plain; charset=utf-8\n");
+        lookup.push_back("Content-Transfer-Encoding: 8bit\n");
+        lookup.push_back("\n");
+        for (const auto& body: raw_mime->body()->body_raw())
+            lookup.push_back(body);
+
+        lookup.push_back("\n");
+        lookup.push_back("--MHngMIME-NoPGP\n");
+
+        /* Now as the second part attach a PGP-signed message. */
         lookup.push_back("Content-Type: multipart/signed; ; micalg=PGP-SHA1;\n");
         lookup.push_back(" boundary=MHngMIME;\n");
         lookup.push_back(" protocol=application/pgp-signature\n");
-        
 
         /* Specify the end of the headers. */
         lookup.push_back("\n");
@@ -251,8 +267,9 @@ int main(int argc, const char **argv)
         for (const auto& line: mhng::gpg_sign(to_sign, from))
             lookup.push_back(line);
 
-        /* Terminate the multi-part MIME section. */
+        /* Terminate the multi-part MIME sections all the way up. */
         lookup.push_back("--MHngMIME--\n");
+        lookup.push_back("--MHngMIME-NoPGP--\n");
 #endif
         /* Now actually re-parse the message. */
         mime = std::make_shared<mhng::mime::message>(lookup);
