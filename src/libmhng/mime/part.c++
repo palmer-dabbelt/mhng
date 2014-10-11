@@ -429,6 +429,16 @@ mime::part_ptr mime::part::body(void) const
     if ((matches_content_type("multipart/alternative") == true)
         || (matches_content_type("multipart/related") == true)
         || (matches_content_type("multipart/signed") == true)) {
+        /* If there's anything that matches multipart-signed then show
+         * its child. */
+        for (const auto& child: _children) {
+            if (child->matches_content_type("multipart/signed")) {
+                auto cbody = child->body();
+                if (cbody != NULL)
+                    return cbody;
+            }
+        }
+
         /* First, prefer anything that's just plain text. */
         for (const auto& child: _children)
             if (child->matches_content_type("text/plain"))
@@ -504,6 +514,15 @@ mime::part_ptr mime::part::signature(void) const
      * all! */
     if (_content_type.known() == false)
         return NULL;
+
+    /* Multipart-alternative sections should be checked. */
+    if (matches_content_type("multipart/alternative")) {
+        for (const auto& child: _children) {
+            auto csig = child->signature();
+            if (csig != NULL)
+                return csig;
+        }
+    }
 
     if (matches_content_type("multipart/signed") == false)
         return NULL;
