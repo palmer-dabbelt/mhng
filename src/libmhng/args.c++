@@ -49,6 +49,16 @@ args::args(const std::vector<message_ptr>& messages,
 {
 }
 
+std::string args::username(void) const
+{
+    return GMAIL_USERNAME;
+}
+
+std::string args::password(void) const
+{
+    return GMAIL_PASSWORD;
+}
+
 args_ptr args::parse_normal(int argc, const char **argv)
 {
     int flags = 0;

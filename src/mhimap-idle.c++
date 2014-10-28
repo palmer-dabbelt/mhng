@@ -32,7 +32,9 @@ int MHIMAP_MAIN(int argc, const char **argv)
 
     fprintf(stderr, "IDLE Logging In: %s\n",
             mhng::date::now()->local().c_str());
-    mhimap::gmail_client client(GMAIL_USERNAME, GMAIL_PASSWORD);
+    mhimap::gmail_client client(args->username(),
+                                args->password()
+        );
     while (true) {
         fprintf(stderr, "Sending IDLE\n");
         client.send_idle("inbox");
