@@ -179,6 +179,16 @@ void mailbox::did_purge(const folder_ptr& folder, uint32_t imapid)
     table->remove(folder->name(), imapid);
 }
 
+std::string mailbox::username(void) const
+{
+    return GMAIL_USERNAME;
+}
+
+std::string mailbox::password(void) const
+{
+    return GMAIL_PASSWORD;
+}
+
 folder_ptr mailbox::_current_folder_impl(void)
 {
     auto table = std::make_shared<db::mh_current>(_self_ptr.lock());

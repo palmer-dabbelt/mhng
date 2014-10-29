@@ -89,11 +89,6 @@ namespace mhng {
         bool nowrap(void) const
             { return _nowrap.known() == true && _nowrap.data() == true; }
 
-        /* Returns the username and password that should be used to
-         * connect to the server. */
-        std::string username(void) const;
-        std::string password(void) const;
-
     public:
         /* Parses normal command-line arguments, which means arguments
          * that look like NMH but slightly extended.  Specifically,

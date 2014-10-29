@@ -114,6 +114,11 @@ namespace mhng {
          * multiplexed over. */
         daemon::connection_ptr daemon(void) { return _daemon; }
 
+        /* Returns the username and password that should be used to
+         * connect to the server. */
+        std::string username(void) const;
+        std::string password(void) const;
+
     private:
         static folder_ptr _current_folder_func(mailbox *mbox)
             { return mbox->_current_folder_impl(); }

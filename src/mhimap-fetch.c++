@@ -34,8 +34,8 @@ int MHIMAP_MAIN(int argc, const char **argv)
             mhng::date::now()->local().c_str());
 
     /* Opens a connection to GMail. */
-    mhimap::gmail_client client(args->username(),
-                                args->password()
+    mhimap::gmail_client client(args->mbox()->username(),
+                                args->mbox()->password()
         );
 
     /* Look through the IMAP server and synchronize every folder. */
