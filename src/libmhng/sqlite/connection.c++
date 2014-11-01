@@ -23,6 +23,7 @@
 #include <map>
 #include <stdarg.h>
 #include <string.h>
+#include <stdlib.h>
 using namespace mhng;
 
 #ifndef BUFFER_SIZE

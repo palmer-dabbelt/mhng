@@ -23,6 +23,7 @@
 #include "logger.h++"
 #include <stdarg.h>
 #include <string.h>
+#include <stdlib.h>
 
 using namespace mhimap;
 

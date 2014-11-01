@@ -121,7 +121,7 @@ int main(int argc, const char **argv)
     size_t terminal_width = 80;
     char *termtype = getenv("TERM");
     if (tgetent(termbuf, termtype) >= 0) {
-        terminal_width = tgetnum("co");
+        terminal_width = tgetnum((char *)"co");
     }
     if (terminal_width > 80)
         terminal_width = 80;

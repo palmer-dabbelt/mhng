@@ -20,6 +20,7 @@
  */
 
 #include "row.h++"
+#include <stdlib.h>
 using namespace mhng;
 
 template<class K, class V>

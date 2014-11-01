@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [[ "$(uname)" == "Darwin" ]]
+then
+    cat <<EOF
+LANGUAGES += c++
+LINKOPTS    += -liconv
+LINKOPTS    += -lsqlite3
+LINKOPTS    += -lncurses
+COMPILEOPTS += -I/usr/include/uuid
+EOF
+fi

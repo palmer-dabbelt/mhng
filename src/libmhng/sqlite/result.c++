@@ -20,6 +20,7 @@
  */
 
 #include "result.h++"
+#include <stdlib.h>
 using namespace mhng;
 
 sqlite::result::result(void)

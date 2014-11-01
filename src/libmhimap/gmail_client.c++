@@ -20,6 +20,7 @@
  */
 
 #include "gmail_client.h++"
+#include <stdlib.h>
 
 #ifndef GMAIL_HOSTNAME
 #define GMAIL_HOSTNAME "imap.gmail.com"

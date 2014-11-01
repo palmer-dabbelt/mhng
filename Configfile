@@ -49,6 +49,10 @@ LINKOPTS    += `ppkg-config --ccmd gpgme --optional --have GPGME --libs`
 GENERATE    += version.h
 GENERATE    += version-pc.sed
 
+# OSX doesn't build this because of missing pkg-config files, so just
+# force it to build here.
+CONFIG += fixme_osx
+
 ##############################################################################
 # Libraries                                                                  #
 ##############################################################################

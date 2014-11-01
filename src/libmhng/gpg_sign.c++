@@ -23,6 +23,7 @@
 #include "gpg_sign.h++"
 #include <gpgme.h>
 #include <string.h>
+#include <stdlib.h>
 
 #ifndef BUFFER_SIZE
 #define BUFFER_SIZE 1024

@@ -21,6 +21,8 @@
 
 #include "process.h++"
 #include <unistd.h>
+#include <stdlib.h>
+#include <signal.h>
 #include <sys/wait.h>
 using namespace mhng;
 

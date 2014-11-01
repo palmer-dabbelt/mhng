@@ -23,6 +23,7 @@
 #include "done_command.h++"
 #include "logger.h++"
 #include <string.h>
+#include <stdlib.h>
 
 using namespace mhimap;
 

@@ -69,7 +69,9 @@ uint64_t date::unix(void) const
 const std::string date::unix_str(void) const
 {
     char buffer[BUFFER_SIZE];
-    snprintf(buffer, BUFFER_SIZE, "%lu", _unix);
+    snprintf(buffer, BUFFER_SIZE, "%llu",
+	     (unsigned long long)_unix
+        );
     return buffer;
 }
 
