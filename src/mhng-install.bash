@@ -66,3 +66,5 @@ CREATE TABLE IMAP__messages (folder STRING NOT NULL,
 EOF
 
 sqlite3 $HOME/.mhng/metadata.sqlite3 < $HOME/.mhng/init.sql
+
+echo "Create $HOME/.mhng/{username,password} with your username and password"

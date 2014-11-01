@@ -181,12 +181,48 @@ void mailbox::did_purge(const folder_ptr& folder, uint32_t imapid)
 
 std::string mailbox::username(void) const
 {
-    return GMAIL_USERNAME;
+    char path[BUFFER_SIZE];
+    snprintf(path, BUFFER_SIZE, "%s/.mhng/username",
+             getenv("HOME"));
+
+    auto file = fopen(path, "r");
+    if (file == NULL) {
+        fprintf(stderr, "Unable to open username file: '%s'\n",
+                path);
+        abort();
+    }
+
+    char line[BUFFER_SIZE];
+    fgets(line, BUFFER_SIZE, file);
+    while (isspace(line[strlen(line)-1]))
+        line[strlen(line)-1] = '\0';
+
+    fclose(file);
+
+    return line;
 }
 
 std::string mailbox::password(void) const
 {
-    return GMAIL_PASSWORD;
+    char path[BUFFER_SIZE];
+    snprintf(path, BUFFER_SIZE, "%s/.mhng/password",
+             getenv("HOME"));
+
+    auto file = fopen(path, "r");
+    if (file == NULL) {
+        fprintf(stderr, "Unable to open password file: '%s'\n",
+                path);
+        abort();
+    }
+
+    char line[BUFFER_SIZE];
+    fgets(line, BUFFER_SIZE, file);
+    while (isspace(line[strlen(line)-1]))
+        line[strlen(line)-1] = '\0';
+
+    fclose(file);
+
+    return line;
 }
 
 folder_ptr mailbox::_current_folder_impl(void)
