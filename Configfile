@@ -23,6 +23,10 @@ LANGUAGES   += bash
 LANGUAGES   += c++
 COMPILEOPTS += -Isrc
 
+# Add git's version number to the pkg-config files
+LANGUAGES   += pkgconfig
+LINKOPTS    += -Sobj/proc/version-pc.sed
+
 # This is my global library list.  I'm putting pretty much everything
 # here because there's a bunch of binaries below and I don't want to
 # add every external dependency to every binary.
@@ -41,6 +45,10 @@ LINKOPTS    += `ppkg-config ncurses --libs`
 COMPILEOPTS += `ppkg-config --ccmd gpgme --optional --have GPGME --cflags`
 LINKOPTS    += `ppkg-config --ccmd gpgme --optional --have GPGME --libs`
 
+# Try to match this with git's version number
+GENERATE    += version.h
+GENERATE    += version-pc.sed
+
 ##############################################################################
 # Libraries                                                                  #
 ##############################################################################
@@ -49,12 +57,16 @@ LINKOPTS    += `ppkg-config --ccmd gpgme --optional --have GPGME --libs`
 LIBRARIES   += libmhimap.so
 CONFIG      += libmhimap_sources
 CONFIG      += libmhimap_headers
+LIBRARIES   += pkgconfig/mhimap.pc
+SOURCES     += libmhimap/mhimap.pc
 
 # The MHNG library, which handles messing around within MH folders on
 # disk.
 LIBRARIES   += libmhng.so
 CONFIG      += libmhng_sources
 CONFIG      += libmhng_headers
+LIBRARIES   += pkgconfig/mhng.pc
+SOURCES     += libmhng/mhng.pc
 
 ##############################################################################
 # Local-Access Binaries                                                      #
