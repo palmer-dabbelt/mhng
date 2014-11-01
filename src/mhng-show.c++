@@ -34,6 +34,7 @@ static std::vector<std::string>
 make_box(const std::vector<std::string>& lines,
          size_t width);
 
+#ifdef HAVE_GPGME
 /* Produces a ASCII terminal string that produces the correct color
  * for this verification code. */
 static std::string color_on(mhng::gpg_verification ver);
@@ -49,6 +50,7 @@ static void write_in_box(FILE *out,
 static void write_line(FILE *o, char c,
                        const char *on, const char *off,
                        size_t n);
+#endif
 
 int main(int argc, const char **argv)
 {
@@ -154,8 +156,9 @@ int main(int argc, const char **argv)
         /* Check if there's a signature field, in which case we want
          * to verify the signutare -- otherwise just don't worry about
          * the verification at all! */
-        auto sig = msg->mime()->signature();
         auto body = msg->mime()->body();
+#ifdef HAVE_GPGME
+        auto sig = msg->mime()->signature();
         auto sigres = mhng::gpg_verification::ERROR;
         if (sig != NULL) {
             sigres = mhng::gpg_verify(body->raw(),
@@ -173,6 +176,15 @@ int main(int argc, const char **argv)
             for (const auto& line: body->utf8())
                 fprintf(out, "%s\n", line.c_str());
         }
+#else
+        if (args->nowrap() == false) {
+            for (const auto& line: make_box(body->utf8(), terminal_width))
+                fprintf(out, "%s\n", line.c_str());
+        } else {
+            for (const auto& line: body->utf8())
+                fprintf(out, "%s\n", line.c_str());
+        }
+#endif
     }
 
     /* Attempt to close the pager.  I have no idea how this can
@@ -297,6 +309,7 @@ make_box(const std::vector<std::string>& lines,
     return out;
 }
 
+#ifdef HAVE_GPGME
 std::string color_on(mhng::gpg_verification ver)
 {
     switch (ver) {
@@ -359,3 +372,4 @@ void write_line(FILE *o, char c,
 
     fprintf(o, "\n");
 }
+#endif
