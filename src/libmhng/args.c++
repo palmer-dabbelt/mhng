@@ -23,6 +23,7 @@
 #include "mailbox.h++"
 #include "sequence_number.h++"
 #include "db/mh_current.h++"
+#include "version.h"
 #include <unordered_map>
 #include <string.h>
 using namespace mhng;
@@ -136,6 +137,9 @@ args_ptr args::parse(int argc, const char **argv, int flags)
             stdout = true;
         } else if (strcmp(argv[i], "--nowrap") == 0) {
             nowrap = true;
+        } else if (strcmp(argv[i], "--version") == 0) {
+            printf("%s\n", PCONFIGURE_VERSION);
+            exit(0);
         } else {
             folders_written = true;
             folder_names.push_back(argv[i]);
