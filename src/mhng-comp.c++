@@ -72,6 +72,7 @@ int main(int argc, const char **argv)
 
 #elif defined(REPL)
         mhng::address_ptr local = NULL;
+        bool should_sync = false;
         for (const auto& msg: args->messages()) {
             for (const auto& addr: msg->bcc()) {
                 if (addr->local() == true)
@@ -85,6 +86,17 @@ int main(int argc, const char **argv)
                 if (addr->local() == true)
                     local = addr;
             }
+
+            if (msg->unread()) {
+                msg->mark_read_and_unsynced();
+                should_sync = true;
+            }
+        }
+
+        if (should_sync == true) {
+            auto daemon = args->mbox()->daemon();
+            auto message = mhng::daemon::message::sync();
+            daemon->send(message);
         }
 
         if (local == NULL)
