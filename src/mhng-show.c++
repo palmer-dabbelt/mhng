@@ -21,6 +21,7 @@
 
 #include <libmhng/args.h++>
 #include <libmhng/gpg_sign.h++>
+#include <regex>
 #include <string.h>
 #include <unistd.h>
 #include <termcap.h>
@@ -245,6 +246,7 @@ make_box(const std::vector<std::string>& lines,
         bool all_small = true;
         auto prefix = paragraph[0];
 
+        bool first = true;
         for (const auto& line: paragraph) {
             if (line.size() > width)
                 all_small = false;
@@ -255,6 +257,14 @@ make_box(const std::vector<std::string>& lines,
                     break;
 
             prefix = std::string(prefix, 0, i);
+
+            if (first && std::regex_match(line, std::regex("On.*wrote:"))) {
+                if (paragraph.size() > 1)
+                    prefix = paragraph[1];
+                all_small = true;
+            }
+
+            first = false;
         }
 
         /* Paragraphs with only one line don't have prefix support at
