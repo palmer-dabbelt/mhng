@@ -207,6 +207,7 @@ mhng::gpg_verification mhng::gpg_verify(const std::vector<std::string>& msg,
         case GPGME_SIGSUM_CRL_TOO_OLD:
         case GPGME_SIGSUM_BAD_POLICY:
         case GPGME_SIGSUM_SYS_ERROR:
+            return mhng::gpg_verification::ERROR;
             break;
         }
     }
