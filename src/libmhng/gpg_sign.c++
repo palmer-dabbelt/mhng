@@ -110,11 +110,13 @@ std::vector<std::string> mhng::gpg_sign(const std::vector<std::string>& in,
 
     std::vector<std::string> out;
     while (true) {
-        char buffer[BUFFER_SIZE];
-        auto readed = gpgme_data_read(gpgme_out, buffer, BUFFER_SIZE);
-        buffer[readed] = '\0';
+        char buffer[BUFFER_SIZE+1];
+        ssize_t readed = gpgme_data_read(gpgme_out, buffer, BUFFER_SIZE);
+
         if (readed <= 0)
             break;
+
+        buffer[readed] = '\0';
 
         ssize_t last_i = 0;
         for (ssize_t i = 0; i < readed; ++i) {
@@ -125,7 +127,7 @@ std::vector<std::string> mhng::gpg_sign(const std::vector<std::string>& in,
             }
         }
 
-        gpgme_data_seek(gpgme_out, readed - last_i, SEEK_CUR);
+        gpgme_data_seek(gpgme_out, last_i - readed, SEEK_CUR);
     }
 
     std::vector<std::string> real_out;
