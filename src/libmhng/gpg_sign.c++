@@ -132,13 +132,32 @@ std::vector<std::string> mhng::gpg_sign(const std::vector<std::string>& in,
 
     std::vector<std::string> real_out;
     bool outing = false;
+    bool ended = false;
     for (const auto& line: out) {
         if (strcmp("-----BEGIN PGP SIGNATURE-----\n", line.c_str()) == 0)
             outing = true;
 
         if (outing == true)
             real_out.push_back(line);
+
+        if (strcmp("-----END PGP SIGNATURE-----\n", line.c_str()) == 0) {
+            ended = outing;
+            break;
+        }
     }
+
+    /* Check to make sure we've got a valid PGP output block, and
+     * attempt to either fix it up or provide some debugging
+     * information. */
+    if (outing == false) {
+        fprintf(stderr, "Unable to match PGP Signature Beginnig\n");
+        fprintf(stderr, "gpgme_op_sign output:\n");
+        for (const auto& line: out)
+            fprintf(stderr, "  %s", line.c_str());
+    }
+
+    if (ended == false)
+        real_out.push_back("-----END PGP SIGNATURE-----\n");
 
     return real_out;
 }
