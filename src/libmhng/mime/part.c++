@@ -151,7 +151,7 @@ mime::part::part(const std::vector<std::string>& raw)
         char line[BUFFER_SIZE];
         snprintf(line, BUFFER_SIZE, "%s", raw_line.c_str());
 
-        while (isspace(line[strlen(line)-1]))
+        while ((strlen(line) > 0) && isspace(line[strlen(line)-1]))
             line[strlen(line)-1] = '\0';
 
         switch (state) {
@@ -378,7 +378,7 @@ std::vector<std::string> mime::part::decoded(void) const
     for (const auto& line: _body_raw) {
         char buffer[BUFFER_SIZE];
         snprintf(buffer, BUFFER_SIZE, "%s", line.c_str());
-        while (isspace(buffer[strlen(buffer)-1]))
+        while ((strlen(buffer) > 0) && isspace(buffer[strlen(buffer)-1]))
             buffer[strlen(buffer)-1] = '\0';
         out.push_back(buffer);
     }
