@@ -248,7 +248,7 @@ int main(int argc, const char **argv)
         lookup.push_back("--MHngMIME-NoPGP\n");
 
         /* Now as the second part attach a PGP-signed message. */
-        lookup.push_back("Content-Type: multipart/signed; ; micalg=PGP-SHA1;\n");
+        lookup.push_back("Content-Type: multipart/signed; micalg=PGP-SHA1;\n");
         lookup.push_back(" boundary=MHngMIME;\n");
         lookup.push_back(" protocol=application/pgp-signature\n");
 
