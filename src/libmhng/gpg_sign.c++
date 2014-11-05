@@ -215,9 +215,11 @@ mhng::gpg_verification mhng::gpg_verify(const std::vector<std::string>& msg,
         switch (sig->summary) {
         case GPGME_SIGSUM_VALID:
         case GPGME_SIGSUM_GREEN:
+            return mhng::gpg_verification::SUCCESS;
             break;
 
         case GPGME_SIGSUM_RED:
+            fprintf(stderr, "WARNING: Verification Failed\n");
             return mhng::gpg_verification::FAIL;
 
         case GPGME_SIGSUM_KEY_REVOKED:
@@ -228,11 +230,12 @@ mhng::gpg_verification mhng::gpg_verify(const std::vector<std::string>& msg,
         case GPGME_SIGSUM_CRL_TOO_OLD:
         case GPGME_SIGSUM_BAD_POLICY:
         case GPGME_SIGSUM_SYS_ERROR:
+            fprintf(stderr, "WARNING: Unable to run verification\n");
             return mhng::gpg_verification::ERROR;
             break;
         }
     }
 
-    return mhng::gpg_verification::SUCCESS;
+    return mhng::gpg_verification::ERROR;
 }
 #endif
