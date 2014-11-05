@@ -202,8 +202,15 @@ int main(int argc, const char **argv)
         std::vector<std::string> raw;
 
         char line[BUFFER_SIZE];
-        while (fgets(line, BUFFER_SIZE, file) != NULL)
+        while (fgets(line, BUFFER_SIZE, file) != NULL) {
+#ifndef COMP_ALLOW_TRAILING_WHITESPACE
+        while ((strlen(line) > 0) && isspace(line[strlen(line)-1]))
+            line[strlen(line)-1] = '\0';
+        strncat(line, "\n", BUFFER_SIZE);
+#endif
+
             raw.push_back(line);
+        }
 
         auto raw_mime = std::make_shared<mhng::mime::message>(raw);
 
