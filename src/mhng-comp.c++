@@ -239,7 +239,13 @@ int main(int argc, const char **argv)
         lookup.push_back("Mime-Version: 1.0 (MHng)\n");
 #if defined(HAVE_GPGME)
         /* Kosta's mail client doesn't understand PGP, so also attach
-         * him another copy in plain-text. */
+         * him another copy in plain-text. If NO_PGP_MIME_BUT_MIME is
+         * defined, then we send another MIME message that includes
+         * the non-signed version as well as the signed version.
+         * While this seems to be the correct thing to do, mutt and
+         * claws-mail are both choking on it...  Maybe I've done
+         * something wrong with the MIME here? */
+#ifdef NO_PGP_MIME_BUT_MIME
         lookup.push_back("Content-Type: multipart/alternative;\n");
         lookup.push_back(" boundary=MHngMIME-NoPGP\n");
         lookup.push_back("\n");
@@ -253,6 +259,7 @@ int main(int argc, const char **argv)
 
         lookup.push_back("\n");
         lookup.push_back("--MHngMIME-NoPGP\n");
+#endif
 
         /* Now as the second part attach a PGP-signed message. */
         lookup.push_back("Content-Type: multipart/signed; micalg=PGP-SHA1;\n");
@@ -262,9 +269,20 @@ int main(int argc, const char **argv)
         /* Specify the end of the headers. */
         lookup.push_back("\n");
 
+        /* Here's the other way of sending a text no a non PGP/MIME
+         * complient client: just include it in the MIME preabmle. */
+#ifndef NO_PGP_MIME_BUT_MIME
+        lookup.push_back("Your mail client doesn't appears to support PGP/MIME\n");
+        lookup.push_back("The contents of the message is copied below:\n");
+        lookup.push_back("\n");
+        for (const auto& body: raw_mime->body()->body_raw())
+            lookup.push_back(body);
+        lookup.push_back("\n");
+#endif
+
         /* Copy over the whole body section. */
         lookup.push_back("--MHngMIME\n");
-#endif
+#endif /*defined(HAVE_GPGME)*/
         std::vector<std::string> to_sign;
         to_sign.push_back("Content-Transfer-Encoding: 8bit\n");
         to_sign.push_back("Content-Type: text/plain; charset=utf-8\n");
@@ -287,9 +305,15 @@ int main(int argc, const char **argv)
             lookup.push_back(line);
 
         /* Terminate the multi-part MIME sections all the way up. */
+        lookup.push_back("\n");
         lookup.push_back("--MHngMIME--\n");
+
+#ifdef NO_PGP_MIME_BUT_MIME
+        lookup.push_back("\n");
         lookup.push_back("--MHngMIME-NoPGP--\n");
 #endif
+
+#endif /*defined(HAVE_GPGME)*/
         /* Now actually re-parse the message. */
         mime = std::make_shared<mhng::mime::message>(lookup);
     }
