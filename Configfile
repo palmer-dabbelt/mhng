@@ -234,3 +234,12 @@ COMPILEOPTS += -DUP
 BINARIES    += mhng-pipe-network_down
 SOURCES     += mhng-pipe-network_up.c++
 COMPILEOPTS += -DDOWN
+
+# Shows the headers for the given message set
+BINARIES    += mhng-pipe-headers
+SOURCES     += mhng-pipe-headers.c++
+COMPILEOPTS += -DHEADERS
+
+BINARIES    += mhng-pipe-header
+SOURCES     += mhng-pipe-headers.c++
+COMPILEOPTS += -DHEADER
