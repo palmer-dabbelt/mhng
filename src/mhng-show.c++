@@ -115,7 +115,7 @@ int main(int argc, const char **argv)
     FILE *out = popen("less -FRSX", "w");
 #else
     FILE *out = NULL;
-    if (isatty(STDOUT_FILENO) == 1)
+    if ((isatty(STDOUT_FILENO) == 1) && (args->stdout() == false))
         out = popen("less", "w");
     else
         out = popen("cat", "w");

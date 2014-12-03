@@ -85,7 +85,8 @@ namespace mhng {
             { return _numbers; }
         const mailbox_ptr& mbox(void) const { return _mbox; }
 
-        const unknown<bool>& stdout(void) const { return _stdout; }
+        bool stdout(void) const
+            { return _stdout.known() == true && _stdout.data() == true; }
         bool nowrap(void) const
             { return _nowrap.known() == true && _nowrap.data() == true; }
 

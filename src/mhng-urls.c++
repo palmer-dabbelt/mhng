@@ -62,7 +62,7 @@ int main(int argc, const char **argv)
 
         auto url = urls[num - 1];
 
-        if (args->stdout().known() && args->stdout().data()) {
+        if (args->stdout() == true) {
             printf("%s\n", url.c_str());
         } else {
             char command[BUFFER_SIZE];
