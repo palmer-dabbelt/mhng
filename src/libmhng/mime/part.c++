@@ -243,6 +243,12 @@ std::vector<std::string> mime::part::utf8(void) const
 
     std::string charset = _charset.data();
 
+    /* Krste sends some malformed messages (UTF-8 marked as US-ASCII),
+     * but because US-ASCII is a subset of UTF-8 it's always safe to
+     * just directly drop the decoded message out. */
+    if (strcasecmp(charset.c_str(), "us-ascii") == 0)
+        return decoded();
+
     std::vector<std::string> out;
 
     iconv_t icd = iconv_open("UTF-8", charset.c_str());
