@@ -21,6 +21,8 @@
 
 #include "mailbox.h++"
 #include "mailrc.h++"
+#include "daemon/dummy_connection.h++"
+#include "daemon/real_connection.h++"
 #include "db/mh_messages.h++"
 #include "db/mh_current.h++"
 #include "db/mh_nextid.h++"
@@ -241,5 +243,10 @@ mailrc_ptr mailbox::_mailrc_impl(void)
 
 daemon::connection_ptr mailbox::_daemon_impl(void)
 {
-    return std::make_shared<daemon::connection>(_path + "/daemon.socket");
+    if (getenv("MHNG_NO_DAEMON") != NULL) {
+        fprintf(stderr, "MHNG_NO_DAEMON set, using no sync daemon\n");
+        return std::make_shared<daemon::dummy_connection>();
+    }
+
+    return std::make_shared<daemon::real_connection>(_path + "/daemon.socket");
 }

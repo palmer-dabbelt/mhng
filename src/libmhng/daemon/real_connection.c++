@@ -19,7 +19,7 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "connection.h++"
+#include "real_connection.h++"
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -30,7 +30,7 @@ using namespace mhng;
 #define BUFFER_SIZE 1024
 #endif
 
-daemon::connection::connection(const std::string& path)
+daemon::real_connection::real_connection(const std::string& path)
 {
     _socket = socket(AF_UNIX, SOCK_SEQPACKET, 0);
     if (_socket < 0) {
@@ -51,13 +51,13 @@ daemon::connection::connection(const std::string& path)
     _recv_thread = std::thread(recv_thread_wrapper, this);
 }
 
-daemon::connection::~connection(void)
+daemon::real_connection::~real_connection(void)
 {
     close(_socket);
     _recv_thread.detach();
 }
 
-daemon::response_ptr daemon::connection::send(const message_ptr& msg)
+daemon::response_ptr daemon::real_connection::send(const message_ptr& msg)
 {
     char buf[BUFFER_SIZE];
     size_t size = daemon::message::serialize(msg, buf, BUFFER_SIZE);
@@ -86,7 +86,7 @@ daemon::response_ptr daemon::connection::send(const message_ptr& msg)
     return resp;
 }
 
-void daemon::connection::recv_thread_main(void)
+void daemon::real_connection::recv_thread_main(void)
 {
     while (true) {
         char buf[BUFFER_SIZE];

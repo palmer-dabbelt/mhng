@@ -19,37 +19,36 @@
  * along with mhng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBMHNG__DAEMON__CONNECTION_HXX
-#define LIBMHNG__DAEMON__CONNECTION_HXX
+#ifndef LIBMHNG__DAEMON__DUMMY_CONNECTION_HXX
+#define LIBMHNG__DAEMON__DUMMY_CONNECTION_HXX
 
 #include <memory>
 
 namespace mhng {
     namespace daemon {
-        class connection;
-        typedef std::shared_ptr<connection> connection_ptr;
+        class dummy_connection;
+        typedef std::shared_ptr<dummy_connection> dummy_connection_ptr;
     }
 }
 
-#include <map>
-#include <mutex>
-#include <string>
-#include <thread>
-#include "message.h++"
-#include "response.h++"
+#include "connection.h++"
 
 namespace mhng {
     namespace daemon {
-        /* An interface that can either contain a real connection to
-         * the daemon, or a dummy connection that doesn't do anything
-         * at all. */
-        class connection {
+        /* Holds a client connection to the MHng daemon running on
+         * this system. */
+        class dummy_connection: public connection {
+        private:
+
         public:
-            /* Sends a message and returns an object that can be used
-             * to interrogate the state of a response from the server.
-             * Note that this doesn't block, if you want it to block
-             * you'll need to query the response object directly. */
-            virtual response_ptr send(const message_ptr& message) = 0;
+            /* Creates a new connection to the server. */
+            dummy_connection(void);
+
+            /* Closes the connection to the server. */
+            ~dummy_connection(void);
+
+        public:
+            virtual response_ptr send(const message_ptr& message);
         };
     }
 }
