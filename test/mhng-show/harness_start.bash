@@ -5,7 +5,7 @@ trap "rm -rf $tempdir" EXIT
 cd $tempdir
 
 mkdir maildir
-export MHNG_MAILDIR="$(readlink -f maildir)"
+export MHNG_MAILDIR="$(pwd)/maildir"
 export MHNG_NO_DAEMON="true"
 
 cat >init.sql <<EOF
