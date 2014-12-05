@@ -39,7 +39,7 @@ mailrc::mailrc(const std::string& path)
     if (file == NULL) {
         perror("Unable to open mailrc");
         fprintf(stderr, "Attempted path: '%s'\n", path.c_str());
-        abort();
+        return;
     }
 
     char line[BUFFER_SIZE];
