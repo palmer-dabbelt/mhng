@@ -55,6 +55,15 @@ message_ptr folder::open(const sequence_number_ptr& seq)
 std::string folder::full_path(void) const
 {
     char path[BUFFER_SIZE];
+
+    if (getenv("MHNG_MAILDIR") != NULL) {
+        snprintf(path, BUFFER_SIZE, "%s/mail/%s",
+                 getenv("MHNG_MAILDIR"),
+                 _name.c_str()
+            );
+        return path;
+    }
+
     snprintf(path, BUFFER_SIZE, "%s/.mhng/mail/%s",
              getenv("HOME"),
              _name.c_str()

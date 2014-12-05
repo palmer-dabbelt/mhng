@@ -282,6 +282,12 @@ args_ptr args::parse(int argc, const char **argv, int flags)
 std::string default_mhng_folder_path(void)
 {
     char buf[BUFFER_SIZE];
-    snprintf(buf, BUFFER_SIZE, "%s/%s", getenv("HOME"), ".mhng");
-    return buf;
+
+    if (getenv("MHNG_MAILDIR") != NULL) {
+        snprintf(buf, BUFFER_SIZE, "%s", getenv("MHNG_MAILDIR"));
+        return buf;
+    } else {
+        snprintf(buf, BUFFER_SIZE, "%s/%s", getenv("HOME"), ".mhng");
+        return buf;
+    }
 }    
