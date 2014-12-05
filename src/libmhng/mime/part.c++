@@ -565,6 +565,10 @@ mime::part_ptr mime::part::body(void) const
                 for (const auto& line: child_body->utf8())
                     out_raw.push_back(line + "\r\n");
 
+            if (child->matches_content_type("text/html") == true)
+                for (const auto& line: child_body->utf8())
+                    out_raw.push_back(line + "\r\n");
+
             first_child = false;
         }
 
