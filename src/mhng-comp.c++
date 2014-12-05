@@ -100,9 +100,9 @@ int main(int argc, const char **argv)
         }
 
         if (local == NULL)
-            fprintf(out, "From:     \n");
+            fprintf(out, "From:        \n");
         else
-            fprintf(out, "From:     %s\n", local->rfc().c_str());
+            fprintf(out, "From:        %s\n", local->rfc().c_str());
 
         for (const auto& msg: args->messages()) {
             for (const auto& addr: msg->from())
