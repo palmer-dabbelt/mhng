@@ -195,7 +195,10 @@ std::string mailbox::username(void) const
     }
 
     char line[BUFFER_SIZE];
-    fgets(line, BUFFER_SIZE, file);
+    if (fgets(line, BUFFER_SIZE, file) == NULL) {
+        fprintf(stderr, "Empty username file\n");
+        abort();
+    }
     while (isspace(line[strlen(line)-1]))
         line[strlen(line)-1] = '\0';
 
@@ -218,7 +221,10 @@ std::string mailbox::password(void) const
     }
 
     char line[BUFFER_SIZE];
-    fgets(line, BUFFER_SIZE, file);
+    if (fgets(line, BUFFER_SIZE, file) == NULL) {
+        fprintf(stderr, "Empty password file\n");
+        abort();
+    }
     while (isspace(line[strlen(line)-1]))
         line[strlen(line)-1] = '\0';
 
