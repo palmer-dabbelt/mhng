@@ -556,6 +556,7 @@ mime::part_ptr mime::part::body(void) const
                 /* Here we push a content-type in because this has
                  * already been decoded. */
                 out_raw.push_back("Content-Type: text/plain; charset=UTF-8\r\n");
+                out_raw.push_back("Content-Transfer-Encoding: 8bit\r\n");
                 out_raw.push_back("\r\n");
             }
 
