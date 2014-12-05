@@ -24,6 +24,7 @@
 #include <iconv.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 using namespace mhng;
 
 #ifndef BUFFER_SIZE
@@ -289,6 +290,72 @@ std::vector<std::string> mime::part::utf8(void) const
     }
 
     iconv_close(icd);
+
+    /* Check to see if we have HTML data, which means we've got to
+     * then go ahead and decode the HTML. */
+    if (matches_content_type("text/html") == true) {
+        char outfile[BUFFER_SIZE], infile[BUFFER_SIZE];
+        snprintf(outfile, BUFFER_SIZE, "/tmp/mhng-html-XXXXXX");
+        snprintf(infile,  BUFFER_SIZE, "/tmp/mhng-html-XXXXXX");
+
+        int outfd = mkstemp(outfile);
+        int infd  = mkstemp(infile);
+
+        for (const auto& line: out) {
+            size_t written = 0;
+            while (written < line.size()) {
+                ssize_t wout = ::write(outfd,
+                                       line.c_str() + written,
+                                       line.size() - written
+                    );
+
+                if (wout <= 0) {
+                    fprintf(stderr, "Unable to write HTML file\n");
+                    unlink(outfile);
+                    unlink(infile);
+                    return out;
+                }
+
+                written += wout;
+            }
+
+            ::write(outfd, "\n", 1);
+        }
+
+        close(outfd);
+        close(infd);
+
+        {
+            char cmd[BUFFER_SIZE];
+            snprintf(cmd, BUFFER_SIZE,
+                     "lynx -force-html -dump -stdin < %s > %s",
+                     outfile,
+                     infile
+                );
+
+            if (system(cmd) != 0) {
+                fprintf(stderr, "Unable to convert HTML with lynx\n");
+                unlink(outfile);
+                unlink(infile);
+                return out;
+            }
+        }
+
+        {
+            std::vector<std::string> dec;
+
+            auto file = fopen(infile, "r");
+            char line[BUFFER_SIZE];
+            while (fgets(line, BUFFER_SIZE, file) != NULL)
+                dec.push_back(line);
+            fclose(file);
+
+            unlink(outfile);
+            unlink(infile);
+
+            return dec;
+        }
+    }
 
     return out;
 }
