@@ -70,7 +70,9 @@ int main(int argc, const char **argv)
                      getenv("BROWSER"),
                      url.c_str()
                 );
-            system(command);
+            if (system(command) != 0)
+                fprintf(stderr, "command '%s' failed\n",
+                        command);
         }
     }
     if (args->numbers().size() != 0)
