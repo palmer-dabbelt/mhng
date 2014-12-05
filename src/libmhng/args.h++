@@ -63,6 +63,7 @@ namespace mhng {
          * command-line. */
         unknown<bool> _stdout;
         unknown<bool> _nowrap;
+        std::vector<std::string> _attach;
 
     public:
         /* This constructor is private because you should be using one
@@ -73,7 +74,8 @@ namespace mhng {
              const std::vector<int>& numbers,
              const mailbox_ptr& mbox,
              const unknown<bool>& stdout,
-             const unknown<bool>& nowrap);
+             const unknown<bool>& nowrap,
+             const std::vector<std::string>& attach);
 
     public:
         /* Accessor functions. */

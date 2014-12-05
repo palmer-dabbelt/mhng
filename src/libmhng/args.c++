@@ -40,13 +40,15 @@ args::args(const std::vector<message_ptr>& messages,
            const std::vector<int>& numbers,
            const mailbox_ptr& mbox,
            const unknown<bool>& stdout,
-           const unknown<bool>& nowrap)
+           const unknown<bool>& nowrap,
+           const std::vector<std::string>& attach)
     : _messages(messages),
       _folders(folders),
       _numbers(numbers),
       _mbox(mbox),
       _stdout(stdout),
-      _nowrap(nowrap)
+      _nowrap(nowrap),
+      _attach(attach)
 {
 }
 
@@ -107,6 +109,8 @@ args_ptr args::parse(int argc, const char **argv, int flags)
     unknown<bool> stdout;
     unknown<bool> nowrap;
 
+    std::vector<std::string> attach;
+
     auto mhng_folder = default_mhng_folder_path();
 
     for (int i = 1; i < argc; ++i) {
@@ -140,6 +144,9 @@ args_ptr args::parse(int argc, const char **argv, int flags)
         } else if (strcmp(argv[i], "--version") == 0) {
             printf("%s\n", PCONFIGURE_VERSION);
             exit(0);
+        } else if (strcmp(argv[i], "--attach") == 0) {
+            attach.push_back(argv[i+1]);
+            i++;
         } else {
             folders_written = true;
             folder_names.push_back(argv[i]);
@@ -197,7 +204,8 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                           numbers,
                                           dir,
                                           stdout,
-                                          nowrap);
+                                          nowrap,
+                                          attach);
         } else if (flags & pf_nom) {
             std::vector<message_ptr> messages;
             return std::make_shared<args>(messages,
@@ -205,7 +213,8 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                           numbers,
                                           dir,
                                           stdout,
-                                          nowrap);
+                                          nowrap,
+                                          attach);
         } else {
             std::vector<message_ptr> messages;
             auto cur = last_folder_ptr->current_message();
@@ -220,7 +229,8 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                           numbers,
                                           dir,
                                           stdout,
-                                          nowrap);
+                                          nowrap,
+                                          attach);
         }
     }
 
@@ -265,7 +275,8 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                   numbers,
                                   dir,
                                   stdout,
-                                  nowrap);
+                                  nowrap,
+                                  attach);
 }
 
 std::string default_mhng_folder_path(void)
