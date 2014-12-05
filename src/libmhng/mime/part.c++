@@ -149,18 +149,15 @@ mime::part::part(const std::vector<std::string>& raw)
      * something with it.  Lines can either by header lines, body
      * lines, or part of the children. */
     for (const auto& raw_line: raw) {
-        char line[BUFFER_SIZE];
-        snprintf(line, BUFFER_SIZE, "%s", raw_line.c_str());
-
-        while ((strlen(line) > 0) && isspace(line[strlen(line)-1]))
-            line[strlen(line)-1] = '\0';
+        std::string line = raw_line;
+        line.erase(line.find_last_not_of(" \n\r\t")+1);
 
         switch (state) {
         case STATE_HEADERS:
             /* First we want to check and see if this is the last line
              * of headers, which really means we want to skip on to
              * the body. */
-            if (strlen(line) == 0) {
+            if (line.size() == 0) {
                 if (last_header != NULL)
                     commit_header(last_header);
                 last_header = NULL;
@@ -395,17 +392,15 @@ std::vector<std::string> mime::part::decoded(void) const
     if (matches_encoding("quoted-printable") == true) {
         std::string last_line = "";
         for (const auto& linestr: _body_raw) {
-            char line[BUFFER_SIZE];
-            snprintf(line, BUFFER_SIZE, "%s", linestr.c_str());
-            while (isspace(line[strlen(line)-1]))
-                line[strlen(line)-1] = '\0';
+            std::string line = linestr;
+            line.erase(line.find_last_not_of(" \n\r\t")+1);
 
             char linebuf[BUFFER_SIZE];
             memset(linebuf, '\0', BUFFER_SIZE);
 
             size_t ii = 0;
             size_t io = 0;
-            while (ii < strlen(line)) {
+            while (ii < line.size()) {
                 if (io >= BUFFER_SIZE - 1) {
                     fprintf(stderr, "Long line\n");
                     abort();
@@ -434,9 +429,9 @@ std::vector<std::string> mime::part::decoded(void) const
                 }
             }
 
-            last_line = last_line + linebuf;
+            last_line = last_line + std::string(linebuf);
 
-            if (line[strlen(line)-1] != '=') {
+            if (line[line.size()-1] != '=') {
                 out.push_back(last_line);
                 last_line = "";
             }
@@ -449,10 +444,8 @@ std::vector<std::string> mime::part::decoded(void) const
     /* The default is to just strip whitespace at the end of the
      * line and do nothing else! */
     for (const auto& line: _body_raw) {
-        char buffer[BUFFER_SIZE];
-        snprintf(buffer, BUFFER_SIZE, "%s", line.c_str());
-        while ((strlen(buffer) > 0) && isspace(buffer[strlen(buffer)-1]))
-            buffer[strlen(buffer)-1] = '\0';
+        std::string buffer = line;
+        buffer.erase(line.find_last_not_of(" \n\r\t")+1);
         out.push_back(buffer);
     }
     return out;
