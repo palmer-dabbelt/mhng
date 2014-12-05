@@ -316,7 +316,10 @@ std::vector<std::string> mime::part::utf8(void) const
                 written += wout;
             }
 
-            ::write(outfd, "\n", 1);
+            if (::write(outfd, "\n", 1) != 1) {
+                fprintf(stderr, "write of 1 failed\n");
+                abort();
+            }
         }
 
         close(outfd);
