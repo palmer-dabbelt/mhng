@@ -343,8 +343,11 @@ std::vector<std::string> mime::part::utf8(void) const
 
             auto file = fopen(infile, "r");
             char line[BUFFER_SIZE];
-            while (fgets(line, BUFFER_SIZE, file) != NULL)
-                dec.push_back(line);
+            while (fgets(line, BUFFER_SIZE, file) != NULL) {
+                std::string l = line;
+                l.erase(l.find_last_not_of(" \n\r\t")+1);
+                dec.push_back(l);
+            }
             fclose(file);
 
             unlink(outfile);
