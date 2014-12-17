@@ -62,6 +62,16 @@ std::string address::rfc(void) const
 address_ptr address::from_email(const std::string email,
                                 bool local)
 {
+    /* Email addresses must have an @, otherwise they're not valid. */
+    if (strstr(email.c_str(), "@") == NULL) {
+        return std::make_shared<address>(
+            unknown<std::string>(),
+            unknown<std::string>(),
+            unknown<std::string>(),
+            local
+            );
+    }
+
     return std::make_shared<address>(
         unknown<std::string>(email),
         unknown<std::string>(),
