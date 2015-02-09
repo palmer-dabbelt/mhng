@@ -244,3 +244,7 @@ COMPILEOPTS += -DHEADERS
 BINARIES    += mhng-pipe-header
 SOURCES     += mhng-pipe-headers.c++
 COMPILEOPTS += -DHEADER
+
+# Looks up an address in the current mailrc
+BINARIES    += mhng-pipe-lookup_address
+SOURCES     += mhng-pipe-lookup_address.c++
