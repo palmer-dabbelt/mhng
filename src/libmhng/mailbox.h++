@@ -35,7 +35,7 @@ namespace mhng {
 #include "promise.h++"
 #include "daemon/connection.h++"
 #include "mime/message.h++"
-#include "sqlite/connection.h++"
+#include <psqlite/connection.h++>
 #include <string>
 
 namespace mhng {
@@ -49,7 +49,7 @@ namespace mhng {
         const std::string _path;
 
         /* Holds a connection to the SQLite database. */
-        sqlite::connection_ptr _db;
+        psqlite::connection::ptr _db;
 
         /* Contains the current folder, which we need to look up if
          * asked for it. */
@@ -92,7 +92,7 @@ namespace mhng {
 
         /* Returns the database connection that relates to this
          * mailbox. */
-        sqlite::connection_ptr db(void) const
+        psqlite::connection::ptr db(void) const
             { return _db; }
 
         /* Returns a copy of the mailrc, which is used for all sorts

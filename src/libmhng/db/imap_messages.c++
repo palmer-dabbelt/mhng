@@ -22,7 +22,7 @@
 #include "imap_messages.h++"
 using namespace mhng;
 
-static sqlite::table_ptr generate_columns(void);
+static psqlite::table::ptr generate_columns(void);
 
 db::imap_messages::imap_messages(const mailbox_ptr& mbox)
     : _table(generate_columns()),
@@ -36,7 +36,10 @@ int64_t db::imap_messages::select(uint64_t uid)
                                     std::to_string(uid).c_str());
 
     switch (resp->return_value()) {
-    case sqlite::error_code::SUCCESS:
+    case psqlite::error_code::SUCCESS:
+        break;
+    case psqlite::error_code::FAILED_UNIQUE:
+        abort();
         break;
     }
 
@@ -48,7 +51,7 @@ int64_t db::imap_messages::select(uint64_t uid)
     if (resp->result_count() != 1)
         return -1;
 
-    auto row = resp->row(0);
+    auto row = resp->rowi(0);
     return row->get_uint("uid");
 }
 
@@ -61,7 +64,10 @@ uint64_t db::imap_messages::select(std::string folder,
         );
 
     switch (resp->return_value()) {
-    case sqlite::error_code::SUCCESS:
+    case psqlite::error_code::SUCCESS:
+        break;
+    case psqlite::error_code::FAILED_UNIQUE:
+        abort();
         break;
     }
 
@@ -73,7 +79,7 @@ uint64_t db::imap_messages::select(std::string folder,
     if (resp->result_count() != 1)
         return -1;
 
-    auto row = resp->row(0);
+    auto row = resp->rowi(0);
     return row->get_uint("mhid");
 }
 
@@ -83,7 +89,10 @@ void db::imap_messages::remove(uint64_t mhid)
                                     mhid);
 
     switch (resp->return_value()) {
-    case sqlite::error_code::SUCCESS:
+    case psqlite::error_code::SUCCESS:
+        break;
+    case psqlite::error_code::FAILED_UNIQUE:
+        abort();
         break;
     }
 }
@@ -95,7 +104,10 @@ void db::imap_messages::remove(std::string folder, uint32_t imapid)
                                     imapid);
 
     switch (resp->return_value()) {
-    case sqlite::error_code::SUCCESS:
+    case psqlite::error_code::SUCCESS:
+        break;
+    case psqlite::error_code::FAILED_UNIQUE:
+        abort();
         break;
     }
 }
@@ -104,13 +116,16 @@ void db::imap_messages::update_purge(uint64_t uid, bool purge)
 {
     auto map = std::map<std::string, std::string>();
     map["purge"] = purge ? "1" : "0";
-    auto row = std::make_shared<sqlite::row>(map);
+    auto row = std::make_shared<psqlite::row>(map);
 
     auto resp = _mbox->db()->replace(_table, row, "mhid = %lu", uid);
 
     switch (resp->return_value()) {
-    case sqlite::error_code::SUCCESS:
+    case psqlite::error_code::SUCCESS:
         return;
+    case psqlite::error_code::FAILED_UNIQUE:
+        abort();
+        break;
     }
 }
 
@@ -120,7 +135,10 @@ std::vector<uint32_t> db::imap_messages::select_purge(std::string folder)
                                     folder.c_str());
 
     switch (resp->return_value()) {
-    case sqlite::error_code::SUCCESS:
+    case psqlite::error_code::SUCCESS:
+        break;
+    case psqlite::error_code::FAILED_UNIQUE:
+        abort();
         break;
     }
 
@@ -139,22 +157,25 @@ void db::imap_messages::insert(std::string folder,
     map["uid"] = std::to_string(imapid);
     map["purge"] = "0";
     map["mhid"] = std::to_string(mhid);
-    auto row = std::make_shared<sqlite::row>(map);
+    auto row = std::make_shared<psqlite::row>(map);
 
     auto resp = _mbox->db()->insert(_table, row);
 
     switch (resp->return_value()) {
-    case sqlite::error_code::SUCCESS:
+    case psqlite::error_code::SUCCESS:
         return;
+    case psqlite::error_code::FAILED_UNIQUE:
+        abort();
+        break;
     }
 }
 
-sqlite::table_ptr generate_columns(void)
+psqlite::table::ptr generate_columns(void)
 {
-    std::vector<sqlite::column_ptr> out;
-    out.push_back(std::make_shared<sqlite::column_t<std::string>>("mhid"));
-    out.push_back(std::make_shared<sqlite::column_t<bool>>("purge"));
-    out.push_back(std::make_shared<sqlite::column_t<uint32_t>>("uid"));
-    out.push_back(std::make_shared<sqlite::column_t<uint32_t>>("folder"));
-    return std::make_shared<sqlite::table>("IMAP__messages", out);
+    std::vector<psqlite::column::ptr> out;
+    out.push_back(std::make_shared<psqlite::column_t<std::string>>("mhid"));
+    out.push_back(std::make_shared<psqlite::column_t<bool>>("purge"));
+    out.push_back(std::make_shared<psqlite::column_t<uint32_t>>("uid"));
+    out.push_back(std::make_shared<psqlite::column_t<uint32_t>>("folder"));
+    return std::make_shared<psqlite::table>("IMAP__messages", out);
 }

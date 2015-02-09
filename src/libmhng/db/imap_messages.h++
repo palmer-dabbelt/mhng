@@ -25,15 +25,15 @@
 #include <libmhng/mailbox.h++>
 #include <libmhng/mailrc.h++>
 #include <libmhng/message.h++>
-#include <libmhng/sqlite/table.h++>
-#include <libmhng/sqlite/connection.h++>
+#include <psqlite/table.h++>
+#include <psqlite/connection.h++>
 
 namespace mhng {
     namespace db {
         /* Holds auxiliary IMAP information for messages. */
         class imap_messages {
         private:
-            sqlite::table_ptr _table;
+            psqlite::table::ptr _table;
             mailbox_ptr _mbox;
 
         public:

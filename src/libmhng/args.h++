@@ -33,7 +33,7 @@ namespace mhng {
 #include "mailrc.h++"
 #include "message.h++"
 #include "promise.h++"
-#include "sqlite/connection.h++"
+#include <psqlite/connection.h++>
 #include <string>
 #include <vector>
 

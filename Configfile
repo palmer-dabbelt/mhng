@@ -44,6 +44,8 @@ COMPILEOPTS += `ppkg-config ncurses --cflags`
 LINKOPTS    += `ppkg-config ncurses --libs`
 COMPILEOPTS += `ppkg-config --ccmd gpgme --optional --have GPGME --cflags`
 LINKOPTS    += `ppkg-config --ccmd gpgme --optional --have GPGME --libs`
+COMPILEOPTS += `ppkg-config psqlite --cflags`
+LINKOPTS    += `ppkg-config psqlite --libs`
 
 # Try to match this with git's version number
 GENERATE    += version.h

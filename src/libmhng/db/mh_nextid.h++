@@ -24,15 +24,15 @@
 
 #include <libmhng/mailbox.h++>
 #include <libmhng/message.h++>
-#include <libmhng/sqlite/table.h++>
-#include <libmhng/sqlite/connection.h++>
+#include <psqlite/table.h++>
+#include <psqlite/connection.h++>
 
 namespace mhng {
     namespace db {
         /* Just holds a single value, the next UID to use. */
         class mh_nextid {
         private:
-            sqlite::table_ptr _table;
+            psqlite::table::ptr _table;
             mailbox_ptr _mbox;
 
         public:

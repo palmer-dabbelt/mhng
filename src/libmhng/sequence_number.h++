@@ -31,7 +31,7 @@ namespace mhng {
 
 #include "folder.h++"
 #include "promise.h++"
-#include "sqlite/connection.h++"
+#include <psqlite/connection.h++>
 #include <string>
 
 namespace mhng {

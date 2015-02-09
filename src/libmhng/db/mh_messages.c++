@@ -22,7 +22,7 @@
 #include "mh_messages.h++"
 using namespace mhng;
 
-static sqlite::table_ptr generate_columns(void);
+static psqlite::table::ptr generate_columns(void);
 
 db::mh_messages::mh_messages(const mailbox_ptr& mbox)
     : _table(generate_columns()),
@@ -36,12 +36,10 @@ message_ptr db::mh_messages::select(uint64_t uid)
                                     std::to_string(uid).c_str());
 
     switch (resp->return_value()) {
-    case sqlite::error_code::SUCCESS:
+    case psqlite::error_code::SUCCESS:
         break;
-
-    default:
+    case psqlite::error_code::FAILED_UNIQUE:
         return NULL;
-        break;
     }
 
     if (resp->result_count() > 1) {
@@ -52,7 +50,7 @@ message_ptr db::mh_messages::select(uint64_t uid)
     if (resp->result_count() == 0)
         return NULL;
 
-    auto row = resp->row(0);
+    auto row = resp->rowi(0);
     return std::make_shared<message>(
         _mbox,
         std::make_shared<sequence_number>(row->get_uint("seq")),
@@ -73,12 +71,10 @@ message_ptr db::mh_messages::select(const std::string& folder_name,
                                     folder_name.c_str(), seq->to_uint());
 
     switch (resp->return_value()) {
-    case sqlite::error_code::SUCCESS:
+    case psqlite::error_code::SUCCESS:
         break;
-
-    default:
+    case psqlite::error_code::FAILED_UNIQUE:
         return NULL;
-        break;
     }
 
     if (resp->result_count() > 1) {
@@ -89,7 +85,7 @@ message_ptr db::mh_messages::select(const std::string& folder_name,
     if (resp->result_count() == 0)
         return NULL;
 
-    auto row = resp->row(0);
+    auto row = resp->rowi(0);
     return std::make_shared<message>(
         _mbox,
         std::make_shared<sequence_number>(row->get_uint("seq")),
@@ -110,8 +106,11 @@ std::vector<message_ptr> db::mh_messages::select(const std::string& folder)
 
     auto out = std::vector<message_ptr>();
     switch (resp->return_value()) {
-    case sqlite::error_code::SUCCESS:
-            break;
+    case psqlite::error_code::SUCCESS:
+        break;
+    case psqlite::error_code::FAILED_UNIQUE:
+        abort();
+        break;
     }
 
     for (const auto& row: resp->rows()) {
@@ -146,7 +145,7 @@ message_ptr db::mh_messages::select(const std::string& folder,
 
     
     switch (resp->return_value()) {
-    case sqlite::error_code::SUCCESS:
+    case psqlite::error_code::SUCCESS:
         break;
 
     default:
@@ -157,7 +156,7 @@ message_ptr db::mh_messages::select(const std::string& folder,
     if (resp->result_count() == 0)
         return NULL;
 
-    auto row = resp->row(0);
+    auto row = resp->rowi(0);
     return std::make_shared<message>(
         _mbox,
         std::make_shared<sequence_number>(row->get_uint("seq")),
@@ -176,13 +175,16 @@ void db::mh_messages::update(uint64_t uid,
 {
     auto map = std::map<std::string, std::string>();
     map["seq"] = std::to_string(seq->to_uint());
-    auto row = std::make_shared<sqlite::row>(map);
+    auto row = std::make_shared<psqlite::row>(map);
 
     auto resp = _mbox->db()->replace(_table, row, "uid='%s'",
                                      std::to_string(uid).c_str());
 
     switch (resp->return_value()) {
-    case sqlite::error_code::SUCCESS:
+    case psqlite::error_code::SUCCESS:
+        return;
+    case psqlite::error_code::FAILED_UNIQUE:
+        abort();
         return;
     }
 }
@@ -192,13 +194,16 @@ void db::mh_messages::update_unread(uint64_t uid,
 {
     auto map = std::map<std::string, std::string>();
     map["unread"] = std::to_string(unread);
-    auto row = std::make_shared<sqlite::row>(map);
+    auto row = std::make_shared<psqlite::row>(map);
 
     auto resp = _mbox->db()->replace(_table, row, "uid='%s'",
                                      std::to_string(uid).c_str());
 
     switch (resp->return_value()) {
-    case sqlite::error_code::SUCCESS:
+    case psqlite::error_code::SUCCESS:
+        return;
+    case psqlite::error_code::FAILED_UNIQUE:
+        abort();
         return;
     }
 }
@@ -220,12 +225,15 @@ void db::mh_messages::insert(unsigned seq,
     map["subject"] = subject;
     map["uid"] = std::to_string(uid);
     map["unread"] = "0";
-    auto row = std::make_shared<sqlite::row>(map);
+    auto row = std::make_shared<psqlite::row>(map);
 
     auto resp = _mbox->db()->insert(_table, row);
 
     switch (resp->return_value()) {
-    case sqlite::error_code::SUCCESS:
+    case psqlite::error_code::SUCCESS:
+        return;
+    case psqlite::error_code::FAILED_UNIQUE:
+        abort();
         return;
     }
 }
@@ -236,25 +244,28 @@ void db::mh_messages::remove(uint64_t uid)
                                     uid);
 
     switch (resp->return_value()) {
-    case sqlite::error_code::SUCCESS:
+    case psqlite::error_code::SUCCESS:
         break;
+    case psqlite::error_code::FAILED_UNIQUE:
+        abort();
+        return;
     }
 }
 
-sqlite::table_ptr generate_columns(void)
+psqlite::table::ptr generate_columns(void)
 {
-    std::vector<sqlite::column_ptr> out;
-    out.push_back(std::make_shared<sqlite::column_t<std::string>>("uid"));
+    std::vector<psqlite::column::ptr> out;
+    out.push_back(std::make_shared<psqlite::column_t<std::string>>("uid"));
 #if 0
     /* FIXME: Fix the database format! */
-    out.push_back(std::make_shared<sqlite::column_t<bool>>("cur"));
+    out.push_back(std::make_shared<psqlite::column_t<bool>>("cur"));
 #endif
-    out.push_back(std::make_shared<sqlite::column_t<int>>("seq"));
-    out.push_back(std::make_shared<sqlite::column_t<std::string>>("date"));
-    out.push_back(std::make_shared<sqlite::column_t<std::string>>("fadr"));
-    out.push_back(std::make_shared<sqlite::column_t<std::string>>("tadr"));
-    out.push_back(std::make_shared<sqlite::column_t<std::string>>("subject"));
-    out.push_back(std::make_shared<sqlite::column_t<std::string>>("folder"));
-    out.push_back(std::make_shared<sqlite::column_t<std::string>>("unread"));
-    return std::make_shared<sqlite::table>("MH__messages", out);
+    out.push_back(std::make_shared<psqlite::column_t<int>>("seq"));
+    out.push_back(std::make_shared<psqlite::column_t<std::string>>("date"));
+    out.push_back(std::make_shared<psqlite::column_t<std::string>>("fadr"));
+    out.push_back(std::make_shared<psqlite::column_t<std::string>>("tadr"));
+    out.push_back(std::make_shared<psqlite::column_t<std::string>>("subject"));
+    out.push_back(std::make_shared<psqlite::column_t<std::string>>("folder"));
+    out.push_back(std::make_shared<psqlite::column_t<std::string>>("unread"));
+    return std::make_shared<psqlite::table>("MH__messages", out);
 }

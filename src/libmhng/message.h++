@@ -35,7 +35,7 @@ namespace mhng {
 #include "promise.h++"
 #include "sequence_number.h++"
 #include "mime/message.h++"
-#include "sqlite/connection.h++"
+#include <psqlite/connection.h++>
 #include <string>
 #include <vector>
 
