@@ -22,8 +22,11 @@
 #include <libmhng/args.h++>
 #include <string.h>
 #include <termcap.h>
+#include <algorithm>
 
 static char termbuf[2048];
+
+static std::string remove_other_white(const std::string& in);
 
 int main(int argc, const char **argv)
 {
@@ -57,7 +60,7 @@ int main(int argc, const char **argv)
     /* At this point that argument list contains the entire set of
      * messages that should be examined as part of the scan. */
     for (const auto& msg: args->messages()) {
-        auto subj = msg->first_subject();
+        auto subj = remove_other_white(msg->first_subject());
 
         auto from = msg->first_from();
         if (strcmp(msg->folder()->name().c_str(), "sent") == 0)
@@ -75,3 +78,19 @@ int main(int argc, const char **argv)
 
     return 0;
 }
+
+std::string remove_other_white(const std::string& in)
+{
+    std::string out(in.length(), ' ');
+
+    std::transform(in.begin(), in.end(), out.begin(),
+                   [](char inc) -> char
+                   {
+                       if (isspace(inc))
+                           return ' ';
+                       return inc;
+                   });
+
+    return out;
+}
+
