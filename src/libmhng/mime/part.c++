@@ -236,57 +236,61 @@ mime::part::part(const std::vector<std::string>& raw)
 
 std::vector<std::string> mime::part::utf8(void) const
 {
-    if (_charset.known() == false)
-        return decoded();
-
-    std::string charset = _charset.data();
-
-    /* Krste sends some malformed messages (UTF-8 marked as US-ASCII),
-     * but because US-ASCII is a subset of UTF-8 it's always safe to
-     * just directly drop the decoded message out. */
-    if (strcasecmp(charset.c_str(), "us-ascii") == 0)
-        return decoded();
-
     std::vector<std::string> out;
 
-    iconv_t icd = iconv_open("UTF-8", charset.c_str());
-    if (icd == NULL) {
-        fprintf(stderr, "Unable to decode charset '%s'\n",
-                _charset.data().c_str());
-        abort();
-    }
+    /* If the charset is encoded then attempt to decode it into UTF-8
+     * before trying to undo the HTML encoding. */
+    if (_charset.known() == true) {
+        std::string charset = _charset.data();
 
-    for (const auto& line: decoded()) {
-        size_t utf_len = strlen(line.c_str()) * 4 + 1;
-        char *utf = new char[utf_len + 1];
-        char *utf_orig = utf;
+        /* Krste sends some malformed messages (UTF-8 marked as
+         * US-ASCII), but because US-ASCII is a subset of UTF-8 it's
+         * always safe to just directly drop the decoded message
+         * out. */
+        if (strcasecmp(charset.c_str(), "us-ascii") == 0)
+            return decoded();
 
-        char *cline = strdup(line.c_str());
-        char *cline_orig = cline;
-        size_t cline_len = strlen(cline);
-
-        {
-            size_t err = iconv(icd,
-                               &cline,
-                               &cline_len,
-                               &utf,
-                               &utf_len);
-            if ((ssize_t)err == -1) {
-                perror("Unable to decode line");
-                fprintf(stderr, "  line '%s'\n", line.c_str());
-                fprintf(stderr, "  charset: '%s'\n", _charset.data().c_str());
-                fprintf(stderr, "  maps to: '%s'\n", charset.c_str());
-                abort();
-            }
+        iconv_t icd = iconv_open("UTF-8", charset.c_str());
+        if (icd == NULL) {
+            fprintf(stderr, "Unable to decode charset '%s'\n",
+                    _charset.data().c_str());
+            abort();
         }
-        utf[0] = '\0';
 
-        out.push_back(utf_orig);
-        free(cline_orig);
-        delete[] utf_orig;
+        for (const auto& line: decoded()) {
+            size_t utf_len = strlen(line.c_str()) * 4 + 1;
+            char *utf = new char[utf_len + 1];
+            char *utf_orig = utf;
+
+            char *cline = strdup(line.c_str());
+            char *cline_orig = cline;
+            size_t cline_len = strlen(cline);
+
+            {
+                size_t err = iconv(icd,
+                                   &cline,
+                                   &cline_len,
+                                   &utf,
+                                   &utf_len);
+                if ((ssize_t)err == -1) {
+                    perror("Unable to decode line");
+                    fprintf(stderr, "  line '%s'\n", line.c_str());
+                    fprintf(stderr, "  charset: '%s'\n", _charset.data().c_str());
+                    fprintf(stderr, "  maps to: '%s'\n", charset.c_str());
+                    abort();
+                }
+            }
+            utf[0] = '\0';
+
+            out.push_back(utf_orig);
+            free(cline_orig);
+            delete[] utf_orig;
+        }
+
+        iconv_close(icd);
+    } else {
+        out = decoded();
     }
-
-    iconv_close(icd);
 
     /* Check to see if we have HTML data, which means we've got to
      * then go ahead and decode the HTML. */
