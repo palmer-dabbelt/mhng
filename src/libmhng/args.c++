@@ -117,6 +117,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
         /* FIXME: Much of this isn't implemented yet... */
         /* Here is my attempt to parse folder names, sequence numbers,
          * etc.  The rules are as follows:
+         *  - Any pair of integers, "%d-%d" is an inclusive range
          *  - Any integer is a sequence number
          *  - Anything that starts with a "+" is a folder name
          *  - Anything that starts with a ":" is a sequence number
@@ -124,7 +125,20 @@ args_ptr args::parse(int argc, const char **argv, int flags)
          *  - Anything that starts with a "-" is an argument
          *  - Anything else is a folder name
          */
-        if (atoi(argv[i]) > 0) {
+        int r_start, r_end;
+        if (sscanf(argv[i], "%d-%d", &r_start, &r_end) == 2) {
+            if (flags & pf_numbers) {
+                for (auto i = r_start; i <= r_end; ++i)
+                    numbers.push_back(i);
+            } else {
+                messages_written = true;
+                for (auto i = r_start; i <= r_end; ++i) {
+                    message_seqs.push_back(
+                        std::make_pair(last_folder, i)
+                        );
+                }
+            }
+        } else if (atoi(argv[i]) > 0) {
             if (flags & pf_numbers) {
                 numbers.push_back(atoi(argv[i]));
             } else {
