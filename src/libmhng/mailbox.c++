@@ -135,8 +135,8 @@ message_ptr mailbox::insert(const std::string &folder_name,
     messages->insert(seq,
                      folder->name(),
                      std::to_string(date->unix()),
-                     from->email(),
-                     to->email(),
+                     from->email_known() ? from->email() : "?",
+                     to->email_known()   ? to->email()   : "?",
                      subject,
                      uid
         );

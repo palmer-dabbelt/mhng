@@ -56,7 +56,10 @@ std::string address::rfc(void) const
         return buffer;
     }
 
-    return _email.data();
+    if (_email.known())
+        return _email.data();
+
+    return "?";
 }
 
 address_ptr address::from_email(const std::string email,
