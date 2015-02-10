@@ -212,6 +212,8 @@ int main(int argc, const char **argv)
             raw.push_back(line);
         }
 
+        fclose(file);
+
         auto raw_mime = std::make_shared<mhng::mime::message>(raw);
 
         /* Now walk back through that MIME message and attempt to

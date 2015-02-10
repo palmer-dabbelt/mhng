@@ -316,7 +316,7 @@ std::vector<std::string> client::fetch(const message m)
 
 int client::eat_hello(void)
 {
-    logger("client::eat_hello()");
+    logger l("client::eat_hello()");
 
     char buffer[BUFFER_SIZE];
     if (gets(buffer, BUFFER_SIZE) < 0) {
