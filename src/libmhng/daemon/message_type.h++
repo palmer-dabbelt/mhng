@@ -30,7 +30,8 @@ namespace mhng {
             SYNC,
             NET_UP,
             NET_DOWN,
-            RESPONSE
+            IDLE,
+            RESPONSE,
         };
 
         /* These let me break type safety so I can push these messages

@@ -59,6 +59,7 @@ static void idle_main(void);
  * sync thread will  */
 static std::atomic<long> sync_req;
 static std::atomic<long> sync_rep;
+static std::atomic<uint64_t> sync_largest_uid;
 static std::mutex sync_lock;
 static std::condition_variable sync_signal;
 
@@ -79,13 +80,17 @@ static mhng::daemon::process idle_process(
         "mhimap-idle"
     );
 
+/* A global context */
+static std::shared_ptr<mhng::args> args = NULL;
+static std::mutex args_lock;
+
 int main(int argc, const char **argv)
 {
     sync_req = 0;
     sync_rep = 0;
     net_up = true;
 
-    auto args = mhng::args::parse_all_folders(argc, argv);
+    args = mhng::args::parse_all_folders(argc, argv);
 
     /* This special thread responds to synchronization requests. */
     {
@@ -95,7 +100,10 @@ int main(int argc, const char **argv)
 
     /* Begin listening for client connections from other programs
      * running on this system. */
-    int server = create_socket(args->mbox()->path() + "/daemon.socket");
+    auto server = []() {
+        std::unique_lock<std::mutex> lock(args_lock);
+        return create_socket(args->mbox()->path() + "/daemon.socket");
+    }();
 
     /* Fires up the IDLE thread, which needs that server connection to
      * have been created so it can send us messages. */
@@ -210,6 +218,15 @@ void client_main(int client)
             break;
         }
 
+        case mhng::daemon::message_type::IDLE:
+        {
+            std::unique_lock<std::mutex> lock(sync_lock);
+            auto uid = msg->idle_uid();
+
+            sync_signal.wait(lock, [&]{ return uid < sync_largest_uid; });
+            break;
+        }
+
         case mhng::daemon::message_type::RESPONSE:
         {
             fprintf(stderr, "Unable to handle RESPONSE packet\n");
@@ -285,6 +302,13 @@ void sync_main(void)
             continue;
         }
 
+        /* After synchronization go and figure out what the largest
+         * UID we've yet seen is. */
+        auto last_uid = []() {
+            std::unique_lock<std::mutex> lock(args_lock);
+            return args->mbox()->largest_uid();
+        }();
+
         /* Now that we've actually synchronized it's time to go ahead
          * and inform all the clients that we've done so. */
         std::unique_lock<std::mutex> lock(sync_lock);
@@ -293,6 +317,10 @@ void sync_main(void)
             abort();
         }
         sync_rep = ticket;
+
+        if (last_uid > sync_largest_uid)
+            sync_largest_uid = last_uid;
+
         sync_signal.notify_all();
     }
 }
