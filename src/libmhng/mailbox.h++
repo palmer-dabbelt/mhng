@@ -123,6 +123,10 @@ namespace mhng {
         uint64_t largest_uid(void) const;
         uint64_t largest_uid(const std::string folder) const;
 
+        /* Opens a new message by UID, returning NULL if it doesn't
+         * exist. */
+        message_ptr open(uint64_t uid) const;
+
     private:
         static folder_ptr _current_folder_func(mailbox *mbox)
             { return mbox->_current_folder_impl(); }

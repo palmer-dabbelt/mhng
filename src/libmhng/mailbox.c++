@@ -262,6 +262,13 @@ uint64_t mailbox::largest_uid(const std::string folder) const
 
     return largest;
 }
+
+message_ptr mailbox::open(uint64_t uid) const
+{
+    auto table = std::make_shared<db::mh_messages>(_self_ptr.lock());
+    return table->select(uid);
+}
+
 folder_ptr mailbox::_current_folder_impl(void)
 {
     auto table = std::make_shared<db::mh_current>(_self_ptr.lock());
