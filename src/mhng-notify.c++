@@ -24,6 +24,10 @@
 #include <libnotify/notify.h>
 #endif
 #include <sstream>
+#include <regex>
+
+/* Returns a HTML-escaped version of a string. */
+static std::string html(const std::string& str);
 
 int main(int argc, const char **argv)
 {
@@ -53,17 +57,20 @@ int main(int argc, const char **argv)
             title << msg->folder()->name() << ":" << msg->seq()->to_uint();
 
             std::stringstream body;
+
             for (const auto& addr: msg->from())
-                body << "From:    " << addr->rfc() << "\n";
+                body << "<tt>From:    " << html(addr->rfc()) << "</tt>\n";
             for (const auto& addr: msg->to())
-                body << "To:      " << addr->rfc() << "\n";
+                body << "<tt>To:      " << html(addr->rfc()) << "</tt>\n";
             for (const auto& str: msg->subject())
-                body << "Subject: " << str << "\n";
+                body << "<tt>Subject: " << html(str) << "</tt>\n";
+
+            body.str(body.str().erase(body.str().length()-1));
 
 #ifdef HAVE_LIBNOTIFY
             auto n = notify_notification_new(
                 title.str().c_str(),
-                body.str().erase(body.str().length()-1).c_str(),
+                body.str().c_str(),
                 NULL
                 );
 
@@ -80,3 +87,20 @@ int main(int argc, const char **argv)
         
     return 0;
 }
+
+std::string html(const std::string& str)
+{
+    std::stringstream os;
+
+    for (const auto c: str) {
+        if (c == '<')
+            os << "&lt;";
+        else if (c == '>')
+            os << "&gt;";
+        else
+            os << c;
+    }
+
+    return os.str();
+}
+
