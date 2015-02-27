@@ -119,6 +119,10 @@ namespace mhng {
         std::string username(void) const;
         std::string password(void) const;
 
+        /* Returns the largest UID in this entire mailbox. */
+        uint64_t largest_uid(void) const;
+        uint64_t largest_uid(const std::string folder) const;
+
     private:
         static folder_ptr _current_folder_func(mailbox *mbox)
             { return mbox->_current_folder_impl(); }

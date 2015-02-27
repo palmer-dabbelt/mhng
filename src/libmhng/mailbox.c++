@@ -29,6 +29,7 @@
 #include "db/imap_messages.h++"
 #include <string.h>
 #include <unistd.h>
+#include <sstream>
 using namespace mhng;
 
 #ifndef BUFFER_SIZE
@@ -233,6 +234,34 @@ std::string mailbox::password(void) const
     return line;
 }
 
+uint64_t mailbox::largest_uid(void) const
+{
+    auto current = std::make_shared<db::mh_current>(_self_ptr.lock());
+
+    uint64_t largest = 0;
+    for (const auto& folder_name: current->select()) {
+        auto folder_largest = largest_uid(folder_name);
+        if (folder_largest > largest)
+            largest = folder_largest;
+    }
+
+    return largest;
+}
+
+uint64_t mailbox::largest_uid(const std::string folder) const
+{
+    auto table = std::make_shared<db::mh_messages>(_self_ptr.lock());
+
+    uint64_t largest = 0;
+    for (const auto& message: table->select(folder)) {
+        uint64_t uid;
+        std::istringstream(message->uid()) >> uid;
+        if (uid > largest)
+            largest = uid;
+    }
+
+    return largest;
+}
 folder_ptr mailbox::_current_folder_impl(void)
 {
     auto table = std::make_shared<db::mh_current>(_self_ptr.lock());
