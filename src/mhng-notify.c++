@@ -71,7 +71,7 @@ int main(int argc, const char **argv)
 
             g_object_unref(G_OBJECT(n));
 #else
-            printf("%s\n%s", title.str.c_str(), body.str().c_str());
+            printf("%s\n%s", title.str().c_str(), body.str().c_str());
 #endif
         }
 
