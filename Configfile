@@ -82,60 +82,84 @@ SOURCES     += libmhng/mhng.pc
 # Lists the messages in the given folder, defaulting to the currently
 # selected folder.
 BINARIES    += mhng-scan
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-scan.c++
 
 # Writes some (or by default, many) messages out to SMTP and then
 # removes them.
 BINARIES    += mhng-post
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-post.c++
 
 # Removes the current message.
 BINARIES    += mhng-rmm
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-rmm.c++
 
 # Shows the current message (or a passed in message), optionally
 # moving to the next/previous message in the list.
 BINARIES    += mhng-show
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-show.c++
 COMPILEOPTS += -DSHOW
 TESTSRC     += utf8-in-ascii.bash
 
 BINARIES    += mhng-next
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-show.c++
 COMPILEOPTS += -DNEXT
 
 BINARIES    += mhng-prev
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-show.c++
 COMPILEOPTS += -DPREV
 
 # This one is really just a mhng-rmm && mhng-{next,prev}, but it's all
 # put in a single binary for ease of use.
 BINARIES    += mhng-mtn
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-show.c++
 COMPILEOPTS += -DNEXT
 COMPILEOPTS += -DRMM
 
 BINARIES    += mhng-mtp
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-show.c++
 COMPILEOPTS += -DPREV
 COMPILEOPTS += -DRMM
 
 # Lists the MIME parts of a given message and allows printing them
 BINARIES    += mhng-mime
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-mime.c++
 COMPILEOPTS += -DMIME
 
 # Lists the MIME parts of a given message and allows saving them
 BINARIES    += mhng-detach
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-mime.c++
 COMPILEOPTS += -DDETACH
 
 # Lists every folder known to the system
 BINARIES    += mhng-folders
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-folders.c++
 
 # Lists all the URLs found in a message
 BINARIES    += mhng-urls
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-urls.c++
 
 # An installation helper script
@@ -146,59 +170,90 @@ SOURCES     += mhng-install.bash
 # such that the messages all stay in order but no longer have any
 # gaps.
 BINARIES    += mhng-pack
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-pack.c++
 
 # Allows me to compose a message, with a set of different default
 # templates: blank, a reply, or a forward.
 BINARIES    += mhng-comp
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-comp.c++
 COMPILEOPTS += -DCOMP
 
 BINARIES    += mhng-repl
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-comp.c++
 COMPILEOPTS += -DREPL
 
 BINARIES    += mhng-forw
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-comp.c++
 COMPILEOPTS += -DFORW
 
 # Forces a sync right now, and blocks until everything has fully
 # synced.
 BINARIES    += mhng-sync
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-sync.c++
 
 # Displays every message in every folder.
 BINARIES    += mhng-hud
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-hud.c++
 
 # Shows a _tiny_ HUD for your BASH prompt
 BINARIES    += mhng-bud
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-bud.c++
 
 # Displays new message notifications in a libnotify window
 BINARIES    += mhng-notify
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-notify.c++
 
 ##############################################################################
 # Remote-Access Binaries                                                     #
 ##############################################################################
 LIBEXECS    += mhng/mhimap-fetch
+AUTODEPS     = false
+DEPLIBS     += mhng
+DEPLIBS     += mhimap
 SOURCES     += mhimap-fetch.c++
 COMPILEOPTS += -DFETCH
 
 LIBEXECS    += mhng/mhimap-purge
+AUTODEPS     = false
+DEPLIBS     += mhng
+DEPLIBS     += mhimap
 SOURCES     += mhimap-fetch.c++
 COMPILEOPTS += -DPURGE
 
 LIBEXECS    += mhng/mhimap-drop
+AUTODEPS     = false
+DEPLIBS     += mhng
+DEPLIBS     += mhimap
 SOURCES     += mhimap-fetch.c++
 COMPILEOPTS += -DDROP
 
 LIBEXECS    += mhng/mhimap-flags
+AUTODEPS     = false
+DEPLIBS     += mhng
+DEPLIBS     += mhimap
 SOURCES     += mhimap-fetch.c++
 COMPILEOPTS += -DFLAGS
 
 LIBEXECS    += mhng/mhimap-sync
+AUTODEPS     = false
+DEPLIBS     += mhng
+DEPLIBS     += mhimap
 SOURCES     += mhimap-fetch.c++
 COMPILEOPTS += -DFETCH
 COMPILEOPTS += -DPURGE
@@ -206,9 +261,14 @@ COMPILEOPTS += -DDROP
 COMPILEOPTS += -DFLAGS
 
 LIBEXECS    += mhng/mhimap-idle
+AUTODEPS     = false
+DEPLIBS     += mhng
+DEPLIBS     += mhimap
 SOURCES     += mhimap-idle.c++
 
 BINARIES    += mhng-daemon
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-daemon.c++
 
 ##############################################################################
@@ -216,15 +276,21 @@ SOURCES     += mhng-daemon.c++
 ##############################################################################
 # Lists all the folder names on stdout
 BINARIES    += mhng-pipe-folder_names
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-pipe-folder_names.c++
 
 # Lists all the sequence numbers on stdout
 BINARIES    += mhng-pipe-sequence_numbers
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-pipe-sequence_numbers.c++
 
 # Takes a single message as stdin and places it into the drafts
 # folder.
 BINARIES    += mhng-pipe-comp_stdin
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-pipe-comp_stdin.c++
 
 # Produces the raw contents of the given set of messages on stdout.
@@ -233,26 +299,38 @@ SOURCES     += mhng-pipe-comp_stdin.c++
 # (importantly the current message pointer or any status bits), and it
 # doesn't attempt to do any formatting at all.
 BINARIES    += mhng-pipe-show_stdout
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-pipe-show_stdout.c++
 
 # Sends a network up/down message to the server
 BINARIES    += mhng-pipe-network_up
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-pipe-network_up.c++
 COMPILEOPTS += -DUP
 
 BINARIES    += mhng-pipe-network_down
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-pipe-network_up.c++
 COMPILEOPTS += -DDOWN
 
 # Shows the headers for the given message set
 BINARIES    += mhng-pipe-headers
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-pipe-headers.c++
 COMPILEOPTS += -DHEADERS
 
 BINARIES    += mhng-pipe-header
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-pipe-headers.c++
 COMPILEOPTS += -DHEADER
 
 # Looks up an address in the current mailrc
 BINARIES    += mhng-pipe-lookup_address
+AUTODEPS     = false
+DEPLIBS     += mhng
 SOURCES     += mhng-pipe-lookup_address.c++
