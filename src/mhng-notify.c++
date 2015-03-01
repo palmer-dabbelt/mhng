@@ -23,8 +23,10 @@
 #ifdef HAVE_LIBNOTIFY
 #include <libnotify/notify.h>
 #endif
-#include <sstream>
+#include <cstring>
+#include <iostream>
 #include <regex>
+#include <sstream>
 
 /* Returns a HTML-escaped version of a string. */
 static std::string html(const std::string& str);
@@ -37,11 +39,10 @@ int main(int argc, const char **argv)
     /* The last message that we've seen. */
     auto last_seen = args->mbox()->largest_uid();
 
-#ifdef HAVE_LIBNOTIFY
-    notify_init("MHng");
-#endif
-
     while (true) {
+        std::cout << "Last Seen: " << last_seen << "\n";
+        std::cout << std::flush;
+
         auto message = mhng::daemon::message::idle(last_seen);
         auto resp = daemon->send(message);
         resp->wait();
@@ -53,33 +54,56 @@ int main(int argc, const char **argv)
             if (msg == NULL)
                 continue;
 
-            std::stringstream title;
-            title << msg->folder()->name() << ":" << msg->seq()->to_uint();
-
-            std::stringstream body;
-
-            for (const auto& addr: msg->from())
-                body << "<tt>From:    " << html(addr->rfc()) << "</tt>\n";
-            for (const auto& addr: msg->to())
-                body << "<tt>To:      " << html(addr->rfc()) << "</tt>\n";
-            for (const auto& str: msg->subject())
-                body << "<tt>Subject: " << html(str) << "</tt>\n";
-
-            body.str(body.str().erase(body.str().length()-1));
+            if (strcmp(msg->folder()->name().c_str(), "drafts") == 0)
+                continue;
 
 #ifdef HAVE_LIBNOTIFY
-            auto n = notify_notification_new(
-                title.str().c_str(),
-                body.str().c_str(),
-                NULL
-                );
+            notify_init("MHng");
 
-            notify_notification_show (n, NULL);
+            {
+                std::stringstream title;
+                title << msg->folder()->name() << ":" << msg->seq()->to_uint();
 
-            g_object_unref(G_OBJECT(n));
-#else
-            printf("%s\n%s", title.str().c_str(), body.str().c_str());
+                std::stringstream body;
+
+                for (const auto& addr: msg->from())
+                    body << "<tt>From:    " << html(addr->rfc()) << "</tt>\n";
+                for (const auto& addr: msg->to())
+                    body << "<tt>To:      " << html(addr->rfc()) << "</tt>\n";
+                for (const auto& str: msg->subject())
+                    body << "<tt>Subject: " << html(str) << "</tt>\n";
+
+                body.str(body.str().erase(body.str().length()-1));
+
+                auto n = notify_notification_new(
+                    title.str().c_str(),
+                    body.str().c_str(),
+                    NULL
+                    );
+
+                notify_notification_show (n, NULL);
+
+                g_object_unref(G_OBJECT(n));
+            }
+
+            notify_uninit();
 #endif
+
+            {
+                std::cout << msg->folder()->name()
+                          << ":"
+                          << msg->seq()->to_uint()
+                          << "\n";
+
+                for (const auto& addr: msg->from())
+                    std::cout << "From:    " << addr->rfc() << "\n";
+                for (const auto& addr: msg->to())
+                    std::cout << "To:      " << addr->rfc() << "\n";
+                for (const auto& str: msg->subject())
+                    std::cout << "Subject: " << str << "\n";
+
+                std::cout << std::flush;
+            }
         }
 
         last_seen = highest;
@@ -103,4 +127,3 @@ std::string html(const std::string& str)
 
     return os.str();
 }
-
