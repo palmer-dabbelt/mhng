@@ -28,8 +28,10 @@
 #include <regex>
 #include <sstream>
 
+#ifdef HAVE_LIBNOTIFY
 /* Returns a HTML-escaped version of a string. */
 static std::string html(const std::string& str);
+#endif
 
 int main(int argc, const char **argv)
 {
@@ -112,6 +114,7 @@ int main(int argc, const char **argv)
     return 0;
 }
 
+#ifdef HAVE_LIBNOTIFY
 std::string html(const std::string& str)
 {
     std::stringstream os;
@@ -127,3 +130,4 @@ std::string html(const std::string& str)
 
     return os.str();
 }
+#endif
