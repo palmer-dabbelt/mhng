@@ -31,8 +31,6 @@ LINKOPTS    += -Sobj/proc/version-pc.sed
 # here because there's a bunch of binaries below and I don't want to
 # add every external dependency to every binary.
 LANGUAGES   += c++
-COMPILEOPTS += `ppkg-config sqlite3 --cflags`
-LINKOPTS    += `ppkg-config sqlite3 --libs`
 COMPILEOPTS += `ppkg-config gnutls --cflags`
 LINKOPTS    += `ppkg-config gnutls --libs`
 LINKOPTS    += -lgnutlsxx
