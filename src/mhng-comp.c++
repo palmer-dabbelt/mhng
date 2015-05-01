@@ -137,10 +137,13 @@ int main(int argc, const char **argv)
                 }
 
                 for (int i = 0; i < trailing_newlines; ++i)
-                    fprintf(out, "> \n");
+                    fprintf(out, ">\n");
                 trailing_newlines = 0;
 
-                fprintf(out, "> %s\n", line.c_str());
+                if (line.c_str()[0] == '>')
+                    fprintf(out, ">%s\n", line.c_str());
+                else
+                    fprintf(out, "> %s\n", line.c_str());
             }
         }
 #elif defined(FORW)
