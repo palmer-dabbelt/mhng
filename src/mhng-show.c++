@@ -219,6 +219,9 @@ make_box(const std::vector<std::string>& lines,
         std::vector<std::string> paragraph;
 
         for (const auto& line: lines) {
+            if (strcmp(line.c_str(), "--") == 0)
+                break;
+
             if (line.size() == 0) {
                 paragraphs.push_back(paragraph);
                 paragraph = std::vector<std::string>();
