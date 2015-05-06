@@ -56,7 +56,7 @@ int main(int argc, const char **argv)
             if (msg == NULL)
                 continue;
 
-            if (strcmp(msg->folder()->name().c_str(), "drafts") == 0)
+            if (strcmp(msg->folder()->name().c_str(), "inbox") != 0)
                 continue;
 
 #ifdef HAVE_LIBNOTIFY
