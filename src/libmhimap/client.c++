@@ -469,8 +469,11 @@ ssize_t client::gets(char *buffer, ssize_t buffer_size)
 
     while (!linebuf.has_line()) {
         l.printf("read(...)");
-        ssize_t n_read = read(linebuf.recharge_buffer(),
-                              linebuf.recharge_size());
+
+        auto size = linebuf.recharge_size();
+        auto buffer = linebuf.recharge_buffer();
+
+        ssize_t n_read = read(buffer, size);
 
         l.printf("read   ==> '%*s'", (int)n_read, linebuf.recharge_buffer());
         l.printf("n_read ==> " SSIZET_FORMAT, n_read);
