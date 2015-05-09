@@ -85,8 +85,8 @@ uint64_t db::imap_messages::select(std::string folder,
 
 void db::imap_messages::remove(uint64_t mhid)
 {
-    auto resp = _mbox->db()->remove(_table, "mhid='%lu'",
-                                    mhid);
+    auto resp = _mbox->db()->remove(_table, "mhid='%llu'",
+                                    (long long unsigned)mhid);
 
     switch (resp->return_value()) {
     case psqlite::error_code::SUCCESS:
@@ -118,7 +118,8 @@ void db::imap_messages::update_purge(uint64_t uid, bool purge)
     map["purge"] = purge ? "1" : "0";
     auto row = std::make_shared<psqlite::row>(map);
 
-    auto resp = _mbox->db()->replace(_table, row, "mhid = %lu", uid);
+    auto resp = _mbox->db()->replace(_table, row, "mhid = %llu",
+				     (long long unsigned)uid);
 
     switch (resp->return_value()) {
     case psqlite::error_code::SUCCESS:

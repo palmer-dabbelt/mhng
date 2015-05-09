@@ -240,8 +240,8 @@ void db::mh_messages::insert(unsigned seq,
 
 void db::mh_messages::remove(uint64_t uid)
 {
-    auto resp = _mbox->db()->remove(_table, "uid='%lu'",
-                                    uid);
+    auto resp = _mbox->db()->remove(_table, "uid='%llu'",
+                                    (long long unsigned)uid);
 
     switch (resp->return_value()) {
     case psqlite::error_code::SUCCESS:
