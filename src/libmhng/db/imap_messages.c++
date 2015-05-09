@@ -166,6 +166,8 @@ void db::imap_messages::insert(std::string folder,
     case psqlite::error_code::SUCCESS:
         return;
     case psqlite::error_code::FAILED_UNIQUE:
+        fprintf(stderr, "FAILED_UNIQUE when inserting %u %llu\n",
+                imapid, (long long unsigned)mhid);
         abort();
         break;
     }
