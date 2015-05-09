@@ -49,8 +49,8 @@ int main(int argc, const char **argv)
                    folder->name().c_str()[0]
                 );
         } else {
-            printf("%lu%c",
-                   unread_count,
+            printf("%llu%c",
+                   (long long unsigned)unread_count,
                    folder->name().c_str()[0]
                 );
         }

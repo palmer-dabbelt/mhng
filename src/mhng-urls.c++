@@ -80,8 +80,12 @@ int main(int argc, const char **argv)
 
     /* If we weren't given any numbers on the commandline then print
      * out every URL as it comes in. */
-    for (size_t i = 0; i < urls.size(); ++i)
-        printf("%lu %s\n", i+1, urls[i].c_str());
+    for (size_t i = 0; i < urls.size(); ++i) {
+        printf("%llu %s\n",
+	       (long long unsigned)(i+1),
+	       urls[i].c_str()
+	       );
+    }
 
     return 0;
 }

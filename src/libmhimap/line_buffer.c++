@@ -101,7 +101,7 @@ void line_buffer::recharge_commit(ssize_t n_read)
 
 ssize_t line_buffer::get(char *buffer, ssize_t buffer_size)
 {
-    logger l("line_buffer::get(..., %ld)", buffer_size);
+    logger l("line_buffer::get(..., " SSIZET_FORMAT ")", buffer_size);
 
     for (ssize_t i = 0; i < used; i++) {
         if (data[i] == '\n') {

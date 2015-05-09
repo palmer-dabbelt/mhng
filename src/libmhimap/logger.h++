@@ -22,6 +22,16 @@
 #ifndef LIBMHIMAP__LOGGER_HXX
 #define LIBMHIMAP__LOGGER_HXX
 
+#ifndef SIZET_FORMAT
+#if defined(__amd64__)
+#define SIZET_FORMAT "%llu"
+#define SSIZET_FORMAT "%lld"
+#elif defined(__arm__)
+#define SIZET_FORMAT "%u"
+#define SSIZET_FORMAT "%d"
+#endif
+#endif /* SIZET_FORMAT */
+
 #include <string>
 
 namespace mhimap {

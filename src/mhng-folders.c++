@@ -39,9 +39,9 @@ int main(int argc, const char **argv)
         if (cur != NULL)
             seq = std::to_string(cur->seq()->to_int());
 
-        printf("%20s %10lu %10s\n",
+        printf("%20s %10llu %10s\n",
                folder->name().c_str(),
-               folder->message_count(),
+               (long long unsigned)folder->message_count(),
                seq.c_str()
             );
     }

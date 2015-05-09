@@ -91,7 +91,7 @@ int main(int argc, const char **argv)
      * tree format. */
     for (size_t i = 0; i < parts.size(); ++i) {
         auto part = parts[i];
-        printf("%lu ", i+1);
+        printf("%llu ", (long long unsigned)(i+1));
 
         for (size_t depth = 0; depth < part2depth[part]; ++depth)
             printf("  ");

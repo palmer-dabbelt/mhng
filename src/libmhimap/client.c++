@@ -179,7 +179,7 @@ void client::fetch_to_file(const message m, FILE *f)
     }
     uint32_t seq, uid;
     ssize_t size;
-    int r = sscanf(buffer, "* %u FETCH (UID %u BODY[] {%ld}",
+    int r = sscanf(buffer, "* %u FETCH (UID %u BODY[] {" SSIZET_FORMAT "}",
                    &seq, &uid, &size);
     if (r != 3) {
         fprintf(stderr, "Unable to parse RFC882 FETCH header\n");
@@ -243,7 +243,7 @@ std::vector<std::string> client::fetch(const message m)
     }
     uint32_t seq, uid;
     ssize_t size;
-    int r = sscanf(buffer, "* %u FETCH (UID %u BODY[] {%ld}",
+    int r = sscanf(buffer, "* %u FETCH (UID %u BODY[] {" SSIZET_FORMAT "}",
                    &seq, &uid, &size);
     if (r != 3) {
         fprintf(stderr, "Unable to parse RFC882 FETCH header\n");
@@ -473,7 +473,7 @@ ssize_t client::gets(char *buffer, ssize_t buffer_size)
                               linebuf.recharge_size());
 
         l.printf("read   ==> '%*s'", (int)n_read, linebuf.recharge_buffer());
-        l.printf("n_read ==> %ld", n_read);
+        l.printf("n_read ==> " SSIZET_FORMAT, n_read);
 
         /* Just die on any errors. */
         if (n_read < 0) {

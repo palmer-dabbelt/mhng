@@ -91,8 +91,8 @@ daemon::message_ptr daemon::message::deserialize(const char *b, size_t l)
 {
     if (sizeof(struct message_on_wire) > l) {
         fprintf(stderr, "Message too small!\n");
-        fprintf(stderr, "  given    %lu\n", l);
-        fprintf(stderr, "  required %lu\n", sizeof(struct message_on_wire));
+        fprintf(stderr, "  given    %llu\n", (long long unsigned)l);
+        fprintf(stderr, "  required %llu\n", (long long unsigned)sizeof(struct message_on_wire));
         abort();
     }
 
