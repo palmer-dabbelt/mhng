@@ -24,8 +24,8 @@
 
 #ifndef SIZET_FORMAT
 #if defined(__amd64__)
-#define SIZET_FORMAT "%llu"
-#define SSIZET_FORMAT "%lld"
+#define SIZET_FORMAT "%lu"
+#define SSIZET_FORMAT "%ld"
 #elif defined(__arm__)
 #define SIZET_FORMAT "%u"
 #define SSIZET_FORMAT "%d"
