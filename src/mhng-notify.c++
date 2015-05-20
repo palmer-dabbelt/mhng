@@ -124,6 +124,8 @@ std::string html(const std::string& str)
             os << "&lt;";
         else if (c == '>')
             os << "&gt;";
+        else if (c == '&')
+            os << "&amp;";
         else
             os << c;
     }
