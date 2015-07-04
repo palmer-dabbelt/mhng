@@ -44,16 +44,22 @@ int main(int argc, const char **argv)
     if (from_width > 35)
         from_width = 35;
     size_t seq_width = (terminal_width > 120) ? 3 : 2;
-    if (args->messages().size() >= 100)
-        seq_width = 3;
-    if (args->messages().size() >= 1000)
-        seq_width = 4;
-    if (args->messages().size() >= 10000)
-        seq_width = 5;
-    if (args->messages().size() >= 100000)
-        seq_width = 6;
-    if (args->messages().size() >= 1000000)
-        seq_width = 7;
+    auto message_count = args->messages().size();
+    if (message_count > 0) {
+        auto last_message = args->messages()[message_count-1];
+        if (last_message->seq()->to_uint() >= 100)
+            seq_width = 3;
+        if (last_message->seq()->to_uint() >= 1000)
+            seq_width = 4;
+        if (last_message->seq()->to_uint() >= 10000)
+            seq_width = 5;
+        if (last_message->seq()->to_uint() >= 100000)
+            seq_width = 6;
+        if (last_message->seq()->to_uint() >= 1000000)
+            seq_width = 7;
+        if (last_message->seq()->to_uint() >= 10000000)
+            seq_width = 8;
+    }
 
     size_t subject_width = terminal_width - from_width - seq_width - 11;
 
