@@ -72,7 +72,7 @@ void mime::message::add_header(const header_ptr& header)
 void mime::message::add_header(const std::string& key,
                                const std::string& value)
 {
-    auto header = std::make_shared<mime::header>(key + ": " + value + "\n");
+    auto header = std::make_shared<mime::header>(key + ": " + value);
     add_header(header);
 }
 
