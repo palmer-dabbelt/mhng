@@ -86,6 +86,7 @@ namespace mhng {
         const std::vector<int>& numbers(void) const
             { return _numbers; }
         const mailbox_ptr& mbox(void) const { return _mbox; }
+        const decltype(_attach)& attach(void) const { return _attach; }
 
         bool stdout(void) const
             { return _stdout.known() == true && _stdout.data() == true; }
