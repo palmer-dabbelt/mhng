@@ -52,11 +52,12 @@ JVBERi0xLjYNJeLjz9MNCjE3MiAwIG9iag08PC9GaWx0ZXIvRmxhdGVEZWNvZGUvRmlyc3QgNTcx
 EOF
 
 cat >out.gold <<"EOF"
-From:    REDACTED1@example.com
-To:      REDACTED2@example.com
-CC:      REDACTED5@example.com
-Subject: Soft Machines "VISC"?
-Date:    Tue, 02 Dec 2014 23:15:26 PST (-0800)
+From:       REDACTED1@example.com
+To:         REDACTED2@example.com
+CC:         REDACTED5@example.com
+Subject:    Soft Machines "VISC"?
+Date:       Tue, 02 Dec 2014 23:15:26 PST (-0800)
+Message-ID: <REDACTED0@example.com>
 
 
 Here's the microprocessor report article from their website.
