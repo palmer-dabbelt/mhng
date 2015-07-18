@@ -234,6 +234,18 @@ mime::part::part(const std::vector<std::string>& raw)
     }
 }
 
+
+std::vector<mime::header_ptr> mime::part::headers(const std::string& name) const
+{
+    std::vector<header_ptr> out;
+
+    for (const auto& header: this->headers())
+        if (strcasecmp(name.c_str(), header->key().c_str()))
+            out.push_back(header);
+
+    return out;
+}
+
 std::vector<std::string> mime::part::utf8(void) const
 {
     std::vector<std::string> out;
@@ -516,9 +528,22 @@ mime::part_ptr mime::part::body(void) const
         }
 
         /* First, prefer anything that's just plain text. */
-        for (const auto& child: _children)
-            if (child->matches_content_type("text/plain"))
-                return child;
+        for (const auto& child: _children) {
+            if (child->matches_content_type("text/plain")) {
+                /* Check for attachments, they shouldn't be shown
+                 * inline. */
+                bool allowed = true;
+                for (const auto& hdr: child->headers("Content-Disposition")) {
+                    auto v = hdr->single_line();
+                    auto a = std::string("attachment");
+                    if (strncasecmp(v.c_str(), a.c_str(), a.size()) == 0)
+                        allowed = false;
+                }
+
+                if (allowed == true)
+                    return child;
+            }
+        }
 
         /* Attempt a recursive parse, looking for a plain text part.
          * The idea here is that it might be hidden in another
@@ -642,7 +667,7 @@ void mime::part::add_header(const header_ptr& header)
 void mime::part::add_header(const std::string& key,
                             const std::string& value)
 {
-    auto header = std::make_shared<mime::header>(key + ": " + value + "\n");
+    auto header = std::make_shared<mime::header>(key + ": " + value);
     add_header(header);
 }
 

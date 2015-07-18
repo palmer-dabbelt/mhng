@@ -21,6 +21,7 @@
 
 #include <libmhng/args.h++>
 #include <libmhng/gpg_sign.h++>
+#include <libmhng/mime/base64.h++>
 #include <string.h>
 #include <unistd.h>
 #include <uuid.h>
@@ -46,6 +47,15 @@ int main(int argc, const char **argv)
 #else
     auto args = mhng::args::parse_normal(argc, argv);
 #endif
+
+    /* Before doing anything, check to make sure that the listed
+     * attachments actually exist. */
+    for (const auto& file: args->attach()) {
+        if (access(file.c_str(), R_OK) != 0) {
+            fprintf(stderr, "Unable to open attachment %s\n", file.c_str());
+            abort();
+        }
+    }
 
     /* We need a temporary file to fire up an editor against.  This is
      * kind of unfortunate, but I guess that's just life... :(. */
@@ -276,6 +286,56 @@ int main(int argc, const char **argv)
 
         mime->add_header("Message-ID", message_id);
         mime->body()->add_header("Message-ID", message_id);
+    }
+
+    /* Check to see if we need to re-parse everything again in order
+     * to insert the attachments. */
+    if (args->attach().size() > 0) {
+        std::vector<std::string> raw;
+
+        /* Copy the headers over. */
+        for (const auto& header: mime->body()->headers())
+            for (const auto& hraw: header->raw())
+                raw.push_back(hraw + "\n");
+
+        /* Add some additional headers to make this a MIME multipart
+         * message. */
+        raw.push_back("Content-Type: multipart/mixed;\n");
+        raw.push_back(" boundary=MHngMIME-attachments\n");
+        raw.push_back("\n");
+        raw.push_back("--MHngMIME-attachments\n");
+        raw.push_back("Content-Type: text/plain; charset=utf-8\n");
+        raw.push_back("Content-Transfer-Encoding: 8bit\n");
+        raw.push_back("Content-Disposition: inline\n");
+        raw.push_back("\n");
+
+        /* Copy the message body. */
+        for (const auto& body: mime->body()->body_raw())
+            raw.push_back(body);
+        raw.push_back("\n");
+
+        /* Add any necessary attachments after the text. */
+        for (const auto& filename: args->attach()) {
+            auto content_type = "text/plain";
+
+            raw.push_back("--MHngMIME-attachments\n");
+            raw.push_back("Content-Transfer-Encoding: base64\n");
+            raw.push_back(std::string("Content-Type: ")
+                          + content_type + ";\n");
+            raw.push_back(std::string(" name=") + filename + "\n");
+            raw.push_back("Content-Disposition: attachment;\n");
+            raw.push_back(std::string(" filename=") + filename + "\n");
+            raw.push_back("\n");
+
+            for (const auto& line: base64_encode_file(filename))
+                raw.push_back(line + "\n");
+            raw.push_back("\n");
+        }
+
+        raw.push_back("--MHngMIME-attachments--\n");
+
+        /* Now actually re-parse the message. */
+        mime = std::make_shared<mhng::mime::message>(raw);
     }
 
     /* Go ahead and insert this message into the database. */

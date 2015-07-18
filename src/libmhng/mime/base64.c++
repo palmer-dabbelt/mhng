@@ -33,6 +33,8 @@ static const std::string base64_chars =
              "abcdefghijklmnopqrstuvwxyz"
              "0123456789+/";
 
+#define BASE64_LINE_SIZE (80 * 3 / 4)
+
 
 static inline bool is_base64(unsigned char c) {
   return (isalnum(c) || (c == '+') || (c == '/'));
@@ -148,4 +150,20 @@ ssize_t base64_decode(const std::string& in, unsigned char *out) {
 ssize_t base64_decode(const std::string& in, char *out)
 {
     return base64_decode(in, (unsigned char *)out);
+}
+
+std::vector<std::string> base64_encode_file(const std::string& filename)
+{
+    std::vector<std::string> out;
+    unsigned char buffer[BASE64_LINE_SIZE];
+
+    auto file = fopen(filename.c_str(), "r");
+    if (file == NULL)
+        abort();
+
+    ssize_t n;
+    while ((n = fread(&buffer[0], 1, BASE64_LINE_SIZE, file)) > 0)
+        out.push_back(base64_encode(buffer, n));
+
+    return out;
 }

@@ -92,6 +92,8 @@ namespace mhng {
             const std::vector<header_ptr> headers(void) const
                 { return _headers; }
 
+            std::vector<header_ptr> headers(const std::string& name) const;
+
             /* Formats the body of this MIME part as UTF-8. */
             std::vector<std::string> utf8(void) const;
 
