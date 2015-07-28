@@ -250,6 +250,31 @@ int main(int argc, const char **argv)
             }
         }
 
+        /* Date-stamp the message with the current date. */
+        {
+            auto date = mhng::date::now();
+            lookup.push_back(std::string("Date: ") + date->local() + "\n");
+        }
+
+        /* Generate a unique identifier that cooresponds to this
+         * message, which is used later for things like
+         * In-Reply-To. */
+        {
+            uuid_t uuid;
+            uuid_generate(uuid);
+
+            char uuid_str[BUFFER_SIZE];
+            uuid_unparse(uuid, uuid_str);
+
+            char hostname[BUFFER_SIZE];
+            gethostname(hostname, BUFFER_SIZE);
+
+            char message_id[BUFFER_SIZE];
+            snprintf(message_id, BUFFER_SIZE, "<mhng-%s@%s>", uuid_str, hostname);
+
+            lookup.push_back(std::string("Message-ID: ") + message_id);
+        }
+
         /* Make this a MIME message. */
         lookup.push_back("Mime-Version: 1.0 (MHng)\n");
         lookup.push_back("\n");
@@ -260,32 +285,6 @@ int main(int argc, const char **argv)
 
         /* Now actually re-parse the message. */
         mime = std::make_shared<mhng::mime::message>(lookup);
-    }
-
-    /* Date-stamp the message with the current date. */
-    {
-        auto date = mhng::date::now();
-        mime->add_header("Date", date->local());
-        mime->body()->add_header("Date", date->local());
-    }
-
-    /* Generate a unique identifier that cooresponds to this message,
-     * which is used later for things like In-Reply-To. */
-    {
-        uuid_t uuid;
-        uuid_generate(uuid);
-
-        char uuid_str[BUFFER_SIZE];
-        uuid_unparse(uuid, uuid_str);
-
-        char hostname[BUFFER_SIZE];
-        gethostname(hostname, BUFFER_SIZE);
-
-        char message_id[BUFFER_SIZE];
-        snprintf(message_id, BUFFER_SIZE, "<mhng-%s@%s>", uuid_str, hostname);
-
-        mime->add_header("Message-ID", message_id);
-        mime->body()->add_header("Message-ID", message_id);
     }
 
     /* Check to see if we need to re-parse everything again in order
