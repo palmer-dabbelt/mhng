@@ -42,6 +42,11 @@ namespace mhng {
             {
             }
 
+        date(const putil::chrono::datetime& dt)
+            : putil::chrono::datetime(dt)
+            {
+            }
+
     public:
         uint64_t unix(void) const
             { return this->unix_seconds(); }
@@ -53,9 +58,7 @@ namespace mhng {
         static date_ptr now(void)
             {
                 auto n = putil::chrono::datetime::now();
-                return std::make_shared<date>(
-                    std::to_string(n->unix_seconds())
-                    );
+                return std::make_shared<date>(n);
             }
     };
 }
