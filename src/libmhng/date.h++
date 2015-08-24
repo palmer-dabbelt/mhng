@@ -29,50 +29,34 @@ namespace mhng {
     typedef std::shared_ptr<date> date_ptr;
 }
 
-#include <stdint.h>
-#include <string>
+#include <libputil/chrono/datetime.h++>
 
 namespace mhng {
     /* Stores a date, along with the ability to store it as a number
      * of formats. */
-    class date {
-    private:
-        /* The returned error code that came from parsing this
-         * date. */
-        int _error;
-
-        /* The canonical date format: UNIX time, stored in UTC. */
-        const uint64_t _unix;
-
+    class date: public putil::chrono::datetime {
     public:
         /* Parses the given string into a date. */
-        date(const std::string to_parse);
+        date(const std::string to_parse)
+            : putil::chrono::datetime(to_parse)
+            {
+            }
 
-        /* Returns this date, pretty printed in the current local
-         * timezone.  This is roughly 2822, but with a timezone
-         * abbreviation in there as well as the hour offset. */
-        const std::string local(void) const;
-
-        /* Returns this date, pretty printed in the UTC (or whatever
-         * comes out of gmtime()...).  This is roughly 2822, but with
-         * a timezone abbreviation in there as well as the hour
-         * offset. */
-        const std::string gm(void) const;
-
-        /* Returns the time as an integer.  This is effectively just
-         * UNIX time. */
-        uint64_t unix(void) const;
-
-        /* Returns the time as a string, which just contains the
-         * decimal representation of the UNIX time above. */
-        const std::string unix_str(void) const;
-
-        /* Prints DD/MM, the day/month format. */
-        const std::string ddmm(void) const;
+    public:
+        uint64_t unix(void) const
+            { return this->unix_seconds(); }
+        std::string unix_str(void) const
+            { return std::to_string(this->unix()); }
 
     public:
         /* Creates a new date that represents the time right now. */
-        static date_ptr now(void);
+        static date_ptr now(void)
+            {
+                auto n = putil::chrono::datetime::now();
+                return std::make_shared<date>(
+                    std::to_string(n->unix_seconds())
+                    );
+            }
     };
 }
 
