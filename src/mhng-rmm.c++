@@ -25,8 +25,14 @@ int main(int argc, const char **argv)
 {
     auto args = mhng::args::parse_normal(argc, argv);
 
-    for (const auto& msg: args->messages())
-        msg->remove();
+    /* This is all in a single transaction for performance reasons:
+     * when removing a lot of messages it's better to only sync once
+     * rather than once per message. */
+    {
+        auto t = args->mbox()->db()->deferred_transaction();
+        for (const auto& msg: args->messages())
+            msg->remove();
+    }
 
     {
         auto daemon = args->mbox()->daemon();
