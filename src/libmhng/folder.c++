@@ -40,6 +40,12 @@ folder::folder(const mailbox_ptr& mbox,
 {
 }
 
+size_t folder::message_count(void)
+{
+    auto messages = std::make_shared<db::mh_messages>(_mbox);
+    return messages->count(this->name());
+}
+
 message_ptr folder::open(uint64_t uid)
 {
     auto messages = std::make_shared<db::mh_messages>(_mbox);

@@ -83,6 +83,10 @@ namespace mhng {
              * messages to be removed by their unique ID as otherwise
              * we could easily have race conditions. */
             void remove(uint64_t uid);
+
+            /* Returns the count of the number of messages inside the
+             * given folder. */
+            size_t count(const std::string& folder_name);
         };
     }
 }

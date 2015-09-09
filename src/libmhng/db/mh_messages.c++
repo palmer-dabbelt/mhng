@@ -252,6 +252,29 @@ void db::mh_messages::remove(uint64_t uid)
     }
 }
 
+size_t db::mh_messages::count(const std::string& folder_name)
+{
+    auto resp = _mbox->db()->count(_table, "folder='%s'",
+                                   folder_name.c_str());
+
+    auto out = std::vector<message_ptr>();
+    switch (resp->return_value()) {
+    case psqlite::error_code::SUCCESS:
+        break;
+    case psqlite::error_code::FAILED_UNIQUE:
+        abort();
+        break;
+    }
+
+    for (const auto& row: resp->rows()) {
+        return row->get_uint("COUNT(uid)");
+    }
+
+    fprintf(stderr, "Unable to get count for %s\n", folder_name.c_str());
+    abort();
+    return -1;
+}
+
 psqlite::table::ptr generate_columns(void)
 {
     std::vector<psqlite::column::ptr> out;
