@@ -195,9 +195,24 @@ int main(int argc, const char **argv)
 
     /* Now fire up an editor to actually edit the template. */
     {
+        auto editor = [](void) -> const char *
+            {
+                if (getenv("MHNG_COMP_EDITOR") != NULL)
+                    return getenv("MHNG_COMP_EDITOR");
+                if (getenv("MHNG_EDITOR") != NULL)
+                    return getenv("MHNG_EDITOR");
+                if (getenv("COMP_EDITOR") != NULL)
+                    return getenv("COMP_EDITOR");
+                if (getenv("MH_EDITOR") != NULL)
+                    return getenv("MH_EDITOR");
+                if (getenv("EDITOR") != NULL)
+                    return getenv("EDITOR");
+                return "vi";
+            }();
+
         char cmd[BUFFER_SIZE];
-        snprintf(cmd, BUFFER_SIZE, "emacs -nw %s/template.msg",
-                 tempdir);
+        snprintf(cmd, BUFFER_SIZE, "%s %s/template.msg",
+                 editor, tempdir);
         if (system(cmd) != 0) {
             perror("Unable to open editor\n");
             abort();
