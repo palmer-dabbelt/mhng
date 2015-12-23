@@ -388,11 +388,10 @@ std::vector<std::string> mime::part::decoded(void) const
     if (matches_encoding("base64") == true) {
         std::string last_line = "";
         for (const auto& linestr: _body_raw) {
-            char decoded[BUFFER_SIZE];
-            snprintf(decoded, BUFFER_SIZE, "%s",
-                     base64_decode(linestr).c_str());
+            auto decoded_bytes = base64_decode(linestr);
+            auto decoded = base64_array2string(decoded_bytes);
 
-            for (size_t i = 0; i < strlen(decoded); ++i) {
+            for (size_t i = 0; i < decoded.size(); ++i) {
                 if (decoded[i] == '\n') {
                     out.push_back(last_line);
                     last_line = "";
@@ -480,12 +479,11 @@ void mime::part::write(FILE *out) const
      * and store it out. */
     if (matches_encoding("base64") == true) {
         for (const auto& linestr: _body_raw) {
-            unsigned char decoded[BUFFER_SIZE*2];
-            auto declen = base64_decode(linestr, decoded);
-            if (declen == 0)
+            auto decoded = base64_decode(linestr);
+            if (decoded.size() == 0)
                 continue;
 
-            auto written = fwrite(decoded, declen, 1, out);
+            auto written = fwrite(&decoded[0], decoded.size(), 1, out);
             if (written != 1) {
                 perror("Unable to write");
                 abort();

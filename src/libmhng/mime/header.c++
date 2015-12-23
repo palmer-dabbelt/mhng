@@ -71,7 +71,8 @@ std::string mime::header::utf8(void) const
                 strstr(base64, "?=")[0] = '\0';
 
                 auto dec = base64_decode(base64);
-                strcpy(raw, dec.c_str());
+                auto dec_str = base64_array2string(dec);
+                strcpy(raw, dec_str.c_str());
                 out_offset = strlen(base64);
             } else if (strncmp(line + i + strlen(charset) + 2, "?Q?", 3) == 0) {
                 char qp[BUFFER_SIZE];
