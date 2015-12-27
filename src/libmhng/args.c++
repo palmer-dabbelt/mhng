@@ -95,6 +95,15 @@ args_ptr args::parse_numbers(int argc, const char **argv)
     return parse(argc, argv, flags);
 }
 
+args_ptr args::parse_noimplicit(int argc, const char **argv)
+{
+    int flags = 0;
+    flags |= pf_nof;
+    flags |= pf_nom;
+
+    return parse(argc, argv, flags);
+}
+
 args_ptr args::parse(int argc, const char **argv, int flags)
 {
     bool messages_written = false;
