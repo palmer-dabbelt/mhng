@@ -19,9 +19,7 @@
  */
 
 #include "base64.h++"
-extern "C" {
 #include <base64.h>
-}
 
 #ifndef BASE64_LINE_SIZE
 #define BASE64_LINE_SIZE 10240
