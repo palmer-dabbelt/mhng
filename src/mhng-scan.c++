@@ -35,9 +35,13 @@ int main(int argc, const char **argv)
 
     /* Find some information about the terminal. */
     size_t terminal_width = 80;
+    char *terminal_bold = (char *)"";
+    char *terminal_norm = (char *)"";
     char *termtype = getenv("TERM");
     if (tgetent(termbuf, termtype) >= 0) {
         terminal_width = tgetnum((char *)"co");
+        terminal_bold = tgetstr((char *)"md", NULL);
+        terminal_norm = tgetstr((char *)"me", NULL);
     }
 
     size_t from_width = (terminal_width * 25) / 80;
@@ -72,13 +76,15 @@ int main(int argc, const char **argv)
         if (strcmp(msg->folder()->name().c_str(), "sent") == 0)
             from = msg->first_to();
 
-        printf("%c %*u %s %-*.*s %-*.*s%c\n",
+        printf("%s%c %*u %s %-*.*s %-*.*s%c%s\n",
+               msg->unread() ? terminal_bold : "",
                msg->cur() ? '*' : ' ',
                (int)seq_width, msg->seq()->to_uint(),
                msg->first_date()->ddmm().c_str(),
                (int)from_width, (int)from_width, from->nom().c_str(),
                (int)subject_width, (int)subject_width, subj.c_str(),
-               strlen(subj.c_str()) > subject_width ? '\\' : ' '
+               strlen(subj.c_str()) > subject_width ? '\\' : ' ',
+               terminal_norm
             );
     }
 
