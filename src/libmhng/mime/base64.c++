@@ -30,8 +30,11 @@ std::vector<uint8_t> base64_decode(const std::string& in)
     auto out_len = base64_declen(in.size()) + 1;
     auto out = std::vector<uint8_t>(0, out_len);
     
-    if (base64_decode(in.c_str(), &out[0], out_len) != 0)
+    int err;
+    if ((err = base64_decode(in.c_str(), &out[0], out_len)) < 0) {
+        fprintf(stderr, "base64_decode('%s', out, %lu) => %d\n", in.c_str(), out_len, err);
         abort();
+    }
 
     return out;
 }
