@@ -332,3 +332,9 @@ BINARIES    += mhng-pipe-lookup_address
 AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-pipe-lookup_address.c++
+
+# Finds all the messages in this folder that have the given header value.
+BINARIES    += mhng-pipe-find_with_header
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhng-pipe-find_with_header.c++
