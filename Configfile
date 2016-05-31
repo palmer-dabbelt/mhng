@@ -338,3 +338,9 @@ BINARIES    += mhng-pipe-find_with_header
 AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-pipe-find_with_header.c++
+
+# Prints the sequence number of every message in the current thread.
+BINARIES    += mhng-pipe-show_seq_for_thread
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhng-pipe-show_seq_for_thread.c++

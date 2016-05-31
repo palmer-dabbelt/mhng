@@ -23,6 +23,7 @@
 #include "db/imap_messages.h++"
 #include "db/mh_current.h++"
 #include "db/mh_messages.h++"
+#include <string.h>
 #include <unistd.h>
 using namespace mhng;
 
@@ -167,6 +168,30 @@ void message::mark_read_and_synced(void)
 
     auto messages = std::make_shared<db::mh_messages>(_mbox);
     messages->update_unread(atoi(_uid.c_str()), _unread);
+}
+
+std::vector<message_ptr> message::get_messages_in_thread(void) const
+{
+    auto message_id = [&]()
+        {
+            auto headers = header_string("Message-ID");
+            if (headers.size() != 1)
+                abort();
+            return headers[0];
+        }();
+
+    std::vector<message_ptr> matching_messages;
+    for (const auto& msg: _folder->messages()) {
+        for (const auto& irt: msg->header_string("In-Reply-To")) {
+            if (strcmp(message_id.c_str(), irt.c_str()) == 0) {
+                matching_messages.push_back(msg);
+                for (const auto& mt: msg->get_messages_in_thread())
+                    matching_messages.push_back(mt);
+            }
+        }
+    }
+
+    return matching_messages;
 }
 
 std::shared_ptr<std::vector<std::string>> message::_raw_impl(void)

@@ -169,6 +169,9 @@ namespace mhng {
         bool read_and_unsynced(void) const { return _unread == 1; }
         bool read_and_synced(void) const { return _unread == 2; }
 
+        /* Returns the message that are in this message's thread. */
+        std::vector<message_ptr> get_messages_in_thread(void) const;
+
     private:
         std::string full_path(void) const;
 
