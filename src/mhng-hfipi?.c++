@@ -40,11 +40,13 @@ int main(int argc, const char **argv)
 
     for (const auto& msg: args->messages()) {
         auto subj = djb_hash(remove_other_white(msg->first_subject()));
+        auto from = djb_hash(remove_other_white(msg->first_from()->email()));
 
-        printf("<tt>%s&nbsp%s&nbsp%s&nbsp0x%08x</tt><br/>\n",
-               msg->cur() ? "    *" : "&nbsp",
+        printf("<tt>%s&nbsp%s&nbsp%s&nbsp0x%08x&nbsp0x%08x</tt><br/>\n",
+               msg->cur() ? "*" : "&nbsp",
                msg->unread() ? "U" : "&nbsp",
                msg->first_date()->ddmm().c_str(),
+               from,
                subj
             );
     }
