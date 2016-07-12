@@ -217,6 +217,12 @@ AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-notify.c++
 
+# Shows a report on the fullness of my inbox
+BINARIES    += mhng-hfipi?
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhng-hfipi?.c++
+
 ##############################################################################
 # Remote-Access Binaries                                                     #
 ##############################################################################
