@@ -350,3 +350,10 @@ BINARIES    += mhng-pipe-show_seq_for_thread
 AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-pipe-show_seq_for_thread.c++
+
+# Like "scan" but more suitable for parsing with a script
+BINARIES    += mhng-pipe-scan
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhng-scan.c++
+COMPILEOPTS += -DPIPE_SCAN

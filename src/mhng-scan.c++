@@ -24,7 +24,9 @@
 #include <termcap.h>
 #include <algorithm>
 
+#ifndef PIPE_SCAN
 static char termbuf[2048];
+#endif
 
 static std::string remove_other_white(const std::string& in);
 
@@ -34,6 +36,7 @@ int main(int argc, const char **argv)
     args->mbox()->set_current_folder(args->folders()[0]);
 
     /* Find some information about the terminal. */
+#ifndef PIPE_SCAN
     size_t terminal_width = 80;
     char *terminal_bold = (char *)"";
     char *terminal_norm = (char *)"";
@@ -66,6 +69,7 @@ int main(int argc, const char **argv)
     }
 
     size_t subject_width = terminal_width - from_width - seq_width - 11;
+#endif
 
     /* At this point that argument list contains the entire set of
      * messages that should be examined as part of the scan. */
@@ -76,6 +80,14 @@ int main(int argc, const char **argv)
         if (strcmp(msg->folder()->name().c_str(), "sent") == 0)
             from = msg->first_to();
 
+#ifdef PIPE_SCAN
+        printf("%u %s %s %s\n",
+               msg->seq()->to_uint(),
+               msg->first_date()->ddmm().c_str(),
+               from->email().c_str(),
+               subj.c_str()
+            );
+#else
         printf("%s%c %*u %s %-*.*s %-*.*s%c%s\n",
                msg->unread() ? terminal_bold : "",
                msg->cur() ? '*' : ' ',
@@ -86,6 +98,7 @@ int main(int argc, const char **argv)
                strlen(subj.c_str()) > subject_width ? '\\' : ' ',
                terminal_norm
             );
+#endif
     }
 
     return 0;
