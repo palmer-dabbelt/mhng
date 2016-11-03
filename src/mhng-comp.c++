@@ -287,7 +287,7 @@ int main(int argc, const char **argv)
             char message_id[BUFFER_SIZE];
             snprintf(message_id, BUFFER_SIZE, "<mhng-%s@%s>", uuid_str, hostname);
 
-            lookup.push_back(std::string("Message-ID: ") + message_id);
+            lookup.push_back(std::string("Message-ID: ") + message_id + "\n");
         }
 
         /* Make this a MIME message. */
