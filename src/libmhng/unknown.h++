@@ -67,4 +67,12 @@ namespace mhng {
     };
 }
 
+template<typename T>
+bool operator==(const mhng::unknown<T>& a, const T& b)
+{
+    if (a.known() == false)
+        return false;
+    return a.data() == b;
+}
+
 #endif
