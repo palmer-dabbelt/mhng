@@ -475,9 +475,9 @@ std::vector<std::string> mime::part::decoded(void) const
 void mime::part::write(FILE *out) const
 {
 
-    /* I handle base64 very simply: I just decode it, break newlines,
-     * and store it out. */
     if (matches_encoding("base64") == true) {
+        /* I handle base64 very simply: I just decode it, break newlines,
+         * and store it out. */
         for (const auto& linestr: _body_raw) {
             auto decoded = base64_decode(linestr);
             if (decoded.size() == 0)
@@ -490,6 +490,18 @@ void mime::part::write(FILE *out) const
             }
         }
         return;
+    } else if (matches_encoding("7bit")) {
+        /* 7bit clean can just be written directly. */
+        for (const auto& decoded: _body_raw) {
+            if (decoded.size() == 0)
+                continue;
+
+            auto written = fwrite(&decoded[0], decoded.size(), 1, out);
+            if (written != 1) {
+                perror("Unable to write");
+                abort();
+            }
+        }
     } else {
         fprintf(stderr, "Unable to decode MIME part for writing\n");
         fprintf(stderr, "  Content-Transfer-Encoding: %s\n", encoding().c_str());

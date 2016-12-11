@@ -147,6 +147,7 @@ AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-mime.c++
 COMPILEOPTS += -DDETACH
+TESTSRC     += attachment.bash
 
 # Lists every folder known to the system
 BINARIES    += mhng-folders
