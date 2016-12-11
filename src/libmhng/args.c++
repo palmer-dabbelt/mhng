@@ -117,6 +117,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
 
     unknown<bool> stdout;
     unknown<bool> nowrap;
+    unknown<bool> thread;
 
     std::vector<std::string> attach;
 
@@ -170,6 +171,8 @@ args_ptr args::parse(int argc, const char **argv, int flags)
         } else if (strcmp(argv[i], "--attach") == 0) {
             attach.push_back(argv[i+1]);
             i++;
+        } else if (strcmp(argv[i], "--thread") == 0) {
+            thread = true;
         } else {
             folders_written = true;
             folder_names.push_back(argv[i]);
@@ -231,6 +234,24 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                           attach);
         } else if (flags & pf_nom) {
             std::vector<message_ptr> messages;
+            return std::make_shared<args>(messages,
+                                          folders,
+                                          numbers,
+                                          dir,
+                                          stdout,
+                                          nowrap,
+                                          attach);
+        } else if (thread == true) {
+            std::vector<message_ptr> messages;
+            auto cur = last_folder_ptr->current_message();
+            if (cur == NULL) {
+                fprintf(stderr, "Unable to open current message\n");
+                fprintf(stderr, "  Probably you just removed it\n");
+                abort();
+            }
+            messages.push_back(cur);
+            for (const auto& mit: cur->get_messages_in_thread())
+                messages.push_back(mit);
             return std::make_shared<args>(messages,
                                           folders,
                                           numbers,
