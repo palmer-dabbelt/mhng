@@ -137,6 +137,10 @@ namespace mhng {
             /* Returns TRUE if this matches the given
              * content-transfer-encoding header. */
             bool matches_encoding(const std::string& enc) const;
+
+            /* Returns the encoding of this message.  Don't use this for
+             * comparisons, only for debug printing.*/
+            std::string encoding(void) const;
         };
     }
 }

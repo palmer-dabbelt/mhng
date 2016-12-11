@@ -490,6 +490,10 @@ void mime::part::write(FILE *out) const
             }
         }
         return;
+    } else {
+        fprintf(stderr, "Unable to decode MIME part for writing\n");
+        fprintf(stderr, "  Content-Transfer-Encoding: %s\n", encoding().c_str());
+        abort();
     }
 }
 
@@ -715,6 +719,14 @@ bool mime::part::matches_encoding(const std::string& type) const
         return true;
 
     return false;
+}
+
+std::string mime::part::encoding(void) const
+{
+    if (_content_transfer_encoding.known() == false)
+        return "((unknown))";
+
+    return _content_transfer_encoding.data();
 }
 
 bool isterm(char c, bool space_p)
