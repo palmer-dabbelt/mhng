@@ -76,7 +76,7 @@ int main(int argc, const char **argv)
             out_filename = part->name();
         fprintf(stderr, "Writing to '%s'\n", out_filename.c_str());
 
-        FILE *out_file = fopen(part->name().c_str(), "w");
+        FILE *out_file = fopen(out_filename.c_str(), "w");
         part->write(out_file);
         fclose(out_file);
 #else
