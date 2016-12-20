@@ -2,6 +2,8 @@
 
 ARGS="inbox 1"
 
+export TZ="America/Los_Angeles"
+
 sqlite3 $MHNG_MAILDIR/metadata.sqlite3 <<EOF
 INSERT INTO MH__messages (uid, seq, folder, unread, subject, date, fadr, tadr) VALUES (2, 1, "inbox", 0, "test", 1, "from@example.com", "to@example.com");
 EOF
