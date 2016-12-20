@@ -35,7 +35,7 @@ before_install:
   - PSQLITE_VERSION=0.0.3
   - PUTIL_VERSION=0.0.4
   - LIBBASE64_VERSION=1.0.0_p2
-  - GITDATE_VERSION=0.0.1
+  - GITDATE_VERSION=0.0.3
   - export MAKEFLAGS="-j3"
   - export S="$(pwd)"
   - mkdir -p "${HOME}/dependencies"
