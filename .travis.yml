@@ -34,7 +34,7 @@ before_install:
   - PCONFIGURE_VERSION=0.11.10
   - PSQLITE_VERSION=0.0.3
   - PUTIL_VERSION=0.0.4
-  - LIBBASE64_VERSION=1.0.0_p2
+  - LIBBASE64_VERSION=1.0.0_p3
   - GITDATE_VERSION=0.0.3
   - export MAKEFLAGS="-j3"
   - export S="$(pwd)"
