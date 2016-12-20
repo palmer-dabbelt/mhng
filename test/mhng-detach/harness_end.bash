@@ -6,5 +6,5 @@ find
 
 find -iname "*.gold" | while read name
 do
-    diff -u "$(echo "$name" | sed 's/[.]gold//g')" "$name"
+    diff -a -u "$(echo "$name" | sed 's/[.]gold//g')" "$name"
 done
