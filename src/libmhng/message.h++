@@ -63,7 +63,7 @@ namespace mhng {
         promise<message, std::vector<std::string>> _raw;
 
         /* This contains the message formatted as a MIME message. */
-        promise<message, mime::message> _mime;
+        mutable promise<message, mime::message> _mime;
 
 
     public:
@@ -99,7 +99,7 @@ namespace mhng {
         std::shared_ptr<std::vector<std::string>> raw_pointer(void)
             { return _raw; }
         std::vector<std::string> raw(void) { return *(raw_pointer()); }
-        mime::message_ptr mime(void) { return _mime; }
+        mime::message_ptr mime(void) const { return _mime; }
 
         /* Removes a message from the store.  Note that this is a
          * somewhat dangerous operation: there could be a whole bunch
@@ -114,9 +114,9 @@ namespace mhng {
          * slow!  If you're just going to throw out everything but the
          * first header then go ahead and use the fast accessors
          * above, but this is significantly safer... */
-        std::vector<address_ptr> header_addr  (const std::string hdr);
-        std::vector<std::string> header_string(const std::string hdr);
-        std::vector<date_ptr>    header_date  (const std::string hdr);
+        std::vector<address_ptr> header_addr  (const std::string hdr) const;
+        std::vector<std::string> header_string(const std::string hdr) const;
+        std::vector<date_ptr>    header_date  (const std::string hdr) const;
 
         std::vector<address_ptr> from(void)
             { return header_addr("From"); }
@@ -136,7 +136,7 @@ namespace mhng {
         /* You shouldn't be using this directly but should instead be
          * using the other functions that parse these headers into a
          * format you actually care about. */
-        std::vector<mime::header_ptr> header(const std::string hdr);
+        std::vector<mime::header_ptr> header(const std::string hdr) const;
 
         /* Returns the body of the message, parsed as UTF-8 and
          * suitable for writing to stdout. */

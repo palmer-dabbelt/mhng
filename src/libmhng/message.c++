@@ -79,7 +79,7 @@ void message::remove(void)
     }
 }
 
-std::vector<address_ptr> message::header_addr(const std::string name)
+std::vector<address_ptr> message::header_addr(const std::string name) const
 {
     std::vector<address_ptr> out;
 
@@ -94,7 +94,7 @@ std::vector<address_ptr> message::header_addr(const std::string name)
     return out;
 }
 
-std::vector<std::string> message::header_string(const std::string name)
+std::vector<std::string> message::header_string(const std::string name) const
 {
     std::vector<std::string> out;
 
@@ -106,7 +106,7 @@ std::vector<std::string> message::header_string(const std::string name)
     return out;
 }
 
-std::vector<date_ptr> message::header_date(const std::string name)
+std::vector<date_ptr> message::header_date(const std::string name) const
 {
     std::vector<date_ptr> out;
 
@@ -119,7 +119,7 @@ std::vector<date_ptr> message::header_date(const std::string name)
     return out;
 }
 
-std::vector<mime::header_ptr> message::header(const std::string name)
+std::vector<mime::header_ptr> message::header(const std::string name) const
 {
     return mime()->header(name);
 }
