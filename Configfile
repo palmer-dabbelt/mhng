@@ -148,6 +148,7 @@ DEPLIBS     += mhng
 SOURCES     += mhng-mime.c++
 COMPILEOPTS += -DDETACH
 TESTSRC     += attachment_7bit.bash
+TESTSRC     += attachment_base64.bash
 
 # Lists every folder known to the system
 BINARIES    += mhng-folders
