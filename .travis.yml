@@ -68,6 +68,7 @@ before_install:
   - wget "https://github.com/palmer-dabbelt/libbase64/archive/v${LIBBASE64_VERSION}.tar.gz" -O "${LIBBASE64_VERSION}.tar.gz"
   - tar -xvzpf "${LIBBASE64_VERSION}.tar.gz"
   - cd "libbase64-${LIBBASE64_VERSION}"
+  - ./autobuild.sh
   - ./configure --prefix="${HOME}/dependencies/install"
   - make
   - make install
