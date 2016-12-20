@@ -48,13 +48,13 @@ before_install:
   - wget "https://github.com/palmer-dabbelt/psqlite/archive/v${PSQLITE_VERSION}.tar.gz" -O "${PSQLITE_VERSION}.tar.gz"
   - tar -xvzpf "${PSQLITE_VERSION}.tar.gz"
   - cd "psqlite-${PSQLITE_VERSION}"
-  - pconfigure
+  - pconfigure --verbose "PREFIX = ${HOME}/dependencies/install"
   - make install
   - cd "${HOME}/dependencies"
   - wget "https://github.com/palmer-dabbelt/putil/archive/v${PUTIL_VERSION}.tar.gz" -O "${PUTIL_VERSION}.tar.gz"
   - tar -xvzpf "${PUTIL_VERSION}.tar.gz"
   - cd "putil-${PUTIL_VERSION}"
-  - pconfigure
+  - pconfigure --verbose "PREFIX = ${HOME}/dependencies/install"
   - make install
   - cd "${HOME}/dependencies"
   - wget "https://github.com/palmer-dabbelt/libbase64/archive/v${LIBBASE64_VERSION}.tar.gz" -O "${LIBBASE64_VERSION}.tar.gz"
