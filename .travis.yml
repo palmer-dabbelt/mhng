@@ -1,0 +1,72 @@
+language: c++
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-precise-3.5
+    packages:
+      - libtclap-dev
+      - libgnutls28-dev
+      - libgnutlsxx28
+      - uuid-dev
+      - libncurses5-dev
+      - libnotify-dev
+      - build-essential
+      - gcc-4.9
+      - g++-4.9
+      - gcc-5
+      - g++-5
+      - gcc-6
+      - g++-6
+
+matrix:
+  include:
+    - env: TRAVIS_CC=gcc-4.9   TRAVIS_CXX=g++-4.9
+    - env: TRAVIS_CC=gcc-5     TRAVIS_CXX=g++-5
+    - env: TRAVIS_CC=gcc-6     TRAVIS_CXX=g++-6
+
+before_install:
+  - export PATH="${HOME}/dependencies/install/bin:$PATH"
+  - export PKG_CONFIG_PATH="${HOME}/dependencies/install/lib/pkgconfig"
+  - export CC=$TRAVIS_CC
+  - export CXX=$TRAVIS_CXX
+  - PCONFIGURE_VERSION=0.11.10
+  - PSQLITE_VERSION=0.0.3
+  - PUTIL_VERSION=0.0.4
+  - LIBBASE64_VERSION=1.0.0_p2
+  - export MAKEFLAGS="-j3"
+  - export S="$(pwd)"
+  - mkdir -p "${HOME}/dependencies"
+  - cd "${HOME}/dependencies"
+  - wget "https://github.com/palmer-dabbelt/pconfigure/archive/v${PCONFIGURE_VERSION}.tar.gz" -O "${PCONFIGURE_VERSION}.tar.gz"
+  - tar -xvzpf "${PCONFIGURE_VERSION}.tar.gz"
+  - cd "pconfigure-${PCONFIGURE_VERSION}"
+  - ./bootstrap.sh --prefix "${HOME}/dependencies/install"
+  - make install
+  - cd "${HOME}/dependencies"
+  - wget "https://github.com/palmer-dabbelt/psqlite/archive/v${PSQLITE_VERSION}.tar.gz" -O "${PSQLITE_VERSION}.tar.gz"
+  - tar -xvzpf "${PSQLITE_VERSION}.tar.gz"
+  - cd "psqlite-${PSQLITE_VERSION}"
+  - pconfigure
+  - make install
+  - cd "${HOME}/dependencies"
+  - wget "https://github.com/palmer-dabbelt/putil/archive/v${PUTIL_VERSION}.tar.gz" -O "${PUTIL_VERSION}.tar.gz"
+  - tar -xvzpf "${PUTIL_VERSION}.tar.gz"
+  - cd "putil-${PUTIL_VERSION}"
+  - pconfigure
+  - make install
+  - cd "${HOME}/dependencies"
+  - wget "https://github.com/palmer-dabbelt/libbase64/archive/v${LIBBASE64_VERSION}.tar.gz" -O "${LIBBASE64_VERSION}.tar.gz"
+  - tar -xvzpf "${LIBBASE64_VERSION}.tar.gz"
+  - cd "libbase64-${LIBBASE64_VERSION}"
+  - ./configure --prefix="${HOME}/dependencies/install"
+  - make
+  - make install
+  - cd "${S}"
+
+script:
+  - pconfigure --verbose
+  - make
+  - make check
+  - ptest --verbose
