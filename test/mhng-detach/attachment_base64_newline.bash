@@ -24,13 +24,13 @@ Look, content!
 Content-Type: text/html; charset=utf-8
 Content-Transfer-Encoding: base64
 
-aGVsbG8K
+aGVsbG8Kd29ybGQK
 ------=_Part_REDATCED3--
 
 EOF
 
 touch out.gold
 
-echo "aGVsbG8K" | base64 -d > mhng-attachment.gold
+echo -e "hello\nworld" > mhng-attachment.gold
 
 #include "harness_end.bash"
