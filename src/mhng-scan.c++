@@ -79,6 +79,8 @@ int main(int argc, const char **argv)
         auto from = msg->first_from();
         if (strcmp(msg->folder()->name().c_str(), "sent") == 0)
             from = msg->first_to();
+        if (strcmp(msg->folder()->name().c_str(), "drafts") == 0)
+            from = msg->first_to();
 
 #ifdef PIPE_SCAN
         printf("%u %s %s %s\n",
