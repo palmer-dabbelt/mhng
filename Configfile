@@ -222,10 +222,10 @@ DEPLIBS     += mhng
 SOURCES     += mhng-notify.c++
 
 # Shows a report on the fullness of my inbox
-BINARIES    += mhng-hfipi?
+BINARIES    += mhng-hfipip
 AUTODEPS     = false
 DEPLIBS     += mhng
-SOURCES     += mhng-hfipi?.c++
+SOURCES     += mhng-hfipip.c++
 
 ##############################################################################
 # Remote-Access Binaries                                                     #
