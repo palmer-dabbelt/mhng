@@ -24,7 +24,10 @@
 #include <libmhng/mime/base64.h++>
 #include <string.h>
 #include <unistd.h>
+
+#ifdef HAVE_UUID
 #include <uuid.h>
+#endif
 
 #ifndef BUFFER_SIZE
 #define BUFFER_SIZE 1024
@@ -275,11 +278,22 @@ int main(int argc, const char **argv)
          * message, which is used later for things like
          * In-Reply-To. */
         {
+#ifdef HAVE_UUID
             uuid_t uuid;
             uuid_generate(uuid);
 
             char uuid_str[BUFFER_SIZE];
             uuid_unparse(uuid, uuid_str);
+#else
+            char uuid_str[BUFFER_SIZE];
+            snprintf(uuid_str,
+                     BUFFER_SIZE,
+                     "%08llx%04x%04x",
+                     mhng::date::now()->unix(),
+                     arc4random(),
+                     arc4random()
+            );
+#endif
 
             char hostname[BUFFER_SIZE];
             gethostname(hostname, BUFFER_SIZE);
