@@ -1,6 +1,6 @@
 
 /*
- * Copyright (C) 2014 Palmer Dabbelt
+ * Copyright (C) 2014-2017 Palmer Dabbelt
  *   <palmer@dabbelt.com>
  *
  * This file is part of mhng.
@@ -44,7 +44,7 @@ mailrc::mailrc(const std::string& path)
 
     char line[BUFFER_SIZE];
     while (fgets(line, BUFFER_SIZE, file) != NULL) {
-        while (isspace(line[strlen(line)-1]))
+        while (strlen(line) > 0 && isspace(line[strlen(line)-1]))
             line[strlen(line)-1] = '\0';
 
         if (line[0] == '#')
