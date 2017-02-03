@@ -68,7 +68,7 @@ ssize_t line_buffer::recharge_size(void)
         auto old_data = data;
         data = new_data;
         count *= 2;
-        delete old_data;
+        delete[] old_data;
 
         return recharge_size();
     }
