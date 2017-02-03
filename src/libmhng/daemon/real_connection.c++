@@ -32,7 +32,11 @@ using namespace mhng;
 
 daemon::real_connection::real_connection(const std::string& path)
 {
+#ifdef __APPLE__
+    _socket = socket(AF_UNIX, SOCK_STREAM, 0);
+#else
     _socket = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+#endif
     if (_socket < 0) {
         perror("Unable to create UNIX socket\n");
         abort();
