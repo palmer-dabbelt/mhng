@@ -132,7 +132,11 @@ int main(int argc, const char **argv)
 
 int create_socket(const std::string path)
 {
+#ifdef __APPLE__
+    int server = socket(AF_UNIX, SOCK_STREAM, 0);
+#else
     int server = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+#endif
     if (server < 0) {
         perror("Unable to create UNIX socket\n");
         abort();
