@@ -114,14 +114,14 @@ address_ptr address::parse_alias(const std::string rfc,
     auto name_start = buf;
     while (isspace(name_start[0]))
         name_start++;
-    while (isspace(name_start[strlen(name_start)-1]))
+    while (strlen(name_start) > 0 && isspace(name_start[strlen(name_start)-1]))
         name_start[strlen(name_start)-1] = '\0';
 
     /* It's possible that names start with some sort of quotation, if
      * so skip that. */
     if (name_start[0] == '"')
         name_start++;
-    if (name_start[strlen(name_start)-1] == '"')
+    if (strlen(name_start) > 0 && name_start[strlen(name_start)-1] == '"')
         name_start[strlen(name_start)-1] = '\0';
 
     return std::make_shared<address>(
