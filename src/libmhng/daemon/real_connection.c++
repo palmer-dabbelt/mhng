@@ -45,7 +45,7 @@ daemon::real_connection::real_connection(const std::string& path)
     struct sockaddr_un local;
     local.sun_family = AF_UNIX;
     strcpy(local.sun_path, path.c_str());
-    socklen_t len = strlen(local.sun_path) + sizeof(local.sun_family);
+    socklen_t len = sizeof(local);
     if (connect(_socket, (struct sockaddr *)&local, len) < 0) {
         perror("Unable to connect to MHng daemon");
         fprintf(stderr, "  path: '%s'\n", path.c_str());

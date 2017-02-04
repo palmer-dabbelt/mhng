@@ -146,9 +146,9 @@ int create_socket(const std::string path)
     local.sun_family = AF_UNIX;
     strcpy(local.sun_path, path.c_str());
     unlink(local.sun_path);
-    socklen_t len = strlen(local.sun_path) + sizeof(local.sun_family);
+    socklen_t len = sizeof(local);
     if (bind(server, (struct sockaddr*)(&local), len) < 0) {
-        perror("Unable to bind\n");
+        perror("Unable to bind to local daemon socket");
         abort();
     }
 
