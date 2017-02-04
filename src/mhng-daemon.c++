@@ -25,12 +25,14 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <thread>
+#include <iostream>
 #include <libmhng/daemon/message.h++>
 #include <libmhng/daemon/process.h++>
 #include <libmhng/args.h++>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <sys/wait.h>
+#include <signal.h>
 
 #ifndef BUFFER_SIZE
 #define BUFFER_SIZE 1024
@@ -90,6 +92,17 @@ int main(int argc, const char **argv)
     sync_rep = 0;
     net_up = true;
 
+#ifdef __APPLE__
+    {
+        struct sigaction sa;
+        sa.sa_handler = SIG_IGN;
+        sa.sa_flags = 0;
+        if (sigaction(SIGPIPE, &sa, nullptr) < 0) {
+            perror("sigaction");
+        }
+    }
+#endif
+
     args = mhng::args::parse_all_folders(argc, argv);
 
     /* This special thread responds to synchronization requests. */
@@ -117,10 +130,25 @@ int main(int argc, const char **argv)
         struct sockaddr_un addr;
         socklen_t len = sizeof(addr);
         int client = accept(server, (struct sockaddr *)&addr, &len);
+
         if (client < 0) {
+            auto old_errno = errno;
             perror("Unable to accept");
+
+            if (old_errno == EINTR)
+                continue;
+
             abort();
         }
+
+#ifdef __APPLE__
+        {
+            /* http://stackoverflow.com/questions/19509348/sigpipe-osx-and-disconnected-sockets */
+            int option_value = 1; /* Set NOSIGPIPE to ON */
+            if (setsockopt (client, SOL_SOCKET, SO_NOSIGPIPE, &option_value, sizeof (option_value)) < 0)
+                perror ("setsockopt(,,SO_NOSIGPIPE)");
+        }
+#endif
 
         std::thread client_thread(client_main, client);
         client_thread.detach();
