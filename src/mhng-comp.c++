@@ -27,8 +27,6 @@
 
 #ifdef HAVE_UUID
 #include <uuid.h>
-#else
-#include <bsd/stdlib.h>
 #endif
 
 #ifndef BUFFER_SIZE
