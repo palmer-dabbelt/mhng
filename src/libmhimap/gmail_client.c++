@@ -67,6 +67,8 @@ gmail_client::gmail_client(const std::string username,
     add_folder_map("rss", "RSS");
     add_folder_map("promo", "Promo");
     add_folder_map("linux", "Linux");
+    add_folder_map("upstream", "Upstream");
+    add_folder_map("berkeley", "Berkeley");
 }
 
 typename mhimap::folder_iter gmail_client::folder_iter(void)
