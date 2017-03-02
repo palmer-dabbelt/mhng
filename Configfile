@@ -277,6 +277,7 @@ SOURCES     += mhimap-idle.c++
 BINARIES    += mhng-daemon
 AUTODEPS     = false
 DEPLIBS     += mhng
+LINKOPTS    += -pthread
 SOURCES     += mhng-daemon.c++
 
 ##############################################################################
