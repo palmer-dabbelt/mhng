@@ -116,7 +116,7 @@ int main(int argc, const char **argv)
 
         char uuid_str[BUFFER_SIZE];
         uuid_unparse(uuid, uuid_str);
-#else
+#elif defined(__APPLE__)
         char uuid_str[BUFFER_SIZE];
         snprintf(uuid_str,
                  BUFFER_SIZE,
@@ -124,6 +124,15 @@ int main(int argc, const char **argv)
                  mhng::date::now()->unix(),
                  arc4random(),
                  arc4random()
+        );
+#else
+        char uuid_str[BUFFER_SIZE];
+        snprintf(uuid_str,
+                 BUFFER_SIZE,
+                 "%08lx%04lx%04lx",
+                 mhng::date::now()->unix(),
+                 random(),
+                 random()
         );
 #endif
 
