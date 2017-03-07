@@ -66,39 +66,45 @@ ssl_client::ssl_client(const std::string hostname,
     logger l("ssl_client::ssl_client('%s', %d, '%s', ..., '%s')",
              hostname.c_str(), port, username.c_str(), priority.c_str());
 
-    /* GNUTLS boilerplate from the manual. */
-    l.printf("server_fd = gnutls_tcp_connect('%s', %d)",
-             hostname.c_str(), port);
-    server_fd = gnutls_tcp_connect(hostname.c_str(), port);
+    try {
+        /* GNUTLS boilerplate from the manual. */
+        l.printf("server_fd = gnutls_tcp_connect('%s', %d)",
+                 hostname.c_str(), port);
+        server_fd = gnutls_tcp_connect(hostname.c_str(), port);
 
-    l.printf("credentials.set_x509_trust_file('%s', %d)", CAFILE, CAFMT);
-    credentials.set_x509_trust_file(CAFILE, CAFMT);
-    session.set_credentials(credentials);
+        l.printf("credentials.set_x509_trust_file('%s', %d)", CAFILE, CAFMT);
+        credentials.set_x509_trust_file(CAFILE, CAFMT);
+        session.set_credentials(credentials);
 
-    l.printf("session.set_priority('%s', NULL)", priority.c_str());
-    session.set_priority(priority.c_str(), NULL);
+        l.printf("session.set_priority('%s', NULL)", priority.c_str());
+        session.set_priority(priority.c_str(), NULL);
 
-    l.printf("session.set_server_name(..._DNS, '%s')", hostname.c_str());
-    session.set_server_name(GNUTLS_NAME_DNS, cstr_len(hostname));
+        l.printf("session.set_server_name(..._DNS, '%s')", hostname.c_str());
+        session.set_server_name(GNUTLS_NAME_DNS, cstr_len(hostname));
 
-    l.printf("session.set_transport_ptr(%d)", server_fd);
-    session.set_transport_ptr((gnutls_transport_ptr_t) (ptrdiff_t) server_fd);
+        l.printf("session.set_transport_ptr(%d)", server_fd);
+        session.set_transport_ptr((gnutls_transport_ptr_t) (ptrdiff_t) server_fd);
 
-    l.printf("session.handshake()");
-    ssize_t ret = session.handshake();
-    if (ret < 0) {
-        throw std::runtime_error("Handshake failed");
-    }
+        l.printf("session.handshake()");
+        ssize_t ret = session.handshake();
+        if (ret < 0) {
+            throw std::runtime_error("Handshake failed");
+        }
 
-    /* We're already secure, so we can proceed directly to the
-     * authentication phase. */
-    if (eat_hello() != 0) {
-        fprintf(stderr, "Unexpected hello from IMAP\n");
-        abort();
-    }
+        /* We're already secure, so we can proceed directly to the
+         * authentication phase. */
+        if (eat_hello() != 0) {
+            fprintf(stderr, "Unexpected hello from IMAP\n");
+            abort();
+        }
 
-    if (authenticate(username, password) != 0) {
-        fprintf(stderr, "Unable to authenticate as '%s'\n", username.c_str());
+        if (authenticate(username, password) != 0) {
+            fprintf(stderr, "Unable to authenticate as '%s'\n", username.c_str());
+            abort();
+        }
+    } catch (...) {
+        std::cerr << "GNUTLS exception thrown\n";
+        std::cerr << "  Maybe " CAFILE " doesn't exist?\n";
         abort();
     }
 }
