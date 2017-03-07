@@ -278,7 +278,7 @@ folder_ptr mailbox::_current_folder_impl(void)
 mailrc_ptr mailbox::_mailrc_impl(void)
 {
     char path[BUFFER_SIZE];
-    snprintf(path, BUFFER_SIZE, "%s/.local/share/pim/mailrc",
+    snprintf(path, BUFFER_SIZE, "%s/.mailrc",
              getenv("HOME"));
     return std::make_shared<typename mhng::mailrc>(path);
 }
