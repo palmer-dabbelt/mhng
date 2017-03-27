@@ -45,11 +45,16 @@ int MHIMAP_MAIN(int argc, const char **argv)
         
         mhimap::idle_response res = client.wait_idle();
         switch (res) {
-        case mhimap::idle_response::TIMEOUT:
         case mhimap::idle_response::DATA:
+            fprintf(stderr, "Got DATA response\n");
+            break;
+
+        case mhimap::idle_response::TIMEOUT:
+            fprintf(stderr, "Got TIMEOUT response\n");
             break;
 
         case mhimap::idle_response::DISCONNECT:
+            fprintf(stderr, "Got DISCONNECT response\n");
             abort();
             break;
         }
