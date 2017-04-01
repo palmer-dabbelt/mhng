@@ -57,11 +57,16 @@ namespace mhng {
             const char *_filename;
             const char *_name;
 
+            const int _timeout;
+
         public:
             /* Creates a new process -- note that this doesn't
              * actually start the process, it simply creates a
              * placeholder that _can_ start processes. */
             process(const char *filename, const char *name);
+
+            /* Creates a process with a timeout. */
+            process(const char *filename, const char *name, int timeout);
 
         public:
             /* Forks off the stored process, allowing for it to be
@@ -80,6 +85,9 @@ namespace mhng {
         private:
             static void do_fork(process *that) { return that->_do_fork(); }
             void _do_fork(void);
+
+            static void do_timeout(process *that) { return that->_do_timeout(); }
+            void _do_timeout(void);
         };
     }
 }

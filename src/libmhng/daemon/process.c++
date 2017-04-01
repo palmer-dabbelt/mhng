@@ -33,7 +33,20 @@ daemon::process::process(const char *filename, const char *name)
       _pid(),
       _status(),
       _filename(filename),
-      _name(name)
+      _name(name),
+      _timeout(0)
+{
+}
+
+daemon::process::process(const char *filename, const char *name, int timeout)
+    : _running(false),
+      _running_lock(),
+      _running_signal(),
+      _pid(),
+      _status(),
+      _filename(filename),
+      _name(name),
+      _timeout(timeout)
 {
 }
 
@@ -49,6 +62,11 @@ void daemon::process::fork(void)
     std::thread forker(do_fork, this);
     forker.detach();
 
+    if (_timeout > 0) {
+        std::thread timeout(do_timeout, this);
+        timeout.detach();
+    }
+
     _running_signal.wait(lock, [&]{ return _running == true; });
 }
 
@@ -61,11 +79,23 @@ int daemon::process::join(void)
 
 void daemon::process::kill(void)
 {
-    std::unique_lock<std::mutex> lock(_running_lock);
-    if (_running == false)
-        return;
+    {
+        std::unique_lock<std::mutex> lock(_running_lock);
+        if (_running == false)
+            return;
 
-    ::kill(_pid, SIGTERM);
+        ::kill(_pid, SIGTERM);
+    }
+
+    sleep(10);
+
+    {
+        std::unique_lock<std::mutex> lock(_running_lock);
+        if (_running == false)
+            return;
+
+        ::kill(_pid, SIGKILL);
+    }
 }
 
 void daemon::process::_do_fork(void)
@@ -96,4 +126,10 @@ void daemon::process::_do_fork(void)
         _pid = 0;
         _running_signal.notify_all();
     }
+}
+
+void daemon::process::_do_timeout(void)
+{
+    sleep(_timeout);
+    kill();
 }
