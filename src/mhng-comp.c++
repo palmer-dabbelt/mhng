@@ -24,6 +24,7 @@
 #include <libmhng/mime/base64.h++>
 #include <string.h>
 #include <unistd.h>
+#include <sstream>
 
 #ifdef HAVE_UUID
 #include <uuid.h>
@@ -42,6 +43,10 @@ static std::string format_reply(const std::string subject);
 /* Formats a string as a reply string. */
 static std::string format_forw(const std::string subject);
 #endif
+
+/* Joins a vector of strings, seperating elements with sep1.  When the string
+ * length is over max, seperate them with sep2 instead. */
+static std::string joinmax(const std::vector<std::string>& v, std::string sep1, size_t max, std::string sep2);
 
 int main(int argc, const char **argv)
 {
@@ -251,13 +256,19 @@ int main(int argc, const char **argv)
          * perform any sort of necessary address book lookups. */
         std::vector<std::string> lookup;
         std::string from;
+        auto oheaders = std::map<std::string, std::vector<std::string>>();
         for (const auto& header: raw_mime->body()->headers()) {
             if (header->match({"From", "To", "CC", "BCC"})) {
                 auto k = header->key();
                 for (const auto v: header->split_commas()) {
                     auto a = args->mbox()->mrc()->emailias(v);
                     auto aa = a->rfc();
-                    lookup.push_back(k + ": " + aa + "\n");
+                    auto o = oheaders.find(k);
+                    if (o == oheaders.end()) {
+                        oheaders.insert(std::make_pair(k, std::vector<std::string>()));
+                        o = oheaders.find(k);
+                    }
+                    o->second.push_back(aa);
 
                     if (strcasecmp(k.c_str(), "from") == 0)
                         from = a->email();
@@ -266,6 +277,12 @@ int main(int argc, const char **argv)
                 for (const auto& hraw: header->raw())
                     lookup.push_back(hraw + "\n");
             }
+        }
+
+        for (const auto& pair: oheaders) {
+            auto key = pair.first;
+            auto val = pair.second;
+            lookup.push_back(key + ": " + joinmax(val, ", ", 80, "\n  ") + "\n");
         }
 
         /* Date-stamp the message with the current date. */
@@ -420,3 +437,25 @@ std::string format_forw(const std::string subject)
     return buf;
 }
 #endif
+
+static std::string joinmax(const std::vector<std::string>& v, std::string sep1, size_t max, std::string sep2)
+{
+    bool first = true;
+    size_t len = 0;
+    std::ostringstream out;
+    for (const auto& s: v) {
+        size_t nlen = len + s.size() + sep1.size();
+        if (nlen > max) {
+            out << sep2 << s;
+            len = 0;
+        } else if (first) {
+            out << s;
+            len = s.size();
+            first = false;
+        } else {
+            out << sep1 << s;
+            len = nlen;
+        }
+    }
+    return out.str();
+}

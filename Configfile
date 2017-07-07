@@ -183,6 +183,8 @@ AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-comp.c++
 COMPILEOPTS += -DCOMP
+TESTSRC     += two-cc.bash
+TESTSRC     += multi-cc.bash
 
 BINARIES    += mhng-repl
 AUTODEPS     = false
