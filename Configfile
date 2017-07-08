@@ -185,6 +185,7 @@ SOURCES     += mhng-comp.c++
 COMPILEOPTS += -DCOMP
 TESTSRC     += two-cc.bash
 TESTSRC     += multi-cc.bash
+TESTSRC     += multi-to.bash
 
 BINARIES    += mhng-repl
 AUTODEPS     = false
