@@ -282,7 +282,7 @@ int main(int argc, const char **argv)
         for (const auto& pair: oheaders) {
             auto key = pair.first;
             auto val = pair.second;
-            lookup.push_back(key + ": " + joinmax(val, ", ", 80, "\n  ") + "\n");
+            lookup.push_back(key + ": " + joinmax(val, ", ", 80, ",\n  ") + "\n");
         }
 
         /* Date-stamp the message with the current date. */

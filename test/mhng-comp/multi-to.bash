@@ -25,7 +25,7 @@ EOF
 
 #include "harness_end.bash"
 
-if [[ "$(grep ^To out.test)" != "To: cc1@example.com, cc2@example.com, cc3@example.com, cc4@example.com" ]]
+if [[ "$(grep ^To out.test)" != "To: cc1@example.com, cc2@example.com, cc3@example.com, cc4@example.com," ]]
 then
   cat out.test
   exit 1
