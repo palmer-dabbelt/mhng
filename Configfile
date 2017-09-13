@@ -105,6 +105,7 @@ DEPLIBS     += mhng
 SOURCES     += mhng-show.c++
 COMPILEOPTS += -DSHOW
 TESTSRC     += utf8-in-ascii.bash
+TESTSRC     += email-with-plus.bash
 
 BINARIES    += mhng-next
 AUTODEPS     = false
