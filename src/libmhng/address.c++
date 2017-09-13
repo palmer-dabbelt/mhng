@@ -102,7 +102,7 @@ address_ptr address::parse_alias(const std::string rfc,
     /* Here we seperate out the mail and strip the < > from it. */
     auto mail_start = strstr(buf, "<");
     if (strstr(mail_start, ">") == NULL) {
-        fprintf(stderr, "Found mail with <, but not >\n");
+        fprintf(stderr, "Found mail with <, but not >, full string is '%s'\n", rfc.c_str());
         abort();
     }
    
