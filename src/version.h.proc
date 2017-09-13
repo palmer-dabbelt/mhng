@@ -18,7 +18,8 @@ then
     if test -f ".git/$ref"
     then
         echo ".git/$ref"
-    else
+    elif test -f ".git/refs/heads/master"
+    then
         echo ".git/refs/heads/master"
     fi
     exit 0
