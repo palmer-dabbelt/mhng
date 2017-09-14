@@ -63,6 +63,7 @@ namespace mhng {
          * command-line. */
         unknown<bool> _stdout;
         unknown<bool> _nowrap;
+        unknown<bool> _nomailrc;
         std::vector<std::string> _attach;
 
     public:
@@ -75,6 +76,7 @@ namespace mhng {
              const mailbox_ptr& mbox,
              const unknown<bool>& stdout,
              const unknown<bool>& nowrap,
+             const unknown<bool>& nomailrc,
              const std::vector<std::string>& attach);
 
     public:
@@ -92,6 +94,8 @@ namespace mhng {
             { return _stdout.known() == true && _stdout.data() == true; }
         bool nowrap(void) const
             { return _nowrap.known() == true && _nowrap.data() == true; }
+        bool nomailrc(void) const
+            { return _nomailrc.known() == true && _nomailrc.data() == true; }
 
     public:
         /* Parses normal command-line arguments, which means arguments

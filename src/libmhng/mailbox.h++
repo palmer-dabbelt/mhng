@@ -48,6 +48,9 @@ namespace mhng {
          * access to it later. */
         const std::string _path;
 
+        /* This is TRUE if we shouldn't be building a mailrc. */
+        const bool _nomailrc;
+
         /* Holds a connection to the SQLite database. */
         psqlite::connection::ptr _db;
 
@@ -71,7 +74,7 @@ namespace mhng {
     public:
         /* Creates a new mailbox, given the folder that contaians the
          * MHng information. */
-        mailbox(const std::string& path);
+        mailbox(const std::string& path, bool nomailrc);
         void set_self_pointer(const mailbox_ptr& self)
             { _self_ptr = self; }
 

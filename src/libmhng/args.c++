@@ -41,6 +41,7 @@ args::args(const std::vector<message_ptr>& messages,
            const mailbox_ptr& mbox,
            const unknown<bool>& stdout,
            const unknown<bool>& nowrap,
+           const unknown<bool>& nomailrc,
            const std::vector<std::string>& attach)
     : _messages(messages),
       _folders(folders),
@@ -48,6 +49,7 @@ args::args(const std::vector<message_ptr>& messages,
       _mbox(mbox),
       _stdout(stdout),
       _nowrap(nowrap),
+      _nomailrc(nomailrc),
       _attach(attach)
 {
 }
@@ -118,6 +120,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
     unknown<bool> stdout;
     unknown<bool> nowrap;
     unknown<bool> thread;
+    unknown<bool> nomailrc;
 
     std::vector<std::string> attach;
 
@@ -173,6 +176,8 @@ args_ptr args::parse(int argc, const char **argv, int flags)
             i++;
         } else if (strcmp(argv[i], "--thread") == 0) {
             thread = true;
+        } else if (strcmp(argv[i], "--no-mailrc") == 0) {
+            nomailrc = true;
         } else {
             folders_written = true;
             folder_names.push_back(argv[i]);
@@ -180,7 +185,10 @@ args_ptr args::parse(int argc, const char **argv, int flags)
         }
     }
 
-    auto dir = std::make_shared<mailbox>(mhng_folder);
+    auto dir = std::make_shared<mailbox>(
+        mhng_folder,
+        (nomailrc.known() == true) && (nomailrc.data() == true)
+    );
     dir->set_self_pointer(dir);
 
     /* If the folder hasn't been written to then take a guess as to
@@ -231,6 +239,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                           dir,
                                           stdout,
                                           nowrap,
+                                          nomailrc,
                                           attach);
         } else if (flags & pf_nom) {
             std::vector<message_ptr> messages;
@@ -240,6 +249,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                           dir,
                                           stdout,
                                           nowrap,
+                                          nomailrc,
                                           attach);
         } else if (thread == true) {
             std::vector<message_ptr> messages;
@@ -258,6 +268,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                           dir,
                                           stdout,
                                           nowrap,
+                                          nomailrc,
                                           attach);
         } else {
             std::vector<message_ptr> messages;
@@ -274,6 +285,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                           dir,
                                           stdout,
                                           nowrap,
+                                          nomailrc,
                                           attach);
         }
     }
@@ -320,6 +332,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                   dir,
                                   stdout,
                                   nowrap,
+                                  nomailrc,
                                   attach);
 }
 

@@ -36,8 +36,9 @@ using namespace mhng;
 #define BUFFER_SIZE 1024
 #endif
 
-mailbox::mailbox(const std::string& path)
+mailbox::mailbox(const std::string& path, bool nomailrc)
     : _path(path),
+      _nomailrc(nomailrc),
       _db(std::make_shared<psqlite::connection>(path + "/metadata.sqlite3")),
       _current_folder(this, _current_folder_func),
       _mailrc(this, _mailrc_func),
@@ -277,6 +278,9 @@ folder_ptr mailbox::_current_folder_impl(void)
 
 mailrc_ptr mailbox::_mailrc_impl(void)
 {
+    if (_nomailrc)
+        return std::make_shared<typename mhng::mailrc>("/dev/null");
+
     char path[BUFFER_SIZE];
     snprintf(path, BUFFER_SIZE, "%s/.mailrc",
              getenv("HOME"));
