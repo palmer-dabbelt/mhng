@@ -86,12 +86,21 @@ int main(int argc, const char **argv)
     if (args->numbers().size() != 0)
         return 0;
 
+    /* FIXME: log10? */
+    size_t parts_width = 1;
+    if (parts.size() > 0) {
+      if (parts.size() > 10)
+        parts_width = 2;
+      if (parts.size() > 100)
+        parts_width = 3;
+    }
+
     /* If we weren't given any numbers on the commandline then print
      * out every MIME part that the message contains in a nice little
      * tree format. */
     for (size_t i = 0; i < parts.size(); ++i) {
         auto part = parts[i];
-        printf("%llu ", (long long unsigned)(i+1));
+        printf("%*llu ", (int)parts_width, (long long unsigned)(i+1));
 
         for (size_t depth = 0; depth < part2depth[part]; ++depth)
             printf("  ");
