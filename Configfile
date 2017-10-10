@@ -46,6 +46,8 @@ COMPILEOPTS += `ppkg-config libnotify --optional --have LIBNOTIFY --cflags`
 LINKOPTS    += `ppkg-config libnotify --optional --have LIBNOTIFY --libs`
 COMPILEOPTS += `ppkg-config libbase64-1 --cflags`
 LINKOPTS    += `ppkg-config libbase64-1 --libs`
+COMPILEOPTS += -pthread
+LINKOPTS    += -pthread
 
 # Try to match this with git's version number
 GENERATE    += version.h
@@ -141,6 +143,8 @@ AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-mime.c++
 COMPILEOPTS += -DMIME
+TESTSRC     += nine_parts.bash
+TESTSRC     += ten_parts.bash
 
 # Lists the MIME parts of a given message and allows saving them
 BINARIES    += mhng-detach
@@ -282,7 +286,6 @@ SOURCES     += mhimap-idle.c++
 BINARIES    += mhng-daemon
 AUTODEPS     = false
 DEPLIBS     += mhng
-LINKOPTS    += -pthread
 SOURCES     += mhng-daemon.c++
 
 ##############################################################################
