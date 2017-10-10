@@ -143,6 +143,8 @@ AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-mime.c++
 COMPILEOPTS += -DMIME
+TESTSRC     += nine_parts.bash
+TESTSRC     += ten_parts.bash
 
 # Lists the MIME parts of a given message and allows saving them
 BINARIES    += mhng-detach

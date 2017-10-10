@@ -50,6 +50,7 @@ int main(int argc, const char **argv)
     size_t from_width = (terminal_width * 25) / 80;
     if (from_width > 35)
         from_width = 35;
+    /* FIXME: log10? */
     size_t seq_width = (terminal_width > 120) ? 3 : 2;
     auto message_count = args->messages().size();
     if (message_count > 0) {
