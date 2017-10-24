@@ -87,7 +87,7 @@ int main(int argc, const char **argv)
          * perform any sort of necessary address book lookups. */
         std::vector<std::string> lookup;
         std::map<std::string, std::vector<std::string>> oheaders;
-        for (const auto& header: raw_mime->body()->headers()) {
+        for (const auto& header: raw_mime->root()->headers()) {
             if (header->match({"From", "To", "CC", "BCC"})) {
                 auto k = header->key();
                 for (const auto v: header->split_commas()) {
@@ -113,7 +113,7 @@ int main(int argc, const char **argv)
         }
 
         lookup.push_back("\n");
-        for (const auto& body: raw_mime->body()->body_raw())
+        for (const auto& body: raw_mime->root()->raw())
             lookup.push_back(body);
         mime = std::make_shared<mhng::mime::message>(lookup);
     }

@@ -307,6 +307,7 @@ BINARIES    += mhng-pipe-comp_stdin
 AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-pipe-comp_stdin.c++
+TESTSRC     += attachment_base64.bash
 
 # Produces the raw contents of the given set of messages on stdout.
 # This is pretty similar to "mhng-show", but it has two important
