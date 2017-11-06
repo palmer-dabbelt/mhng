@@ -113,8 +113,23 @@ int main(int argc, const char **argv)
         }
 
         lookup.push_back("\n");
-        for (const auto& body: raw_mime->root()->raw())
-            lookup.push_back(body);
+        bool in_headers = true;
+        for (const auto& body: raw_mime->root()->raw()) {
+            if (in_headers) {
+                if (strcmp(body.c_str(), "") == 0)
+                    in_headers = false;
+                if (strcmp(body.c_str(), "\r") == 0)
+                    in_headers = false;
+                if (strcmp(body.c_str(), "\n") == 0)
+                    in_headers = false;
+                if (strcmp(body.c_str(), "\r\n") == 0)
+                    in_headers = false;
+                if (strcmp(body.c_str(), "\n\r") == 0)
+                    in_headers = false;
+            } else {
+                lookup.push_back(body);
+            }
+        }
         mime = std::make_shared<mhng::mime::message>(lookup);
     }
 
