@@ -29,7 +29,7 @@ static uint32_t djb_hash(const std::string& in);
 
 int main(int argc, const char **argv)
 {
-    auto args = mhng::args::parse_all_messages(argc, argv);
+    auto args = mhng::args::parse_all_messages(argc, argv, {"+inbox"});
 
     /* At this point that argument list contains the entire set of
      * messages that should be examined as part of the scan. */
