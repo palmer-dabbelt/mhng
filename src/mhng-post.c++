@@ -27,14 +27,7 @@ static char termbuf[2048];
 
 int main(int argc, const char **argv)
 {
-    /* Overwrite the default argument list by */
-    const char **new_argv = new const char*[argc+1];
-    new_argv[0] = argv[0];
-    new_argv[1] = "+drafts";
-    for (int i = 1; i < argc; ++i)
-        new_argv[i+1] = argv[i];
-
-    auto args = mhng::args::parse_all_messages(argc+1, new_argv);
+    auto args = mhng::args::parse_all_messages(argc, argv, {"+drafts"});
 
     /* Find some information about the terminal. */
     size_t terminal_width = 80;
