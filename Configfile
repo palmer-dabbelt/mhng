@@ -235,6 +235,7 @@ BINARIES    += mhng-hfipip
 AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-hfipip.c++
+TESTSRC     += outside-inbox.bash
 
 ##############################################################################
 # Remote-Access Binaries                                                     #
