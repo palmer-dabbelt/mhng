@@ -75,6 +75,27 @@ args_ptr args::parse_all_messages(int argc, const char **argv)
     return parse(argc, argv, flags);
 }
 
+args_ptr args::parse_all_messages(int argc, const char **argv, const std::vector<std::string>& more)
+{
+    int flags = 0;
+    flags |= pf_skipplus;
+    flags |= pf_folders;
+    flags |= pf_messages;
+    flags |= pf_allm;
+
+    auto new_argv = new const char*[argc + more.size()];
+    new_argv[0] = argv[0];
+    for (size_t i = 0; i < more.size(); ++i)
+        new_argv[i + 1] = more[i].c_str();
+    for (size_t i = 1; i < (size_t)argc; ++i)
+        new_argv[i + 1 + more.size()] = argv[i];
+
+    auto out = parse(argc + more.size(), new_argv, flags);
+
+    delete[] new_argv;
+    return out;
+}
+
 args_ptr args::parse_all_folders(int argc, const char **argv)
 {
     int flags = 0;

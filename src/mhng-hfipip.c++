@@ -29,7 +29,15 @@ static uint32_t djb_hash(const std::string& in);
 
 int main(int argc, const char **argv)
 {
-    auto args = mhng::args::parse_all_messages(argc, argv);
+    auto args = mhng::args::parse_all_messages(argc, argv, {"+inbox"});
+
+    auto env_date = [](){
+        auto env = getenv("MHNG_HFIPIP_DATE");
+        if (env != nullptr)
+            return std::string(env);
+        else
+            return mhng::date::now()->local();
+    }();
 
     /* At this point that argument list contains the entire set of
      * messages that should be examined as part of the scan. */
@@ -51,7 +59,7 @@ int main(int argc, const char **argv)
             );
     }
     printf("<p/>\n");
-    printf("This message was computed on %s\n", mhng::date::now()->local().c_str());
+    printf("This message was computed on %s\n", env_date.c_str());
     printf("</BODY> </HTML>\n");
 
     return 0;

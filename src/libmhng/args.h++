@@ -108,8 +108,11 @@ namespace mhng {
 
         /* Like a normal parse, but defaults to listing every message
          * in the default folder (or whatever folder is passed in)
-         * rather than just the current message. */
+         * rather than just the current message.  A second version takes
+         * additional arguments. */
         static args_ptr parse_all_messages(int argc, const char **argv);
+        static args_ptr parse_all_messages(int argc, const char **argv,
+                                           const std::vector<std::string>& more);
 
         /* Like a normal parse, but defaults to listing every folder
          * in the mailbox, but no messages at all. */
