@@ -30,6 +30,8 @@ using namespace mhng;
 #define BUFFER_SIZE 10240
 #endif
 
+static char *strstr_esc(const char *str, const char *match);
+
 mime::header::header(const std::string& first_line)
     : _raw({first_line})
 {
@@ -200,7 +202,7 @@ std::vector<std::string> mime::header::split_commas(void) const
         char buffer[BUFFER_SIZE];
         snprintf(buffer, BUFFER_SIZE, "%s", start);
 
-        char *end = strstr(buffer, ",");
+        char *end = strstr_esc(buffer, ",");
         *end = '\0';
         while ((end > buffer) && isspace(end[-1])) {
             end--;
@@ -209,7 +211,7 @@ std::vector<std::string> mime::header::split_commas(void) const
 
         out.push_back(buffer);
 
-        start = strstr(start, ",") + 1;
+        start = strstr_esc(start, ",") + 1;
         while (isspace(*start))
             start++;
     }
@@ -261,4 +263,31 @@ bool mime::header::match(const std::vector<std::string>& keys) const
             return true;
 
     return false;
+}
+
+char *strstr_esc(const char *str, const char *match)
+{
+    bool escape = false;
+    bool quote = false;
+    for (size_t i = 0; i < strlen(str); ++i) {
+        if (!escape && str[i] == '\\')
+            escape = true;
+        else if (!escape && str[i] == '"')
+            quote = !quote;
+
+        if (quote) {
+            escape = false;
+            continue;
+        }
+
+        if (escape) {
+            escape = false;
+            continue;
+        }
+
+        if (strncmp(str + i, match, strlen(match)) == 0)
+            return (char *)(str + i);
+    }
+
+    return NULL;
 }
