@@ -33,7 +33,7 @@ static char termbuf[2048];
  * like ASCII escape codes. */
 static std::vector<std::string>
 make_box(const std::vector<std::string>& lines,
-         size_t width);
+         size_t wrap_width, size_t trigger_width, size_t hard_width);
 
 #ifdef HAVE_GPGME
 /* Produces a ASCII terminal string that produces the correct color
@@ -126,8 +126,15 @@ int main(int argc, const char **argv)
     if (tgetent(termbuf, termtype) >= 0) {
         terminal_width = tgetnum((char *)"co");
     }
-    if (terminal_width > 80)
-        terminal_width = 80;
+
+    /* Allow a bit of extra slop when wrapping: wrap to 78 characters, but then
+     * allow */
+    size_t wrap_width = terminal_width;
+    if (wrap_width > 78)
+        wrap_width = 78;
+    size_t trigger_width = terminal_width;
+    if (trigger_width > 90)
+        trigger_width = 90;
 
     /* Show every message out to the pager.  Note that this is
      * essentially the mbox format, but by default I don't bother
@@ -171,9 +178,9 @@ int main(int argc, const char **argv)
         }
 
         if (sig != NULL) {
-            write_in_box(out, body->utf8(), sigres, terminal_width);
+            write_in_box(out, body->utf8(), sigres, wrap_width, trigger_width, terminal_width);
         } else if (args->nowrap() == false) {
-            for (const auto& line: make_box(body->utf8(), terminal_width))
+            for (const auto& line: make_box(body->utf8(), wrap_width, trigger_width, terminal_width))
                 fprintf(out, "%s\n", line.c_str());
         } else {
             for (const auto& line: body->utf8())
@@ -181,7 +188,7 @@ int main(int argc, const char **argv)
         }
 #else
         if (args->nowrap() == false) {
-            for (const auto& line: make_box(body->utf8(), terminal_width))
+            for (const auto& line: make_box(body->utf8(), wrap_width, trigger_width, terminal_width))
                 fprintf(out, "%s\n", line.c_str());
         } else {
             for (const auto& line: body->utf8())
@@ -210,7 +217,7 @@ int main(int argc, const char **argv)
 
 std::vector<std::string>
 make_box(const std::vector<std::string>& lines,
-         size_t width)
+         size_t wrap_width, size_t trig_width, size_t hard_width)
 {
     /* First split the mail up into the paragraphs that make up
      * this document. */
@@ -237,53 +244,54 @@ make_box(const std::vector<std::string>& lines,
      * those, line-breaking them seperately in order to form the
      * desired output format. */
     std::vector<std::string> out;
+    bool first_paragraph = true;
     for (const auto& paragraph: paragraphs) {
-        /* Empty paragraphs don't need to be processed at all! */
-        if (paragraph.size() == 0) {
+        /* All paragraphs (except the first, which isn't separated from
+         * anything) must be separated by a newline. */
+        if (first_paragraph == true)
+            first_paragraph = false;
+        else
             out.push_back("");
-            continue;
-        }
 
         /* First we check if this is a special sort of paragraph: it
          * might be one of those with a whole bunch of small,
          * already-broken lines or it might be one with a large shared
          * prefix. */
         bool all_small = true;
-        auto prefix = paragraph[0];
-
-        bool first = true;
+        char prefix_char = '\0';
         for (const auto& line: paragraph) {
-            if (line.size() > width)
+            /* If we ever cross the hard wrapping width, then just force a
+             * wrapping. */
+            if (line.size() > hard_width)
                 all_small = false;
 
-            size_t i;
-            for (i = 0; i < prefix.size() && i < line.size(); ++i)
-                if (prefix[i] != line[i])
-                    break;
-
-            prefix = std::string(prefix, 0, i);
-
-            if (first && std::regex_match(line, std::regex("On.*wrote:"))) {
-                if (paragraph.size() > 1)
-                    prefix = paragraph[1];
-                all_small = true;
+            /* Check to see if this is a reply line, in which case we don't
+             * want to trigger wrapping for the paragraph (unless it should
+             * already be wrapped). */
+            if (std::regex_match(line, std::regex(">* *On.*wrote:"))) {
+                prefix_char = '<';
+                continue;
             }
 
-            first = false;
-        }
+            if (prefix_char == '\0')
+                prefix_char = line[0];
 
-        /* Paragraphs with only one line don't have prefix support at
-         * all. */
-        if (paragraph.size() == 1)
-            prefix = "";
+            /* Count the number of prefix characters. */
+            size_t prefix_length;
+            for (prefix_length = 0;
+                line[prefix_length] == prefix_char || isspace(line[prefix_length]);
+                ++prefix_length);
+
+            /* Ignore the prefix characters when checking for */
+            if ((line.size() - prefix_length) > trig_width)
+                all_small = false;
+        }
 
         /* If it's one of those special cases then just don't break it
          * at all. */
-        if ((all_small == true) || (prefix.size() >= 1)) {
+        if (all_small == true) {
             for (const auto& line: paragraph)
                 out.push_back(line);
-
-            out.push_back("");
 
             continue;
         }
@@ -292,16 +300,10 @@ make_box(const std::vector<std::string>& lines,
          * boundries, leaving very long words un-touched. */
         std::string remainder;
         for (const auto& line: paragraph) {
-            auto line_start = line.c_str();
-            while (isspace(*line_start))
-                line_start++;
-            remainder = remainder + line_start;
+            remainder = remainder + line;
 
-            if (strlen(line_start) > 0)
-                remainder = remainder + " ";
-
-            while (remainder.size() > width) {
-                auto f = remainder.rfind(" ", width);
+            while (remainder.size() > wrap_width) {
+                auto f = remainder.rfind(" ", wrap_width);
                 if (f == std::string::npos)
                     break;
 
@@ -311,14 +313,14 @@ make_box(const std::vector<std::string>& lines,
 
             if (line.size() == 0) {
                 out.push_back(remainder);
-                out.push_back("");
                 remainder = "";
                 continue;
             }
         }
 
-        out.push_back(remainder);
-        out.push_back("");
+        if (remainder.size() > 0) {
+            out.push_back(remainder);
+        }
     }
 
     return out;

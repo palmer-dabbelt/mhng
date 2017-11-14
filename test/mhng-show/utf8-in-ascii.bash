@@ -73,7 +73,6 @@ Krste
 | Has anyone heard anything about Soft Machines and their “virtual
 | hardware threads"?  I stumbled across it and I can’t tell if it is
 | actually interesting or just some weird Transmeta rehash.  -Ben
-
 EOF
 
 #include "harness_end.bash"

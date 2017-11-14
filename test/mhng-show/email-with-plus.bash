@@ -3,6 +3,8 @@
 ARGS="inbox 1"
 
 export TZ="America/Los_Angeles"
+export TERM="xterm"
+export COLUMNS="90"
 
 sqlite3 $MHNG_MAILDIR/metadata.sqlite3 <<EOF
 INSERT INTO MH__messages (uid, seq, folder, unread, subject, date, fadr, tadr) VALUES (2, 1, "inbox", 0, "test", 1, "from@example.com", "to@example.com");
@@ -214,7 +216,6 @@ the sp/tp values. Would that guarantee to put the CPUs in a low
 power state?
 
        Arnd
-
 EOF
 
 #include "harness_end.bash"
