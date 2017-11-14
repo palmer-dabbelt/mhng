@@ -192,6 +192,7 @@ TESTSRC     += two-cc.bash
 TESTSRC     += multi-cc.bash
 TESTSRC     += multi-to.bash
 TESTSRC     += linux-cc.bash
+TESTSRC     += eating_date.bash
 
 BINARIES    += mhng-repl
 AUTODEPS     = false
@@ -311,6 +312,7 @@ AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-pipe-comp_stdin.c++
 TESTSRC     += attachment_base64.bash
+TESTSRC     += eating_date.bash
 
 # Produces the raw contents of the given set of messages on stdout.
 # This is pretty similar to "mhng-show", but it has two important

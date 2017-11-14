@@ -664,7 +664,7 @@ void mime::part::add_header(const header_ptr& header)
         if (added == false && (strlen(raw.c_str()) == 1)) {
             added = true;
             for (const auto& hraw: header->raw())
-                new_raw.push_back(hraw);
+                new_raw.push_back(hraw + "\n");
         }
 
         new_raw.push_back(raw);
