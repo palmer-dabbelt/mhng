@@ -45,6 +45,9 @@ before_install:
   - PUTIL_VERSION=0.0.4
   - LIBBASE64_VERSION=1.0.0_p3
   - GITDATE_VERSION=0.0.3
+  - export CFLAGS="-fsanitize=address -g -Og"
+  - export CXXFLAGS="-fsanitize=address -g -Og"
+  - export LDFLAGS="-fsanitize=address -g"
   - export MAKEFLAGS="-j3"
   - export S="$(pwd)"
   - mkdir -p "${HOME}/dependencies"
