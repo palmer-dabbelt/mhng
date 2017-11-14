@@ -108,6 +108,8 @@ SOURCES     += mhng-show.c++
 COMPILEOPTS += -DSHOW
 TESTSRC     += utf8-in-ascii.bash
 TESTSRC     += email-with-plus.bash
+TESTSRC     += law-repl.bash
+TESTSRC     += break-single-line.bash
 
 BINARIES    += mhng-next
 AUTODEPS     = false
