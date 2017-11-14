@@ -67,16 +67,21 @@ int main(int argc, const char **argv)
 
     /* We need a temporary file to fire up an editor against.  This is
      * kind of unfortunate, but I guess that's just life... :(. */
-    char *tempdir = strdup("/tmp/mhng-comp-XXXXXX");
-    if (mkdtemp(tempdir) == NULL) {
-        perror("Unable to create temporary directory\n");
-        abort();
-    }
+    auto tempdir = [](){
+        auto dup = strdup("/tmp/mhng-comp-XXXXXX");
+        if (mkdtemp(dup) == NULL) {
+            perror("Unable to create temporary directory\n");
+            abort();
+        }
+        auto out = std::string(dup);
+        free(dup);
+        return out;
+    }();
 
     /* First we create the template that will be edited. */
     {
         char tmpl[BUFFER_SIZE];
-        snprintf(tmpl, BUFFER_SIZE, "%s/template.msg", tempdir);
+        snprintf(tmpl, BUFFER_SIZE, "%s/template.msg", tempdir.c_str());
         FILE *out = fopen(tmpl, "w");
 
 #if defined(COMP)
@@ -220,7 +225,7 @@ int main(int argc, const char **argv)
 
         char cmd[BUFFER_SIZE];
         snprintf(cmd, BUFFER_SIZE, "%s %s/template.msg",
-                 editor, tempdir);
+                 editor, tempdir.c_str());
         if (system(cmd) != 0) {
             perror("Unable to open editor\n");
             abort();
@@ -232,19 +237,18 @@ int main(int argc, const char **argv)
     std::shared_ptr<mhng::mime::message> mime;
     {
         char filename[BUFFER_SIZE];
-        snprintf(filename, BUFFER_SIZE, "%s/template.msg", tempdir);
+        snprintf(filename, BUFFER_SIZE, "%s/template.msg", tempdir.c_str());
         FILE *file = fopen(filename, "r");
 
         std::vector<std::string> raw;
 
         char line[BUFFER_SIZE];
         while (fgets(line, BUFFER_SIZE, file) != NULL) {
-#ifndef COMP_ALLOW_TRAILING_WHITESPACE
-        while ((strlen(line) > 0) && isspace(line[strlen(line)-1]))
-            line[strlen(line)-1] = '\0';
-        strncat(line, "\n", BUFFER_SIZE);
-#endif
-
+            if (args->nowrap() == true) {
+                while ((strlen(line) > 0) && isspace(line[strlen(line)-1]))
+                    line[strlen(line)-1] = '\0';
+                strncat(line, "\n", BUFFER_SIZE);
+            }
             raw.push_back(line);
         }
 
@@ -288,7 +292,9 @@ int main(int argc, const char **argv)
         /* Date-stamp the message with the current date. */
         {
             auto date = mhng::date::now();
-            lookup.push_back(std::string("Date: ") + date->local() + "\n");
+            auto env_date = getenv("MHNG_COMP_DATE");
+            auto date_str = (env_date == NULL) ? date->local() : std::string(env_date);
+            lookup.push_back(std::string("Date: ") + date_str + "\n");
         }
 
         /* Generate a unique identifier that cooresponds to this
@@ -327,11 +333,21 @@ int main(int argc, const char **argv)
             char message_id[BUFFER_SIZE];
             snprintf(message_id, BUFFER_SIZE, "<mhng-%s@%s>", uuid_str, hostname);
 
-            lookup.push_back(std::string("Message-ID: ") + message_id + "\n");
+            auto message_id_env = getenv("MHNG_COMP_MESSAGE_ID");
+            auto message_id_str = (message_id_env == NULL) ? std::string(message_id) : std::string(message_id_env);
+
+            lookup.push_back(std::string("Message-ID: ") + message_id_str + "\n");
         }
 
         /* Make this a MIME message. */
         lookup.push_back("Mime-Version: 1.0 (MHng)\n");
+        if (args->attach().size() == 0) {
+            if (args->nowrap())
+                lookup.push_back("Content-Type: text/plain; charset=utf-8\n");
+            else
+                lookup.push_back("Content-Type: text/plain; charset=utf-8; format=flowed\n");
+            lookup.push_back("Content-Transfer-Encoding: 8bit\n");
+        }
         lookup.push_back("\n");
 
         /* Copy the whole body of the message into the output. */
@@ -358,14 +374,19 @@ int main(int argc, const char **argv)
         raw.push_back(" boundary=MHngMIME-attachments\n");
         raw.push_back("\n");
         raw.push_back("--MHngMIME-attachments\n");
-        raw.push_back("Content-Type: text/plain; charset=utf-8\n");
+        if (args->nowrap())
+            raw.push_back("Content-Type: text/plain; charset=utf-8\n");
+        else
+            raw.push_back("Content-Type: text/plain; charset=utf-8; format=flowed\n");
         raw.push_back("Content-Transfer-Encoding: 8bit\n");
         raw.push_back("Content-Disposition: inline\n");
         raw.push_back("\n");
 
-        /* Copy the message body. */
-        for (const auto& body: mime->body()->body_raw())
+        /* Copy the message body, inserting a trailing space after every line
+         * so it gets wrapped. */
+        for (const auto& body: mime->body()->body_raw()) {
             raw.push_back(body);
+        }
         raw.push_back("\n");
 
         /* Add any necessary attachments after the text. */
@@ -374,8 +395,7 @@ int main(int argc, const char **argv)
 
             raw.push_back("--MHngMIME-attachments\n");
             raw.push_back("Content-Transfer-Encoding: base64\n");
-            raw.push_back(std::string("Content-Type: ")
-                          + content_type + ";\n");
+            raw.push_back(std::string("Content-Type: ") + content_type + ";\n");
             raw.push_back(std::string(" name=") + filename + "\n");
             raw.push_back("Content-Disposition: attachment;\n");
             raw.push_back(std::string(" filename=") + filename + "\n");
@@ -398,10 +418,10 @@ int main(int argc, const char **argv)
     /* Clean up after ourselves... */
     {
         char cmd[BUFFER_SIZE];
-        snprintf(cmd, BUFFER_SIZE, "rm -rf '%s'", tempdir);
+        snprintf(cmd, BUFFER_SIZE, "rm -rf '%s'", tempdir.c_str());
         if (system(cmd) != 0) {
             perror("Unable to clean up\n");
-            fprintf(stderr, "  There may be files in '%s'\n", tempdir);
+            fprintf(stderr, "  There may be files in '%s'\n", tempdir.c_str());
             abort();
         }
     }
