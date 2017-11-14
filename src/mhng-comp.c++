@@ -239,12 +239,11 @@ int main(int argc, const char **argv)
 
         char line[BUFFER_SIZE];
         while (fgets(line, BUFFER_SIZE, file) != NULL) {
-#ifndef COMP_ALLOW_TRAILING_WHITESPACE
-        while ((strlen(line) > 0) && isspace(line[strlen(line)-1]))
-            line[strlen(line)-1] = '\0';
-        strncat(line, "\n", BUFFER_SIZE);
-#endif
-
+            if (args->nowrap() == true) {
+                while ((strlen(line) > 0) && isspace(line[strlen(line)-1]))
+                    line[strlen(line)-1] = '\0';
+                strncat(line, "\n", BUFFER_SIZE);
+            }
             raw.push_back(line);
         }
 
@@ -332,6 +331,13 @@ int main(int argc, const char **argv)
 
         /* Make this a MIME message. */
         lookup.push_back("Mime-Version: 1.0 (MHng)\n");
+        if (args->attach().size() == 0) {
+            if (args->nowrap())
+                lookup.push_back("Content-Type: text/plain; charset=utf-8\n");
+            else
+                lookup.push_back("Content-Type: text/plain; charset=utf-8; format=flowed\n");
+            lookup.push_back("Content-Transfer-Encoding: 8bit\n");
+        }
         lookup.push_back("\n");
 
         /* Copy the whole body of the message into the output. */
@@ -358,14 +364,19 @@ int main(int argc, const char **argv)
         raw.push_back(" boundary=MHngMIME-attachments\n");
         raw.push_back("\n");
         raw.push_back("--MHngMIME-attachments\n");
-        raw.push_back("Content-Type: text/plain; charset=utf-8\n");
+        if (args->nowrap())
+            raw.push_back("Content-Type: text/plain; charset=utf-8\n");
+        else
+            raw.push_back("Content-Type: text/plain; charset=utf-8; format=flowed\n");
         raw.push_back("Content-Transfer-Encoding: 8bit\n");
         raw.push_back("Content-Disposition: inline\n");
         raw.push_back("\n");
 
-        /* Copy the message body. */
-        for (const auto& body: mime->body()->body_raw())
+        /* Copy the message body, inserting a trailing space after every line
+         * so it gets wrapped. */
+        for (const auto& body: mime->body()->body_raw()) {
             raw.push_back(body);
+        }
         raw.push_back("\n");
 
         /* Add any necessary attachments after the text. */
@@ -374,8 +385,7 @@ int main(int argc, const char **argv)
 
             raw.push_back("--MHngMIME-attachments\n");
             raw.push_back("Content-Transfer-Encoding: base64\n");
-            raw.push_back(std::string("Content-Type: ")
-                          + content_type + ";\n");
+            raw.push_back(std::string("Content-Type: ") + content_type + ";\n");
             raw.push_back(std::string(" name=") + filename + "\n");
             raw.push_back("Content-Disposition: attachment;\n");
             raw.push_back(std::string(" filename=") + filename + "\n");

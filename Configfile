@@ -195,6 +195,8 @@ TESTSRC     += multi-cc.bash
 TESTSRC     += multi-to.bash
 TESTSRC     += linux-cc.bash
 TESTSRC     += eating_date.bash
+TESTSRC     += format_flowed.bash
+TESTSRC     += format_flowed_nowrap.bash
 
 BINARIES    += mhng-repl
 AUTODEPS     = false
