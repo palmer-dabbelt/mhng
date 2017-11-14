@@ -150,7 +150,7 @@ mime::part::part(const std::vector<std::string>& raw)
      * lines, or part of the children. */
     for (const auto& raw_line: raw) {
         std::string line = raw_line;
-        line.erase(line.find_last_not_of(" \n\r\t")+1);
+        line.erase(line.find_last_not_of("\n\r\t")+1);
 
         switch (state) {
         case STATE_HEADERS:

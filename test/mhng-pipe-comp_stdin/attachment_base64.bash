@@ -7,7 +7,7 @@ To: REDATCED2@example.com
 Message-ID: <REDACTED@email.amazonses.com>
 Subject: Shipping Label for your Trade-In (TRN-REDACTED4)
 MIME-Version: 1.0
-Content-Type: multipart/alternative; 
+Content-Type: multipart/alternative;
 	boundary="----=_Part_REDATCED3"
 Date: Sat, 10 Dec 2016 20:03:44 +0000
 
