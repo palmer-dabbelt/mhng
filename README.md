@@ -8,9 +8,9 @@ Copyright 2014-2017 Palmer Dabbelt <palmer@dabbelt.com>
 
 To build and install MHng, run the following commands
 
-$ pconfigure
-$ make
-$ make install
+    $ pconfigure
+    $ make
+    $ make install
 
 The full list of dependinces, along with an up-to-date build and test
 script, can be found in `.travis.yml`.
