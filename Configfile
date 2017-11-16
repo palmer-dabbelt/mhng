@@ -111,6 +111,7 @@ TESTSRC     += email-with-plus.bash
 TESTSRC     += law-repl.bash
 TESTSRC     += break-single-line.bash
 TESTSRC     += linus-address.bash
+TESTSRC     += cilk-plus.bash
 
 BINARIES    += mhng-next
 AUTODEPS     = false
