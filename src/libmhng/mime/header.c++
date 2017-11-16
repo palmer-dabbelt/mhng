@@ -198,7 +198,7 @@ std::vector<std::string> mime::header::split_commas(void) const
 
     auto line = utf8();
     const char *start = line.c_str();
-    while (strstr(start, ",") != NULL) {
+    while (strstr_esc(start, ",") != NULL) {
         char buffer[BUFFER_SIZE];
         snprintf(buffer, BUFFER_SIZE, "%s", start);
 
