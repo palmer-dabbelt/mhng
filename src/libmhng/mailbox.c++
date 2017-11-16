@@ -281,6 +281,9 @@ mailrc_ptr mailbox::_mailrc_impl(void)
     if (_nomailrc)
         return std::make_shared<typename mhng::mailrc>("/dev/null");
 
+    if (getenv("MHNG_MAILRC") != NULL)
+        return std::make_shared<typename mhng::mailrc>(getenv("MHNG_MAILRC"));
+
     char path[BUFFER_SIZE];
     snprintf(path, BUFFER_SIZE, "%s/.mailrc",
              getenv("HOME"));

@@ -8,6 +8,7 @@ mkdir maildir
 export MHNG_MAILDIR="$(pwd)/maildir"
 export MHNG_NO_DAEMON="true"
 export MHNG_EDITOR="$(pwd)/mhng-editor"
+export MHNG_MAILRC="$(pwd)/mailrc"
 
 cat >init.sql <<EOF
 CREATE TABLE MH__current (folder STRING NOT NULL CHECK(folder != ''),
@@ -62,3 +63,5 @@ mkdir -p $MHNG_MAILDIR/mail/promo
 mkdir -p $MHNG_MAILDIR/mail/lists
 mkdir -p $MHNG_MAILDIR/mail/sent
 mkdir -p $MHNG_MAILDIR/mail/trash
+
+touch $MHNG_MAILRC

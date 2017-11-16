@@ -198,6 +198,7 @@ TESTSRC     += linux-cc.bash
 TESTSRC     += eating_date.bash
 TESTSRC     += format_flowed.bash
 TESTSRC     += format_flowed_nowrap.bash
+TESTSRC     += name-lookup.bash
 
 BINARIES    += mhng-repl
 AUTODEPS     = false
