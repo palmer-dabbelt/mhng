@@ -110,6 +110,7 @@ TESTSRC     += utf8-in-ascii.bash
 TESTSRC     += email-with-plus.bash
 TESTSRC     += law-repl.bash
 TESTSRC     += break-single-line.bash
+TESTSRC     += linus-address.bash
 
 BINARIES    += mhng-next
 AUTODEPS     = false
