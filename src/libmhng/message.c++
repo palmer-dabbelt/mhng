@@ -73,10 +73,8 @@ void message::remove(void)
     imap->update_purge(atoi(_uid.c_str()), true);
 
     int err = unlink(full_path().c_str());
-    if (err < 0) {
-        perror("Unable to remove message file");
-        abort();
-    }
+    if (err < 0)
+        perror("Unable to remove message file, your mailbox may be corrupted");
 }
 
 std::vector<address_ptr> message::header_addr(const std::string name) const
