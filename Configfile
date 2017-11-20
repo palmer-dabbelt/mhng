@@ -93,6 +93,7 @@ AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-post.c++
 TESTSRC     += post-2-all.bash
+TESTSRC     += post-2-only.bash
 
 # Removes the current message.
 BINARIES    += mhng-rmm
