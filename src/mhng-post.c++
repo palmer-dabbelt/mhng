@@ -56,9 +56,9 @@ int main(int argc, const char **argv)
             );
 
         auto command = getenv("MHNG_POST_MAILER") == nullptr
-            ? "msmtp -t"
-            : getenv("MHNG_POST_MAILER");
-        FILE *smtp = popen(command, "w");
+            ? std::string("msmtp -t --from=") + msg->first_from()->email()
+            : std::string(getenv("MHNG_POST_MAILER"));
+        FILE *smtp = popen(command.c_str(), "w");
 
         for (const auto& line: msg->raw())
             fprintf(smtp, "%s", line.c_str());
