@@ -339,6 +339,9 @@ int main(int argc, const char **argv)
             lookup.push_back(std::string("Message-ID: ") + message_id_str + "\n");
         }
 
+        for (const auto& bcc: args->mbox()->mrc()->bcc())
+            lookup.push_back(std::string("BCC: ") + bcc->nom() + "\n");
+
         /* Make this a MIME message. */
         lookup.push_back("Mime-Version: 1.0 (MHng)\n");
         if (args->attach().size() == 0) {
