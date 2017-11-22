@@ -55,7 +55,10 @@ int main(int argc, const char **argv)
                strlen(subj.c_str()) > subject_width ? '\\' : ' '
             );
 
-        FILE *smtp = popen("msmtp -t", "w");
+        auto command = getenv("MHNG_POST_MAILER") == nullptr
+            ? "msmtp -t"
+            : getenv("MHNG_POST_MAILER");
+        FILE *smtp = popen(command, "w");
 
         for (const auto& line: msg->raw())
             fprintf(smtp, "%s", line.c_str());

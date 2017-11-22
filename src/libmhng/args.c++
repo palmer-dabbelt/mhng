@@ -88,7 +88,7 @@ args_ptr args::parse_all_messages(int argc, const char **argv, const std::vector
     for (size_t i = 0; i < more.size(); ++i)
         new_argv[i + 1] = more[i].c_str();
     for (size_t i = 1; i < (size_t)argc; ++i)
-        new_argv[i + 1 + more.size()] = argv[i];
+        new_argv[i + more.size()] = argv[i];
 
     auto out = parse(argc + more.size(), new_argv, flags);
 
