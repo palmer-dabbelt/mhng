@@ -203,6 +203,7 @@ TESTSRC     += format_flowed.bash
 TESTSRC     += format_flowed_nowrap.bash
 TESTSRC     += name-lookup.bash
 TESTSRC     += linux-reorg.bash
+TESTSRC     += bcc.bash
 
 BINARIES    += mhng-repl
 AUTODEPS     = false

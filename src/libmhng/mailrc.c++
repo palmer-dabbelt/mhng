@@ -85,6 +85,16 @@ mailrc::mailrc(const std::string& path)
             continue;
         }
 
+        if (strsta(line, "bcc ") == true) {
+            auto lline = line + strlen("bcc ");
+            while (isspace(*lline)) lline++;
+            auto addr = address::parse_rfc(lline, false);
+            if (email(addr->email())->local() == true)
+                addr = address::parse_rfc(addr->email(), true);
+            add_bcc(addr);
+            continue;
+        }
+
         fprintf(stderr, "Unable to parse mailrc line: '%s'\n", line);
         abort();
     }
@@ -126,4 +136,9 @@ void mailrc::add(const address_ptr& addr)
 
     if (addr->name_known())
         _name_map[addr->name()] = addr;
+}
+
+void mailrc::add_bcc(const address_ptr& addr)
+{
+    _bcc.push_back(addr);
 }
