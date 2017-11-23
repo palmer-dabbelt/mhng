@@ -114,6 +114,7 @@ TESTSRC     += law-repl.bash
 TESTSRC     += break-single-line.bash
 TESTSRC     += linus-address.bash
 TESTSRC     += cilk-plus.bash
+TESTSRC     += long-url-wrap.bash
 
 BINARIES    += mhng-next
 AUTODEPS     = false
