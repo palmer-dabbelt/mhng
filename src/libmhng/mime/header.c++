@@ -215,7 +215,14 @@ std::vector<std::string> mime::header::split_commas(void) const
         while (isspace(*start))
             start++;
     }
-    out.push_back(start);
+    char buffer[BUFFER_SIZE];
+    snprintf(buffer, BUFFER_SIZE, "%s", start);
+    char *end = buffer + strlen(buffer);
+    while ((end > buffer) && isspace(end[-1])) {
+        end--;
+        *end = '\0';
+    }
+    out.push_back(buffer);
 
     return out;
 }
