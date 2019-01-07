@@ -386,3 +386,10 @@ AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-scan.c++
 COMPILEOPTS += -DPIPE_SCAN
+
+# Like "mhng-notify", but just prints out the UID of each message as it goes so
+# scripts can then consume that stream.
+BINARIES    += mhng-pipe-watch
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhng-pipe-watch.c++
