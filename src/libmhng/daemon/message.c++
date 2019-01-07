@@ -53,10 +53,10 @@ daemon::message_ptr daemon::message::sync(int32_t seconds_since)
     return out;
 }
 
-daemon::message_ptr daemon::message::idle(size_t uid)
+daemon::message_ptr daemon::message::new_message(size_t uid)
 {
-    auto out = std::make_shared<daemon::message>(daemon::message_type::IDLE);
-    out->wire.idle.uid = uid;
+    auto out = std::make_shared<daemon::message>(daemon::message_type::NEW_MESSAGE);
+    out->wire.new_message.uid = uid;
 
     return out;
 }

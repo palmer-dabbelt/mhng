@@ -30,7 +30,7 @@ namespace mhng {
             SYNC,
             NET_UP,
             NET_DOWN,
-            IDLE,
+            NEW_MESSAGE,
             RESPONSE,
         };
 

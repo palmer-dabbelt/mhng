@@ -45,7 +45,7 @@ int main(int argc, const char **argv)
         std::cout << "Last Seen: " << last_seen << "\n";
         std::cout << std::flush;
 
-        auto message = mhng::daemon::message::idle(last_seen);
+        auto message = mhng::daemon::message::new_message(last_seen);
         auto resp = daemon->send(message);
         resp->wait();
 

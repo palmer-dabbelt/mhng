@@ -46,7 +46,7 @@ namespace mhng {
             } sync;
             struct {
                 uint64_t uid;
-            } idle;
+            } new_message;
         };
 
         /* Holds a single message to/from the daemon. */
@@ -71,7 +71,7 @@ namespace mhng {
             uint32_t id(void) const { return wire.id; }
 
             /* Accessor functions. */
-            uint64_t idle_uid(void) const { return wire.idle.uid; }
+            uint64_t new_message_uid(void) const { return wire.new_message.uid; }
 
             /* Returns the type of this message. */
             message_type type(void) const
@@ -101,7 +101,7 @@ namespace mhng {
             /* Creates a new message that requests that the daemon
              * blocks until a message newer than the given UID has
              * been recieved. */
-            static message_ptr idle(size_t uid);
+            static message_ptr new_message(size_t uid);
 
         public:
             /* Converts between raw buffers and parsed messages. */

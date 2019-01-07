@@ -251,10 +251,10 @@ void client_main(int client)
             break;
         }
 
-        case mhng::daemon::message_type::IDLE:
+        case mhng::daemon::message_type::NEW_MESSAGE:
         {
             std::unique_lock<std::mutex> lock(sync_lock);
-            auto uid = msg->idle_uid();
+            auto uid = msg->new_message_uid();
 
             sync_signal.wait(lock, [&]{ return uid < sync_largest_uid; });
             break;
