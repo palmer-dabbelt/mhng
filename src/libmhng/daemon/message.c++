@@ -39,9 +39,11 @@ daemon::message::message(uint32_t id)
     wire.type = message_type2uint(daemon::message_type::RESPONSE);
 }
 
-daemon::message_ptr daemon::message::response(void) const
+daemon::message_ptr daemon::message::response(uint64_t ticket) const
 {
     auto out = std::make_shared<daemon::message>(wire.id);
+    out->wire.response.event_ticket = ticket;
+
     return out;
 }
 
@@ -53,10 +55,18 @@ daemon::message_ptr daemon::message::sync(int32_t seconds_since)
     return out;
 }
 
-daemon::message_ptr daemon::message::new_message(size_t uid)
+daemon::message_ptr daemon::message::new_message(uint64_t uid)
 {
     auto out = std::make_shared<daemon::message>(daemon::message_type::NEW_MESSAGE);
     out->wire.new_message.uid = uid;
+
+    return out;
+}
+
+daemon::message_ptr daemon::message::folder_event(uint32_t ticket)
+{
+    auto out = std::make_shared<daemon::message>(daemon::message_type::FOLDER_EVENT);
+    out->wire.folder_event.ticket = ticket;
 
     return out;
 }

@@ -32,6 +32,7 @@ namespace mhng {
 }
 
 #include "message_type.h++"
+#include <iostream>
 #include <stdint.h>
 
 namespace mhng {
@@ -47,6 +48,12 @@ namespace mhng {
             struct {
                 uint64_t uid;
             } new_message;
+            struct {
+                uint64_t ticket;
+            } folder_event;
+            struct {
+                uint64_t event_ticket;
+            } response;
         };
 
         /* Holds a single message to/from the daemon. */
@@ -72,14 +79,39 @@ namespace mhng {
 
             /* Accessor functions. */
             uint64_t new_message_uid(void) const { return wire.new_message.uid; }
+            uint64_t folder_event_ticket(void) const { return wire.folder_event.ticket; }
+            uint64_t response_event_ticket(void) const { return wire.response.event_ticket; }
 
             /* Returns the type of this message. */
             message_type type(void) const
                 { return uint2message_type(wire.type); }
 
-            /* Returns a message that is the respones for this current
+            /* Returns a message that is the response for this current
              * message. */
-            message_ptr response(void) const;
+            message_ptr response(uint64_t ticket) const;
+
+            /* Dumps this message to stdout. */
+            void debug_dump(const std::string prefix="") const {
+                std::cerr << prefix << "message {\n"
+                          << prefix << "    \"type\":        " << std::to_string(wire.type) << "\n"
+                          << prefix << "    \"id\":          " << std::to_string(wire.id)   << "\n";
+
+                switch (type()) {
+                case message_type::RESPONSE:
+                    std::cerr << prefix << "    \"type name\":    \"RESPONSE\"\n"
+                              << prefix << "    \"event_ticket\": " << std::to_string(wire.response.event_ticket) << "\n";
+                    break;
+
+                case message_type::NET_UP:
+                case message_type::NET_DOWN:
+                case message_type::NEW_MESSAGE:
+                case message_type::FOLDER_EVENT:
+                case message_type::SYNC:
+                    break;
+                }
+
+                std::cerr << prefix << "};\n";
+            }
 
         public:
             /* Creates a new message that requests a full inbox
@@ -101,7 +133,13 @@ namespace mhng {
             /* Creates a new message that requests that the daemon
              * blocks until a message newer than the given UID has
              * been recieved. */
-            static message_ptr new_message(size_t uid);
+            static message_ptr new_message(uint64_t uid);
+
+            /* Creates new message that requests that the daemon blocks until
+             * anything happens inside a folder.   The ticket is essentially
+             * just a Lamport clock, it's used by the daemon to fast-forward
+             * events. */
+            static message_ptr folder_event(uint32_t ticket);
 
         public:
             /* Converts between raw buffers and parsed messages. */

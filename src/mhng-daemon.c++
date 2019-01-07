@@ -20,6 +20,7 @@
  */
 
 #include <atomic>
+#include <cassert>
 #include <condition_variable>
 #include <mutex>
 #include <unistd.h>
@@ -70,6 +71,11 @@ static std::condition_variable sync_signal;
  * that we don't want to continue to check for mail.  Note that this
  * lock is locked by the sync lock! */
 static std::atomic<bool> net_up;
+
+/* A counter of any folder event that happens. */
+static std::atomic<uint32_t> event_ticket;
+static std::mutex event_lock;
+static std::condition_variable event_signal;
 
 /* These two processes are global so everyone can just go ahead and
  * kill them whenever they want! */
@@ -209,15 +215,21 @@ void client_main(int client)
         switch (msg->type()) {
         case mhng::daemon::message_type::SYNC:
         {
+            /* Whatever it is that requested a sync is an event, so go wake up
+             * all the waiters.  */
+            std::unique_lock<std::mutex> lock(event_lock);
+            auto ticket = ++event_ticket;
+            std::cerr << "Notifying for event_ticket=" << std::to_string(ticket) << " due to SYNC.\n";
+            event_signal.notify_all();
+        } {
             /* Trigger the sync thread to go to the server and
              * actually do something. */
             std::unique_lock<std::mutex> lock(sync_lock);
             auto ticket = ++sync_req;
             sync_signal.notify_all();
             sync_signal.wait(lock, [&]{ return ticket <= sync_rep; });
-
-            break;
         }
+            break;
 
         case mhng::daemon::message_type::NET_UP:
         {
@@ -260,6 +272,16 @@ void client_main(int client)
             break;
         }
 
+        case mhng::daemon::message_type::FOLDER_EVENT:
+        {
+            std::unique_lock<std::mutex> lock(event_lock);
+            auto ticket = msg->folder_event_ticket();
+
+            sync_signal.wait(lock, [&]{ return ticket < event_ticket; });
+            std::cerr << "Finished FOLDER_EVENT(ticket=" << std::to_string(ticket) << ")\n";
+            break;
+        }
+
         case mhng::daemon::message_type::RESPONSE:
         {
             fprintf(stderr, "Unable to handle RESPONSE packet\n");
@@ -270,8 +292,13 @@ void client_main(int client)
 
         }
 
-        auto resp = msg->response();
-        auto len = mhng::daemon::message::serialize(msg, buf, BUFFER_SIZE);
+        auto ticket_to_respond_with = [&]() -> uint32_t {
+            std::unique_lock<std::mutex> lock(event_lock);
+            return event_ticket;
+        }();
+
+        auto resp = msg->response(ticket_to_respond_with);
+        auto len = mhng::daemon::message::serialize(resp, buf, BUFFER_SIZE);
         auto ss = send(client, buf, len, 0);
         if (ss < 0) {
             if (errno != EPIPE)
@@ -344,17 +371,27 @@ void sync_main(void)
 
         /* Now that we've actually synchronized it's time to go ahead
          * and inform all the clients that we've done so. */
-        std::unique_lock<std::mutex> lock(sync_lock);
-        if (sync_rep >= ticket) {
-            fprintf(stderr, "Race condition!\n");
-            abort();
+        {
+            std::unique_lock<std::mutex> lock(sync_lock);
+            if (sync_rep >= ticket) {
+                fprintf(stderr, "Race condition!\n");
+                abort();
+            }
+            sync_rep = ticket;
+    
+            if (last_uid > sync_largest_uid)
+                sync_largest_uid = last_uid;
+    
+            sync_signal.notify_all();
         }
-        sync_rep = ticket;
 
-        if (last_uid > sync_largest_uid)
-            sync_largest_uid = last_uid;
-
-        sync_signal.notify_all();
+        /* After a sync we need to go ahead and fire off another event. */
+        {
+            std::unique_lock<std::mutex> lock(event_lock);
+            event_ticket++;
+            std::cerr << "Notifying for event_ticket=" << std::to_string(event_ticket) << " due to a sync finishing.\n";
+            event_signal.notify_all();
+        }
     }
 }
 

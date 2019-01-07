@@ -35,9 +35,10 @@ void daemon::response::wait(void)
     _signal.wait(lock, [this]{ return _finished; });
 }
 
-void daemon::response::fill(void)
+void daemon::response::fill(uint64_t ticket)
 {
     std::lock_guard<std::mutex> lock(_lock);
+    _ticket = ticket;
     _finished = true;
     _signal.notify_all();
 }

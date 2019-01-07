@@ -32,6 +32,7 @@ namespace mhng {
     }
 }
 
+#include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <stdint.h>
@@ -45,7 +46,8 @@ namespace mhng {
          * it can be fast... */
         class response {
         private:
-            uint32_t _id;
+            std::atomic<uint32_t> _id;
+            std::atomic<uint64_t> _ticket;
 
             bool _finished;
             std::mutex _lock;
@@ -57,6 +59,7 @@ namespace mhng {
         public:
             /* Accessor functions. */
             uint32_t id(void) const { return _id; }
+            uint64_t ticket(void) const { return _ticket; }
 
         public:
             /* Waits for the server to actually return this response
@@ -64,7 +67,7 @@ namespace mhng {
             void wait(void);
 
             /* Fills out this return code. */
-            void fill(void);
+            void fill(uint64_t ticket);
         };
     }
 }

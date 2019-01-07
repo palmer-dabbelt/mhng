@@ -226,10 +226,10 @@ DEPLIBS     += mhng
 SOURCES     += mhng-sync.c++
 
 # Displays every message in every folder.
-BINARIES    += mhng-hud
+BINARIES    += mhng-hud_one
 AUTODEPS     = false
 DEPLIBS     += mhng
-SOURCES     += mhng-hud.c++
+SOURCES     += mhng-hud_one.c++
 
 # Shows a _tiny_ HUD for your BASH prompt
 BINARIES    += mhng-bud

@@ -27,11 +27,12 @@
 namespace mhng {
     namespace daemon {
         enum class message_type {
-            SYNC,
-            NET_UP,
-            NET_DOWN,
-            NEW_MESSAGE,
-            RESPONSE,
+            RESPONSE     = 0,
+            SYNC         = 1,
+            NET_UP       = 2,
+            NET_DOWN     = 3,
+            NEW_MESSAGE  = 4,
+            FOLDER_EVENT = 5,
         };
 
         /* These let me break type safety so I can push these messages

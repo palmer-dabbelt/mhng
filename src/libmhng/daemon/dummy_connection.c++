@@ -34,6 +34,6 @@ daemon::dummy_connection::~dummy_connection(void)
 daemon::response_ptr daemon::dummy_connection::send(const message_ptr& msg)
 {
     auto resp = std::make_shared<response>(msg->id());
-    resp->fill();
+    resp->fill(0);
     return resp;
 }
