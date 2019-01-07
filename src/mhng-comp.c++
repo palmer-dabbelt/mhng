@@ -68,7 +68,7 @@ int main(int argc, const char **argv)
     /* We need a temporary file to fire up an editor against.  This is
      * kind of unfortunate, but I guess that's just life... :(. */
     auto tempdir = [](){
-        auto dup = strdup("/tmp/mhng-comp-XXXXXX");
+        auto dup = strdup("/home/palmer/.mhng/tmp/mhng-comp-XXXXXX");
         if (mkdtemp(dup) == NULL) {
             perror("Unable to create temporary directory\n");
             abort();

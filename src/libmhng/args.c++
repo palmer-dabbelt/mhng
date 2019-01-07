@@ -142,6 +142,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
     unknown<bool> nowrap;
     unknown<bool> thread;
     unknown<bool> nomailrc;
+    unknown<bool> noimplicit;
 
     std::vector<std::string> attach;
 

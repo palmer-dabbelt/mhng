@@ -27,9 +27,12 @@
 
 std::vector<uint8_t> base64_decode(const std::string& in)
 {
-    auto out_len = base64_declen(in.size()) + 1;
+    auto out_len = base64_declen(in.size()) + 5;
     auto out = std::vector<uint8_t>(out_len);
-    auto out_unused = in[in.size() - 2] == '=' ? 2 : 1;
+    auto out_unused = 5 + (
+        in[in.size() - 3] == '=' ? 2
+        : in[in.size() - 2] == '=' ? 1
+        : 0);
     
     int err;
     if ((err = base64_decode(in.c_str(), &out[0], out_len)) < 0) {

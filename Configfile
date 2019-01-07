@@ -225,12 +225,6 @@ AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-sync.c++
 
-# Displays every message in every folder.
-BINARIES    += mhng-hud_one
-AUTODEPS     = false
-DEPLIBS     += mhng
-SOURCES     += mhng-hud_one.c++
-
 # Shows a _tiny_ HUD for your BASH prompt
 BINARIES    += mhng-bud
 AUTODEPS     = false
@@ -249,6 +243,10 @@ AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-hfipip.c++
 TESTSRC     += outside-inbox.bash
+
+# Displays a real-time HUD
+BINARIES    += mhng-hud
+SOURCES     += mhng-hud.bash
 
 ##############################################################################
 # Remote-Access Binaries                                                     #
@@ -393,3 +391,9 @@ BINARIES    += mhng-pipe-watch
 AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-pipe-watch.c++
+
+# Displays every message in every folder.
+BINARIES    += mhng-pipe-hud_one
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhng-pipe-hud_one.c++

@@ -99,6 +99,8 @@ int main(int argc, const char **argv)
     sync_rep = 0;
     net_up = true;
 
+    std::cerr << "\n\n\n\n\n\nMHng Daemon Starting" << std::endl;
+
 #ifdef __APPLE__
     {
         struct sigaction sa;
