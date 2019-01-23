@@ -66,6 +66,11 @@ namespace mhng {
                     _ptr = _func(_arg);
                 return _ptr;
             }
+
+        void compact(void)
+            {
+                _ptr = NULL;
+            }
     };
 }
 

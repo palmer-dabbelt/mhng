@@ -187,6 +187,7 @@ std::vector<message_ptr> message::get_messages_in_thread(void) const
                     matching_messages.push_back(mt);
             }
         }
+        msg->compact();
     }
 
     return matching_messages;

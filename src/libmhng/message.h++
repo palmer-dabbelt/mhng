@@ -60,7 +60,7 @@ namespace mhng {
 
         /* Contains the raw bytes of the message, parsed as strings
          * (one per line). */
-        promise<message, std::vector<std::string>> _raw;
+        mutable promise<message, std::vector<std::string>> _raw;
 
         /* This contains the message formatted as a MIME message. */
         mutable promise<message, mime::message> _mime;
@@ -79,6 +79,12 @@ namespace mhng {
                 const std::string& subject,
                 const std::string& uid,
                 int unread);
+
+        /* Compacts a message. */
+        void compact(void) const {
+            _raw.compact();
+            _mime.compact();
+        }
 
     public:
         /* Accessors for the various database fields, these are all
