@@ -346,6 +346,26 @@ args_ptr args::parse(int argc, const char **argv, int flags)
         messages.push_back(message);
     }
 
+    /* If we've been asked to thread the messages then we need to merge them
+     * all together. */
+    if (thread == true) {
+        std::vector<message_ptr> threaded_messages;
+        for (const auto& msg: messages) {
+            threaded_messages.push_back(msg);
+            for (const auto& mit: msg->get_messages_in_thread())
+                threaded_messages.push_back(mit);
+        }
+
+       return std::make_shared<args>(threaded_messages,
+                                     folders,
+                                     numbers,
+                                     dir,
+                                     stdout,
+                                     nowrap,
+                                     nomailrc,
+                                     attach);
+    }
+
     /* At this point everything should be fixed up so we can just go
      * ahead and construct the relevant argument structure. */
     return std::make_shared<args>(messages,
