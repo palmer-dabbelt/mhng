@@ -20,6 +20,7 @@
  */
 
 #include <libmhng/args.h++>
+#include <libmhng/util/string.h++>
 #include <string.h>
 #include <termcap.h>
 #include <algorithm>
@@ -91,13 +92,13 @@ int main(int argc, const char **argv)
                subj.c_str()
             );
 #else
-        printf("%s%c %*u %s %-*.*s %-*.*s%c%s\n",
+        printf("%s%c %*u %s %s %s%c%s\n",
                msg->unread() ? terminal_bold : "",
                msg->cur() ? '*' : ' ',
                (int)seq_width, msg->seq()->to_uint(),
                msg->first_date()->ddmm().c_str(),
-               (int)from_width, (int)from_width, from->nom().c_str(),
-               (int)subject_width, (int)subject_width, subj.c_str(),
+               libmhng::util::string::utf8_pad_to_length(from->nom(), from_width).c_str(),
+               libmhng::util::string::utf8_pad_to_length(subj, subject_width).c_str(),
                strlen(subj.c_str()) > subject_width ? '\\' : ' ',
                terminal_norm
             );

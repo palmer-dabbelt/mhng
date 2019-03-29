@@ -85,6 +85,7 @@ BINARIES    += mhng-scan
 AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-scan.c++
+TESTSRC     += utf.bash
 
 # Writes some (or by default, many) messages out to SMTP and then
 # removes them.
