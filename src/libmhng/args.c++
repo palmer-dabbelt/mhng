@@ -130,6 +130,7 @@ args_ptr args::parse_noimplicit(int argc, const char **argv)
 args_ptr args::parse(int argc, const char **argv, int flags)
 {
     bool messages_written = false;
+    bool skip_invalid_seqs = false;
     std::vector<std::pair<std::string, int>> message_seqs;
 
     bool folders_written = false;
@@ -152,7 +153,10 @@ args_ptr args::parse(int argc, const char **argv, int flags)
         /* FIXME: Much of this isn't implemented yet... */
         /* Here is my attempt to parse folder names, sequence numbers,
          * etc.  The rules are as follows:
-         *  - Any pair of integers, "%d-%d" is an inclusive range
+         *  - Any pair of integers, "%d-%d" is an inclusive range of sequence
+         *    numbers where they all must exist.
+         *  - Any pair of integers, "%d--%d" is an inclusive range of sequence
+         *    numbers where the non-existing messages are silently ignored.
          *  - Any integer is a sequence number
          *  - Anything that starts with a "+" is a folder name
          *  - Anything that starts with a ":" is a sequence number
@@ -161,7 +165,20 @@ args_ptr args::parse(int argc, const char **argv, int flags)
          *  - Anything else is a folder name
          */
         int r_start, r_end;
-        if (sscanf(argv[i], "%d-%d", &r_start, &r_end) == 2) {
+        if (sscanf(argv[i], "%d--%d", &r_start, &r_end) == 2) {
+            if (flags & pf_numbers) {
+                for (auto i = r_start; i <= r_end; ++i)
+                    numbers.push_back(i);
+            } else {
+                messages_written = true;
+                for (auto i = r_start; i <= r_end; ++i) {
+                    message_seqs.push_back(
+                        std::make_pair(last_folder, i)
+                        );
+                }
+            }
+            skip_invalid_seqs = true;
+        } else if (sscanf(argv[i], "%d-%d", &r_start, &r_end) == 2) {
             if (flags & pf_numbers) {
                 for (auto i = r_start; i <= r_end; ++i)
                     numbers.push_back(i);
@@ -335,7 +352,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
         auto folder = l->second;
         auto seq = std::make_shared<sequence_number>(seq_int);
         auto message = folder->open(seq);
-        if (message == NULL) {
+        if (message == NULL && skip_invalid_seqs == false) {
             fprintf(stderr, "Unable to open '%d' in '%s'\n",
                     seq_int,
                     folder_name.c_str()
@@ -343,7 +360,8 @@ args_ptr args::parse(int argc, const char **argv, int flags)
             abort();
         }
 
-        messages.push_back(message);
+        if (message != NULL)
+            messages.push_back(message);
     }
 
     /* If we've been asked to thread the messages then we need to merge them
