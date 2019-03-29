@@ -342,8 +342,8 @@ std::vector<std::string> mime::part::utf8(void) const
         close(infd);
 
         {
-            char cmd[BUFFER_SIZE];
-            snprintf(cmd, BUFFER_SIZE,
+            char cmd[BUFFER_SIZE*3];
+            snprintf(cmd, BUFFER_SIZE*3,
                      "lynx -force-html -dump -stdin < %s > %s",
                      outfile,
                      infile
