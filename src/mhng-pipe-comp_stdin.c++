@@ -174,8 +174,8 @@ int main(int argc, const char **argv)
         char hostname[BUFFER_SIZE];
         gethostname(hostname, BUFFER_SIZE);
 
-        char message_id[BUFFER_SIZE];
-        snprintf(message_id, BUFFER_SIZE, "<mhng-%s@%s>", uuid_str, hostname);
+        char message_id[BUFFER_SIZE*3];
+        snprintf(message_id, BUFFER_SIZE*3, "<mhng-%s@%s>", uuid_str, hostname);
 
         auto message_id_env = getenv("MHNG_COMP_MESSAGE_ID");
         auto message_id_str = (message_id_env == NULL) ? std::string(message_id) : std::string(message_id_env);
