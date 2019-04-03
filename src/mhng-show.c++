@@ -86,12 +86,12 @@ int main(int argc, const char **argv)
      * attempt to move the current message pointer around based on
      * what was given on the commandline, or we move to the
      * next/previous message based on sequence numbers. */
-#if defined(SHOW)
+#if defined(SHOW) || !defined(PIPE)
     if (folders.size() == 1 && messages.size() == 1) {
         args->mbox()->set_current_folder(folders[0]);
         folders[0]->set_current_message(messages[0]);
     }
-#elif defined(NEXT) || defined(PREV)
+#elif defined(NEXT) || defined(PREV) || !defined(PIPE)
 #if defined(NEXT)
     auto next = messages[0]->next_message( 1);
 #elif defined(PREV)

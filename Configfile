@@ -398,3 +398,11 @@ BINARIES    += mhng-pipe-hud_one
 AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-pipe-hud_one.c++
+
+# Exactly the same as show, but it doesn't modify the current context
+BINARIES    += mhng-pipe-show_pretty
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhng-show.c++
+COMPILEOPTS += -DSHOW
+COMPILEOPTS += -DPIPE
