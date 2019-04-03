@@ -70,6 +70,7 @@ gmail_client::gmail_client(const std::string username,
     add_folder_map("upstream", "Upstream");
     add_folder_map("berkeley", "Berkeley");
     add_folder_map("patches", "Patches");
+    add_folder_map("lkcl", "LKCL");
 }
 
 typename mhimap::folder_iter gmail_client::folder_iter(void)
