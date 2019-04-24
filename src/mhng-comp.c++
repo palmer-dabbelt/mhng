@@ -242,7 +242,7 @@ int main(int argc, const char **argv)
 
         std::vector<std::string> raw;
 
-        char line[BUFFER_SIZE];
+        char line[BUFFER_SIZE*2];
         while (fgets(line, BUFFER_SIZE, file) != NULL) {
             if (args->nowrap() == true) {
                 while ((strlen(line) > 0) && isspace(line[strlen(line)-1]))
