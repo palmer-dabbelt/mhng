@@ -82,21 +82,22 @@ int main(int argc, const char **argv)
 #endif
 #endif
 
+#if !defined(PIPE)
     /* Here we figure out what to do with this message: either we
      * attempt to move the current message pointer around based on
      * what was given on the commandline, or we move to the
      * next/previous message based on sequence numbers. */
-#if defined(SHOW) || !defined(PIPE)
+# if defined(SHOW)
     if (folders.size() == 1 && messages.size() == 1) {
         args->mbox()->set_current_folder(folders[0]);
         folders[0]->set_current_message(messages[0]);
     }
-#elif defined(NEXT) || defined(PREV) || !defined(PIPE)
-#if defined(NEXT)
+# elif defined(NEXT) || defined(PREV)
+#  if defined(NEXT)
     auto next = messages[0]->next_message( 1);
-#elif defined(PREV)
+#  elif defined(PREV)
     auto next = messages[0]->next_message(-1);
-#endif
+#  endif
     if (next == NULL) {
         fprintf(stderr, "Unable to move message pointer\n");
         fprintf(stderr, "  Is there a message in that direction?\n");
@@ -105,8 +106,13 @@ int main(int argc, const char **argv)
 
     args->folders()[0]->set_current_message(next);
     messages = {args->folders()[0]->current_message()};
+# else
+#  error "Define some operation mode..."
+# endif
 #else
-#error "Define some operation mode..."
+# if defined(NEXT) || defined(PREV)
+#  error "PIPE means don't change the current pointer, but NEXT or PREV means move the pointer"
+# endif
 #endif
 
     /* Here's the command we want to run in order to produce some
