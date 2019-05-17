@@ -97,8 +97,8 @@ int main(int argc, const char **argv)
                msg->cur() ? '*' : ' ',
                (int)seq_width, msg->seq()->to_uint(),
                msg->first_date()->ddmm().c_str(),
-               libmhng::util::string::utf8_pad_to_length(from->nom(), from_width).c_str(),
-               libmhng::util::string::utf8_pad_to_length(subj, subject_width).c_str(),
+               mhng::util::string::utf8_pad_to_length(from->nom(), from_width).c_str(),
+               mhng::util::string::utf8_pad_to_length(subj, subject_width).c_str(),
                strlen(subj.c_str()) > subject_width ? '\\' : ' ',
                terminal_norm
             );

@@ -23,7 +23,7 @@
 
 #include <string>
 
-namespace libmhng {
+namespace mhng {
     namespace util {
         namespace string {
             /* Performs a UTF8-aware padding. */

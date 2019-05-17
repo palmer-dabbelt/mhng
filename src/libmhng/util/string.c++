@@ -21,7 +21,7 @@
 #include "string.h++"
 #include <cstring>
 
-std::string libmhng::util::string::utf8_pad_to_length(std::string base, size_t length, char element)
+std::string mhng::util::string::utf8_pad_to_length(std::string base, size_t length, char element)
 {
     auto out = new char[length*4+1];
 
