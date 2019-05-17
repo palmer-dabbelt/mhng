@@ -136,6 +136,7 @@ DEPLIBS     += mhng
 SOURCES     += mhng-show.c++
 COMPILEOPTS += -DNEXT
 COMPILEOPTS += -DRMM
+TESTSRC     += two-messages.bash
 
 BINARIES    += mhng-mtp
 AUTODEPS     = false
@@ -248,6 +249,11 @@ TESTSRC     += outside-inbox.bash
 # Displays a real-time HUD
 BINARIES    += mhng-hud
 SOURCES     += mhng-hud.bash
+
+# A helper script to launch the deamons that should be running during a GUI
+# session.
+BINARIES    += mhng-launch-gui-daemons
+SOURCES     += mhng-launch-gui-daemons.bash
 
 ##############################################################################
 # Remote-Access Binaries                                                     #
