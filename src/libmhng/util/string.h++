@@ -21,6 +21,7 @@
 #ifndef LIBMHNG__UTIL__STRING_HXX
 #define LIBMHNG__UTIL__STRING_HXX
 
+#include <algorithm>
 #include <string>
 
 namespace mhng {
@@ -28,6 +29,14 @@ namespace mhng {
         namespace string {
             /* Performs a UTF8-aware padding. */
             std::string utf8_pad_to_length(std::string base, size_t length, char element = ' ');
+
+            /* Converts a string to lower case. */
+            static inline std::string tolower(std::string in)
+            {
+                std::string out = in;
+                std::transform(out.begin(), out.end(), out.begin(), ::tolower);
+                return out;
+            }
         }
     }
 }

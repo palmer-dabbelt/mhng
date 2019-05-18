@@ -20,6 +20,7 @@
  */
 
 #include "mailrc.h++"
+#include "util/string.h++"
 #include <stdio.h>
 #include <string.h>
 using namespace mhng;
@@ -104,7 +105,7 @@ mailrc::mailrc(const std::string& path)
 
 address_ptr mailrc::email(const std::string& email)
 {
-    auto l = _mail_map.find(email);
+    auto l = _mail_map.find(util::string::tolower(email));
     if (l == _mail_map.end())
         return address::from_email(email, false);
 
@@ -129,7 +130,7 @@ bool strsta(const std::string haystack, const std::string needle)
 void mailrc::add(const address_ptr& addr)
 {
     if (addr->email_known())
-        _mail_map[addr->email()] = addr;
+        _mail_map[util::string::tolower(addr->email())] = addr;
 
     if (addr->alias_known())
         _alias_map[addr->alias()] = addr;

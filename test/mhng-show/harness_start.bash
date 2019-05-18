@@ -7,6 +7,9 @@ cd $tempdir
 mkdir maildir
 export MHNG_MAILDIR="$(pwd)/maildir"
 export MHNG_NO_DAEMON="true"
+export MHNG_MAILRC="$(pwd)/.mailrc"
+
+touch $MHNG_MAILRC
 
 cat >init.sql <<EOF
 CREATE TABLE MH__current (folder STRING NOT NULL CHECK(folder != ''),
