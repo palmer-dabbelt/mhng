@@ -19,12 +19,21 @@ addons:
       - g++-5
       - gcc-6
       - g++-6
+      - gcc-7
+      - g++-7
+      - gcc-8
+      - g++-8
+      - gcc-9
+      - g++-9
 
 matrix:
   include:
     - env: TRAVIS_CC=gcc-4.9   TRAVIS_CXX=g++-4.9
     - env: TRAVIS_CC=gcc-5     TRAVIS_CXX=g++-5
     - env: TRAVIS_CC=gcc-6     TRAVIS_CXX=g++-6
+    - env: TRAVIS_CC=gcc-7     TRAVIS_CXX=g++-7
+    - env: TRAVIS_CC=gcc-8     TRAVIS_CXX=g++-8
+    - env: TRAVIS_CC=gcc-9     TRAVIS_CXX=g++-9
 
 before_install:
   - export PATH="${HOME}/dependencies/install/bin:$PATH"
