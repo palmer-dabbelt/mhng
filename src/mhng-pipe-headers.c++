@@ -27,13 +27,13 @@ int main(int argc, const char **argv)
 #if defined(HEADERS)
     auto args = mhng::args::parse_normal(argc, argv);
 #elif defined(HEADER)
-    if (argc != 2) {
-        fprintf(stderr, "mhng-header <header name>: Prints a header\n");
+    if (argc < 2) {
+        fprintf(stderr, "mhng-header <header name> [messages]: Prints a header\n");
         return 1;
     }
 
-    const char *empty_argv[] = {argv[0], NULL};
-    auto args = mhng::args::parse_normal(1, empty_argv);
+    const char **filtered_argv = argv + 1;
+    auto args = mhng::args::parse_normal(argc - 1, filtered_argv);
 #else
 #error "Define HEADERS or HEADER"
 #endif
