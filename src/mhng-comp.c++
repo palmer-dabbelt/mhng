@@ -67,10 +67,15 @@ int main(int argc, const char **argv)
 
     /* We need a temporary file to fire up an editor against.  This is
      * kind of unfortunate, but I guess that's just life... :(. */
-    auto tempdir = [](){
-        auto dup = strdup("/home/palmer/.mhng/tmp/mhng-comp-XXXXXX");
+    auto tempdir = [&](){
+        char *dup = NULL;
+        if (asprintf(&dup, "%s/tmp/mhng-comp-XXXXXX", args->mbox()->path().c_str()) == -1) {
+            fprintf(stderr, "Unable to asprintf\n");
+            abort();
+        }
         if (mkdtemp(dup) == NULL) {
-            perror("Unable to create temporary directory\n");
+            perror("Unable to create temporary directory");
+            fprintf(stderr, "    tmpdir: %s\n", dup);
             abort();
         }
         auto out = std::string(dup);
