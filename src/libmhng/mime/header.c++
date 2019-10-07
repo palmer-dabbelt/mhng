@@ -72,7 +72,13 @@ std::string mime::header::utf8(void) const
                     fprintf(stderr, "  line: '%s'\n", line + i);
                     abort();
                 }
-                strstr(base64, "?=")[0] = '\0';
+
+                /* base64_decode() expects a newline at the end of the input
+                 * string, and it's easier to just whack it in there than to
+                 * change the mime part parser.. */
+                auto end = strstr(base64, "?=");
+                end[0] = '\n';
+                end[1] = '\0';
 
                 auto dec = base64_decode(base64);
                 auto dec_str = base64_array2string(dec);
