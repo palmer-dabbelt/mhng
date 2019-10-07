@@ -53,8 +53,10 @@ std::string mime::header::utf8(void) const
             char charset[BUFFER_SIZE];
             snprintf(charset, BUFFER_SIZE, "%s", line + i + 2);
             if (strstr(charset, "?") == NULL) {
-                fprintf(stderr, "Unable to find charset in '%s'\n", line + i);
-                abort();
+                /* We might just have a "=?" in a regular message, in which
+                 * case we shouldn't be treating this as a special character.
+                 * and should instead just pass through the character. */
+                goto actually_not_special;
             }
             strstr(charset, "?")[0] = '\0';
 
@@ -150,6 +152,7 @@ std::string mime::header::utf8(void) const
             if (isspace(line[i]))
                 i++;
         } else {
+        actually_not_special:
             out[oi] = line[i];
             oi++;
             i++;
