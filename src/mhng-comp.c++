@@ -259,6 +259,11 @@ int main(int argc, const char **argv)
 
         fclose(file);
 
+        if (raw.size() < 2) {
+            fprintf(stderr, "Extremely small message detected\n");
+            return 1;
+        }
+
         auto raw_mime = std::make_shared<mhng::mime::message>(raw);
 
         /* Now walk back through that MIME message and attempt to
