@@ -1,8 +1,10 @@
 #!/bin/bash
 
+trap true TERM
 killall mhng-launch-gui-daemons
 killall mhng-daemon
 killall mhng-notify
+trap - TERM
 
 ( while true
 do
