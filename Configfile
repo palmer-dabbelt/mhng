@@ -122,6 +122,7 @@ AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-show.c++
 COMPILEOPTS += -DNEXT
+TESTSRC     += nocur.bash
 
 BINARIES    += mhng-prev
 AUTODEPS     = false

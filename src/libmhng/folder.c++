@@ -20,6 +20,7 @@
  */
 
 #include "folder.h++"
+#include "fake_message.h++"
 #include "db/mh_current.h++"
 #include "db/mh_messages.h++"
 #include "db/imap_messages.h++"
@@ -144,4 +145,13 @@ std::shared_ptr<std::vector<uint32_t>> folder::_purge_impl(void)
     for (const auto& uid: table->select_purge(_name))
         out->push_back(uid);
     return out;
+}
+
+fake_message_ptr folder::fake_current_message(void)
+{
+    auto cur = std::make_shared<db::mh_current>(_mbox);
+    auto seq_uint = cur->select(_name);
+    auto seq = std::make_shared<sequence_number>(seq_uint);
+
+    return std::make_shared<fake_message>(_mbox, shared_from_this(), seq);
 }

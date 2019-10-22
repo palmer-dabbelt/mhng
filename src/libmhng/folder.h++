@@ -29,6 +29,7 @@ namespace mhng {
     typedef std::shared_ptr<folder> folder_ptr;
 }
 
+#include "fake_message.h++"
 #include "mailbox.h++"
 #include "message.h++"
 #include "promise.h++"
@@ -38,7 +39,7 @@ namespace mhng {
 
 namespace mhng {
     /* Stores a single MHng folder.  */
-    class folder {
+    class folder: public std::enable_shared_from_this<folder> {
     private:
         mailbox_ptr _mbox;
 
@@ -113,6 +114,14 @@ namespace mhng {
         /* Returns the path that's associated with this folder. */
         std::string full_path(void) const;
 
+        /* Gets either the current message, or a fake message that just
+         * contains a sequence number. */
+        maybe_fake_message_ptr current_or_fake(void) {
+            if (current_message() != nullptr)
+                return std::make_shared<maybe_fake_message>(current_message());
+          return std::make_shared<maybe_fake_message>(fake_current_message());
+        }
+
         /* Allows for the modification of the UID VALIDITY field,
          * which IMAP uses to tell clients when they throw away their
          * cache of a mailbox. */
@@ -152,6 +161,10 @@ namespace mhng {
         static std::shared_ptr<std::vector<uint32_t>> _purge_func(folder *f)
             { return f->_purge_impl(); }
         std::shared_ptr<std::vector<uint32_t>> _purge_impl(void);
+
+        /* I'm not bothering to cache this one because it's not going to be
+         * used all that often. */
+        fake_message_ptr fake_current_message(void);
     };
 }
 

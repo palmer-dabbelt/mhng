@@ -29,6 +29,7 @@ namespace mhng {
     typedef std::shared_ptr<args> args_ptr;
 }
 
+#include "fake_message.h++"
 #include "folder.h++"
 #include "mailrc.h++"
 #include "message.h++"
@@ -66,6 +67,9 @@ namespace mhng {
         unknown<bool> _nomailrc;
         std::vector<std::string> _attach;
 
+        /* Sometimes the current message is actually fake. */
+        fake_message_ptr _fake_current;
+
     public:
         /* This constructor is private because you should be using one
          * of the public static methods below to ensure you parse your
@@ -77,7 +81,18 @@ namespace mhng {
              const unknown<bool>& stdout,
              const unknown<bool>& nowrap,
              const unknown<bool>& nomailrc,
-             const std::vector<std::string>& attach);
+             const std::vector<std::string>& attach,
+             const fake_message_ptr& fake_current)
+        : _messages(messages),
+          _folders(folders),
+          _numbers(numbers),
+          _mbox(mbox),
+          _stdout(stdout),
+          _nowrap(nowrap),
+          _nomailrc(nomailrc),
+          _attach(attach),
+          _fake_current(fake_current)
+        {}
 
     public:
         /* Accessor functions. */
@@ -96,6 +111,8 @@ namespace mhng {
             { return _nowrap.known() == true && _nowrap.data() == true; }
         bool nomailrc(void) const
             { return _nomailrc.known() == true && _nomailrc.data() == true; }
+
+        const fake_message_ptr& fake_current(void) const { return _fake_current; }
 
     public:
         /* Parses normal command-line arguments, which means arguments
@@ -128,20 +145,25 @@ namespace mhng {
          * arbitrary integers. */
         static args_ptr parse_numbers(int argc, const char **argv);
 
+        /* Parses like regular, but installs a fake current message if there
+         * isn't one that actually currently exists. */
+        static args_ptr parse_fakecur(int argc, const char **argv);
+
         /* A generic parsing method that allows flags to be passed in.
          * The idea here is that we want to allow users to specify
          * some arbitrary set of parsing options. */
         static args_ptr parse(int argc, const char **argv, int flags);
 
         /* A list of flags that can be passed to parse(). */
-        static const int pf_skipplus = 0x01;
-        static const int pf_folders  = 0x02;
-        static const int pf_messages = 0x04;
-        static const int pf_numbers  = 0x08;
-        static const int pf_allf     = 0x10;
-        static const int pf_allm     = 0x20;
-        static const int pf_nof      = 0x40;
-        static const int pf_nom      = 0x80;
+        static const int pf_skipplus = 0x001;
+        static const int pf_folders  = 0x002;
+        static const int pf_messages = 0x004;
+        static const int pf_numbers  = 0x008;
+        static const int pf_allf     = 0x010;
+        static const int pf_allm     = 0x020;
+        static const int pf_nof      = 0x040;
+        static const int pf_nom      = 0x080;
+        static const int pf_fakecur  = 0x100;
     };
 }
 
