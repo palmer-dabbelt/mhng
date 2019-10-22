@@ -116,6 +116,8 @@ TESTSRC     += break-single-line.bash
 TESTSRC     += linus-address.bash
 TESTSRC     += cilk-plus.bash
 TESTSRC     += email-upper.bash
+TESTSRC     += base64.bash
+TESTSRC     += ctrl-m.bash
 
 BINARIES    += mhng-next
 AUTODEPS     = false
