@@ -55,6 +55,6 @@ std::string mhng::util::string::utf8_pad_to_length(std::string base, size_t leng
     out[length] = '\0';
 
     auto ostr = std::string(out);
-    delete out;
+    delete[] out;
     return ostr;
 }
