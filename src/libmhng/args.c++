@@ -35,25 +35,6 @@ using namespace mhng;
 /* Obtains the default MHNG folder. */
 static std::string default_mhng_folder_path(void);
 
-args::args(const std::vector<message_ptr>& messages,
-           const std::vector<folder_ptr>& folders,
-           const std::vector<int>& numbers,
-           const mailbox_ptr& mbox,
-           const unknown<bool>& stdout,
-           const unknown<bool>& nowrap,
-           const unknown<bool>& nomailrc,
-           const std::vector<std::string>& attach)
-    : _messages(messages),
-      _folders(folders),
-      _numbers(numbers),
-      _mbox(mbox),
-      _stdout(stdout),
-      _nowrap(nowrap),
-      _nomailrc(nomailrc),
-      _attach(attach)
-{
-}
-
 args_ptr args::parse_normal(int argc, const char **argv)
 {
     int flags = 0;
@@ -123,6 +104,14 @@ args_ptr args::parse_noimplicit(int argc, const char **argv)
     int flags = 0;
     flags |= pf_nof;
     flags |= pf_nom;
+
+    return parse(argc, argv, flags);
+}
+
+args_ptr args::parse_fakecur(int argc, const char **argv)
+{
+    int flags = 0;
+    flags |= pf_fakecur;
 
     return parse(argc, argv, flags);
 }
@@ -279,7 +268,8 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                           stdout,
                                           nowrap,
                                           nomailrc,
-                                          attach);
+                                          attach,
+                                          nullptr);
         } else if (flags & pf_nom) {
             std::vector<message_ptr> messages;
             return std::make_shared<args>(messages,
@@ -289,35 +279,21 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                           stdout,
                                           nowrap,
                                           nomailrc,
-                                          attach);
-        } else if (thread == true) {
-            std::vector<message_ptr> messages;
-            auto cur = last_folder_ptr->current_message();
-            if (cur == NULL) {
-                fprintf(stderr, "Unable to open current message\n");
-                fprintf(stderr, "  Probably you just removed it\n");
-                abort();
-            }
-            messages.push_back(cur);
-            for (const auto& mit: cur->get_messages_in_thread())
-                messages.push_back(mit);
-            return std::make_shared<args>(messages,
-                                          folders,
-                                          numbers,
-                                          dir,
-                                          stdout,
-                                          nowrap,
-                                          nomailrc,
-                                          attach);
+                                          attach,
+                                          nullptr);
         } else {
             std::vector<message_ptr> messages;
-            auto cur = last_folder_ptr->current_message();
-            if (cur == NULL) {
+            auto cur = last_folder_ptr->current_or_fake();
+            if (!(flags & pf_fakecur) && (cur->real() == nullptr)) {
                 fprintf(stderr, "Unable to open current message\n");
                 fprintf(stderr, "  Probably you just removed it\n");
                 abort();
             }
-            messages.push_back(cur);
+            if (cur->real() != nullptr)
+                messages.push_back(cur->real());
+            if (thread == true)
+                for (const auto& mit: cur->real()->get_messages_in_thread())
+                    messages.push_back(mit);
             return std::make_shared<args>(messages,
                                           folders,
                                           numbers,
@@ -325,7 +301,8 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                           stdout,
                                           nowrap,
                                           nomailrc,
-                                          attach);
+                                          attach,
+                                          cur->fake());
         }
     }
 
@@ -381,7 +358,8 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                      stdout,
                                      nowrap,
                                      nomailrc,
-                                     attach);
+                                     attach,
+                                     nullptr);
     }
 
     /* At this point everything should be fixed up so we can just go
@@ -393,7 +371,8 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                   stdout,
                                   nowrap,
                                   nomailrc,
-                                  attach);
+                                  attach,
+                                  nullptr);
 }
 
 std::string default_mhng_folder_path(void)

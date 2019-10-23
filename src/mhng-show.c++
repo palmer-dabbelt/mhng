@@ -55,7 +55,13 @@ static void write_line(FILE *o, char c,
 
 int main(int argc, const char **argv)
 {
+#if defined(SHOW)
     auto args = mhng::args::parse_normal(argc, argv);
+#elif (defined(NEXT) || defined(PREV))
+    auto args = mhng::args::parse_fakecur(argc, argv);
+#else
+# error "You must define SHOW, NEXT, or PREV"
+#endif
 
     auto folders = args->folders();
     auto messages = args->messages();
@@ -94,9 +100,13 @@ int main(int argc, const char **argv)
     }
 # elif defined(NEXT) || defined(PREV)
 #  if defined(NEXT)
-    auto next = messages[0]->next_message( 1);
+    auto next = (args->fake_current() != nullptr)
+                ? args->fake_current()->next_message( 1)
+                : messages[0]->next_message( 1);
 #  elif defined(PREV)
-    auto next = messages[0]->next_message(-1);
+    auto next = (args->fake_current() != nullptr)
+                ? args->fake_current()->next_message(-1)
+                : messages[0]->next_message(-1);
 #  endif
     if (next == NULL) {
         fprintf(stderr, "Unable to move message pointer\n");
