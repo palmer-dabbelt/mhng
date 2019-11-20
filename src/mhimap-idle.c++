@@ -14,9 +14,12 @@ int MHIMAP_MAIN(int argc, const char **argv)
 
     fprintf(stderr, "IDLE Logging In: %s\n",
             mhng::date::now()->local().c_str());
-    mhimap::gmail_client client(args->mbox()->username(),
-                                args->mbox()->password()
-        );
+    if (args->mbox()->accounts().size() != 1) {
+        std::cerr << "MHng only supports a single account\n";
+        abort();
+    }
+    auto account = args->mbox()->accounts()[0];
+    mhimap::gmail_client client(account->name(), account->access_token());
     while (true) {
         fprintf(stderr, "Sending IDLE\n");
         client.send_idle("inbox");

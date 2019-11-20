@@ -4,6 +4,7 @@
 #ifndef MHNG__PROMISE_HXX
 #define MHNG__PROMISE_HXX
 
+#include <iostream>
 #include <functional>
 #include <memory>
 
@@ -43,6 +44,11 @@ namespace mhng {
 
     public:
         operator std::shared_ptr<T>()
+            {
+                return get();
+            }
+
+        std::shared_ptr<T> get(void)
             {
                 if (_ptr == NULL)
                     _ptr = _func(_arg);

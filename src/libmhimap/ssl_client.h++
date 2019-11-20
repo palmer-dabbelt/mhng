@@ -5,8 +5,9 @@
 #define LIBMHIMAP__SSL_CLIENT_HXX
 
 #include "client.h++"
-#include <string>
+#include <libmhoauth/access_token.h++>
 #include <gnutls/gnutlsxx.h>
+#include <string>
 
 namespace mhimap {
     /* An IMAP client, which represents a client-side connection to an
@@ -29,9 +30,9 @@ namespace mhimap {
         /* Creates a connection to an IMAP client that speaks SSL. */
         ssl_client(const std::string hostname,
                    uint16_t port,
-                   const std::string username,
-                   const std::string password,
-                   const std::string priority="NORMAL"
+                   std::string username,
+                   libmhoauth::access_token token,
+                   std::string priority="NORMAL"
             );
 
         ~ssl_client(void);

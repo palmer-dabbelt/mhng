@@ -15,6 +15,7 @@ std::vector<uint8_t> base64_decode(const std::string& in);
 /* Encodes a binary array as a base64-encoded string. */
 std::string base64_encode(const std::vector<uint8_t>& in);
 std::string base64_encode(const uint8_t *in, size_t in_count);
+std::string base64_encode(std::string in);
 
 /* A utility function that should probably be killed -- this converts a base64
  * array to a string. */

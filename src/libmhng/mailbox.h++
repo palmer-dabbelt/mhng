@@ -11,6 +11,7 @@ namespace mhng {
     typedef std::shared_ptr<mailbox> mailbox_ptr;
 }
 
+#include "account.h++"
 #include "folder.h++"
 #include "mailrc.h++"
 #include "message.h++"
@@ -53,6 +54,9 @@ namespace mhng {
         /* Sometimes we need a back-pointer to ourselves. */
         std::weak_ptr<mailbox> _self_ptr;
 
+        /* All the accounts. */
+        promise<mailbox, std::vector<account_ptr>> _accounts;
+
     public:
         /* Creates a new mailbox, given the folder that contaians the
          * MHng information. */
@@ -68,6 +72,9 @@ namespace mhng {
         /* Returns the current folder, which involves a database
          * lookup. */
         folder_ptr current_folder(void) { return _current_folder; }
+
+        /* Returns every account that's currently supported. */
+        std::vector<account_ptr> accounts(void);
 
         /* Sets the current folder to be something else. */
         void set_current_folder(const folder_ptr& folder);
@@ -100,11 +107,6 @@ namespace mhng {
          * multiplexed over. */
         daemon::connection_ptr daemon(void) { return _daemon; }
 
-        /* Returns the username and password that should be used to
-         * connect to the server. */
-        std::string username(void) const;
-        std::string password(void) const;
-
         /* Returns the largest UID in this entire mailbox. */
         uint64_t largest_uid(void) const;
         uint64_t largest_uid(const std::string folder) const;
@@ -112,6 +114,14 @@ namespace mhng {
         /* Opens a new message by UID, returning NULL if it doesn't
          * exist. */
         message_ptr open(uint64_t uid) const;
+
+        /* Adds a new account.  For now this is only gmail.  In theory you can
+         * do other stuff after calling this, but nothing is going to test
+         * that. */
+        void add_account(const std::string& name) const;
+
+        /* Obtains the account with the given name. */
+        account_ptr account(const std::string& name);
 
     private:
         static folder_ptr _current_folder_func(mailbox *mbox)
@@ -125,6 +135,10 @@ namespace mhng {
         static daemon::connection_ptr _daemon_func(mailbox *mbox)
             { return mbox->_daemon_impl(); }
         daemon::connection_ptr _daemon_impl(void);
+
+        static std::shared_ptr<std::vector<account_ptr>> _accounts_func(mailbox *mbox)
+            { return mbox->_accounts_impl(); }
+        std::shared_ptr<std::vector<account_ptr>> _accounts_impl(void);
     };
 }
 

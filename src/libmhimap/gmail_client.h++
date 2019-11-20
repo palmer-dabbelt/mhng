@@ -5,6 +5,7 @@
 #define LIBMHIMAP__GMAIL_CLIENT_HXX
 
 #include "ssl_client.h++"
+#include <libmhoauth/access_token.h++>
 #include <map>
 #include <string>
 
@@ -29,9 +30,7 @@ namespace mhimap {
          * username and password.  The set of supported authentication
          * mechanisms and such is hard-coded into this class, which is
          * really why it exists. */
-        gmail_client(const std::string username,
-                     const std::string password
-            );
+        gmail_client(std::string username, libmhoauth::access_token token);
 
         /* mh::client overrides. */
         typename mhimap::folder_iter folder_iter(void);

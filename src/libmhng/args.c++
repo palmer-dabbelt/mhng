@@ -98,6 +98,19 @@ args_ptr args::parse_fakecur(int argc, const char **argv)
     return parse(argc, argv, flags);
 }
 
+args_ptr args::parse_account(int argc, const char **argv)
+{
+    int flags = 0;
+    flags |= pf_skipplus;
+    flags |= pf_folders;
+    flags |= pf_messages;
+    flags |= pf_allf;
+    flags |= pf_nom;
+    flags |= pf_account;
+
+    return parse(argc, argv, flags);
+}
+
 args_ptr args::parse(int argc, const char **argv, int flags)
 {
     bool messages_written = false;
@@ -115,6 +128,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
     unknown<bool> thread;
     unknown<bool> nomailrc;
     unknown<bool> noimplicit;
+    unknown<std::string> account;
 
     std::vector<std::string> attach;
 
@@ -136,7 +150,13 @@ args_ptr args::parse(int argc, const char **argv, int flags)
          *  - Anything else is a folder name
          */
         int r_start, r_end;
-        if (sscanf(argv[i], "%d--%d", &r_start, &r_end) == 2) {
+        if (flags & pf_account) {
+            if (account.known()) {
+                std::cerr << "Multiple accounts provided\n";
+                abort();
+            }
+            account = std::string(argv[i]);
+        } else if (sscanf(argv[i], "%d--%d", &r_start, &r_end) == 2) {
             if (flags & pf_numbers) {
                 for (auto i = r_start; i <= r_end; ++i)
                     numbers.push_back(i);
@@ -251,6 +271,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                           nowrap,
                                           nomailrc,
                                           attach,
+                                          account,
                                           nullptr);
         } else if (flags & pf_nom) {
             std::vector<message_ptr> messages;
@@ -262,6 +283,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                           nowrap,
                                           nomailrc,
                                           attach,
+                                          account,
                                           nullptr);
         } else {
             std::vector<message_ptr> messages;
@@ -284,6 +306,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                           nowrap,
                                           nomailrc,
                                           attach,
+                                          account,
                                           cur->fake());
         }
     }
@@ -341,6 +364,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                      nowrap,
                                      nomailrc,
                                      attach,
+                                     account,
                                      nullptr);
     }
 
@@ -354,6 +378,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                   nowrap,
                                   nomailrc,
                                   attach,
+                                  account,
                                   nullptr);
 }
 

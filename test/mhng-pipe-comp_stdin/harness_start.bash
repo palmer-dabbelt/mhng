@@ -50,6 +50,7 @@ CREATE TABLE IMAP__messages (folder STRING NOT NULL,
                              uid INTEGER NOT NULL,
                              mhid INTEGER NOT NULL,
                              purge INTEGER CHECK(purge >= 0 AND purge <= 1),
+                             account STRING NOT NULL,
                              UNIQUE(folder, uid),
                              UNIQUE(mhid)
        );

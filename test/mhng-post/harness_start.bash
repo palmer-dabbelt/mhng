@@ -54,6 +54,13 @@ CREATE TABLE IMAP__messages (folder STRING NOT NULL,
                              UNIQUE(folder, uid),
                              UNIQUE(mhid)
        );
+
+CREATE TABLE MH__accounts (name STRING NOT NULL,
+                           access_token STRING NOT NULL,
+                           refresh_token STRING NOT NULL,
+                           access_token_expires DATE NOT NULL,
+                           UNIQUE(name)
+       );
 EOF
 sqlite3 $MHNG_MAILDIR/metadata.sqlite3 < init.sql
 

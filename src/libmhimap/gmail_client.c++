@@ -26,9 +26,8 @@
 
 using namespace mhimap;
 
-gmail_client::gmail_client(const std::string username,
-                           const std::string password)
-    : ssl_client(GMAIL_HOSTNAME, GMAIL_PORT, username, password,
+gmail_client::gmail_client(std::string username, libmhoauth::access_token token)
+    : ssl_client(GMAIL_HOSTNAME, GMAIL_PORT, username, token,
                  "NORMAL" VERS_RC4 VERS_SSLONLY),
       _g2m(),
       _m2g()

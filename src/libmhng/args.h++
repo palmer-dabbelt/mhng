@@ -48,6 +48,7 @@ namespace mhng {
         unknown<bool> _nowrap;
         unknown<bool> _nomailrc;
         std::vector<std::string> _attach;
+        unknown<std::string> _account;
 
         /* Sometimes the current message is actually fake. */
         fake_message_ptr _fake_current;
@@ -64,6 +65,7 @@ namespace mhng {
              const unknown<bool>& nowrap,
              const unknown<bool>& nomailrc,
              const std::vector<std::string>& attach,
+             const unknown<std::string>& account,
              const fake_message_ptr& fake_current)
         : _messages(messages),
           _folders(folders),
@@ -73,6 +75,7 @@ namespace mhng {
           _nowrap(nowrap),
           _nomailrc(nomailrc),
           _attach(attach),
+          _account(account),
           _fake_current(fake_current)
         {}
 
@@ -86,6 +89,7 @@ namespace mhng {
             { return _numbers; }
         const mailbox_ptr& mbox(void) const { return _mbox; }
         const decltype(_attach)& attach(void) const { return _attach; }
+        std::string const account(void) const { return _account.data(); }
 
         bool stdout(void) const
             { return _stdout.known() == true && _stdout.data() == true; }
@@ -131,6 +135,10 @@ namespace mhng {
          * isn't one that actually currently exists. */
         static args_ptr parse_fakecur(int argc, const char **argv);
 
+        /* Parse, but require an account name.  Don't care about anything else,
+         * as this is probably being run on an otherwise empty mailbox. */
+        static args_ptr parse_account(int argc, const char **argv);
+
         /* A generic parsing method that allows flags to be passed in.
          * The idea here is that we want to allow users to specify
          * some arbitrary set of parsing options. */
@@ -146,6 +154,7 @@ namespace mhng {
         static const int pf_nof      = 0x040;
         static const int pf_nom      = 0x080;
         static const int pf_fakecur  = 0x100;
+        static const int pf_account  = 0x200;
     };
 }
 

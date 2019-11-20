@@ -12,9 +12,9 @@ addons:
       - uuid-dev
       - libncurses5-dev
       - libnotify-dev
+      - libuv1-dev
+      - libcurl4-gnutls-dev
       - build-essential
-      - gcc-4.9
-      - g++-4.9
       - gcc-5
       - g++-5
       - gcc-6
@@ -28,7 +28,6 @@ addons:
 
 matrix:
   include:
-    - env: TRAVIS_CC=gcc-4.9   TRAVIS_CXX=g++-4.9
     - env: TRAVIS_CC=gcc-5     TRAVIS_CXX=g++-5
     - env: TRAVIS_CC=gcc-6     TRAVIS_CXX=g++-6
     - env: TRAVIS_CC=gcc-7     TRAVIS_CXX=g++-7
@@ -41,10 +40,11 @@ before_install:
   - export CC=$TRAVIS_CC
   - export CXX=$TRAVIS_CXX
   - PCONFIGURE_VERSION=0.12.5
-  - PSQLITE_VERSION=0.0.3
-  - PUTIL_VERSION=0.0.4
+  - PSQLITE_VERSION=0.0.7
+  - PUTIL_VERSION=0.0.6
   - LIBBASE64_VERSION=1.0.0_p3
   - GITDATE_VERSION=0.0.3
+  - PSON_VERSION=0.0.4
   - export MAKEFLAGS="-j3"
   - export S="$(pwd)"
   - mkdir -p "${HOME}/dependencies"
@@ -80,6 +80,12 @@ before_install:
   - autoreconf -i
   - ./configure --prefix="${HOME}/dependencies/install"
   - make
+  - make install
+  - cd "${HOME}/dependencies"
+  - wget "https://github.com/palmer-dabbelt/pson/archive/v${PSON_VERSION}.tar.gz" -O "${PSON_VERSION}.tar.gz"
+  - tar -xvzpf "${PSON_VERSION}.tar.gz"
+  - cd "pson-${PSON_VERSION}"
+  - pconfigure --verbose "PREFIX = ${HOME}/dependencies/install"
   - make install
   - cd "${S}"
 
