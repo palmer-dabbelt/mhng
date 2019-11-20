@@ -41,10 +41,10 @@ static inline void *get_in_addr(const struct sockaddr *sa);
 
 ssl_client::ssl_client(const std::string hostname,
                        uint16_t port,
-                       const std::string username,
-                       const std::string password,
-                       const std::string priority)
-    : client(),
+                       std::string username,
+                       libmhoauth::access_token token,
+                       std::string priority)
+    : client(account(username)),
       session(),
       credentials(),
       buffer(new char[buffer_size])
@@ -124,7 +124,7 @@ ssl_client::ssl_client(const std::string hostname,
         }
 
         try {
-            if (authenticate(username, password) != 0) {
+            if (authenticate(username, token) != 0) {
                 fprintf(stderr, "Unable to authenticate as '%s'\n", username.c_str());
                 abort();
             }

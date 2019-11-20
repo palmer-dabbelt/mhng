@@ -4,6 +4,7 @@
 #include "client.h++"
 #include "done_command.h++"
 #include "logger.h++"
+#include <libmhng/mime/base64.h++>
 #include <string.h>
 #include <stdlib.h>
 
@@ -13,10 +14,11 @@ using namespace mhimap;
 #define BUFFER_SIZE 1024
 #endif
 
-client::client(void)
+client::client(const account& account)
     : sequence(0),
       logged_out(false),
-      current_folder("")
+      current_folder(""),
+      _account(account)
 {
 }
 
@@ -313,13 +315,38 @@ int client::eat_hello(void)
     return 0;
 }
 
-int client::authenticate(const std::string user, const std::string pass)
+int client::authenticate(std::string user, std::string pass)
 {
     char buffer[BUFFER_SIZE];
-    logger l("client::authenticate('%s', ...)", user.c_str());
+    logger l("client::authenticate('%s', ...) [password]", user.c_str());
 
     l.printf("login(...)");
-    command login(this, "LOGIN %s %s", user.c_str(), pass.c_str());
+    command login(this, "AUTHENTICATE %s %s", user.c_str(), pass.c_str());
+    do {
+        l.printf("gets(...)");
+        gets(buffer, BUFFER_SIZE);
+
+        l.printf("is_end(...)");
+    } while (!login.is_end(buffer));
+
+    if (login.is_error_end(buffer)) {
+        fprintf(stderr, "Error while logging in: '%s'\n", buffer);
+        abort();
+    }
+
+    return 0;
+}
+
+int client::authenticate(std::string user, libmhoauth::access_token token)
+{
+    char buffer[BUFFER_SIZE];
+    logger l("client::authenticate('%s', ...) [oauth2]", user.c_str());
+
+    auto oauth2 = base64_encode(std::string("user=") + user + "\001"
+                                + "auth=Bearer " + token.value() + "\001\001");
+
+    l.printf("login(...)");
+    command login(this, "AUTHENTICATE XOAUTH2 %s", oauth2.c_str());
     do {
         l.printf("gets(...)");
         gets(buffer, BUFFER_SIZE);

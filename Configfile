@@ -7,7 +7,7 @@ LANGUAGES   += c++
 COMPILEOPTS += -Wall
 COMPILEOPTS += -Werror
 COMPILEOPTS += -Wextra
-COMPILEOPTS += -std=c++11
+COMPILEOPTS += -std=c++14
 COMPILEOPTS += -pedantic
 
 # One of the downsides of C++ is that it appears to define a public
@@ -46,6 +46,12 @@ COMPILEOPTS += `ppkg-config libnotify --optional --have LIBNOTIFY --cflags`
 LINKOPTS    += `ppkg-config libnotify --optional --have LIBNOTIFY --libs`
 COMPILEOPTS += `ppkg-config libbase64-1 --cflags`
 LINKOPTS    += `ppkg-config libbase64-1 --libs`
+COMPILEOPTS += `ppkg-config libcurl --cflags`
+LINKOPTS    += `ppkg-config libcurl --libs`
+COMPILEOPTS += `ppkg-config libuv --cflags`
+LINKOPTS    += `ppkg-config libuv --libs`
+COMPILEOPTS += `ppkg-config pson --cflags`
+LINKOPTS    += `ppkg-config pson --libs`
 COMPILEOPTS += -pthread
 LINKOPTS    += -pthread
 
@@ -67,6 +73,14 @@ CONFIG      += libmhimap_sources
 CONFIG      += libmhimap_headers
 LIBRARIES   += pkgconfig/mhimap.pc
 SOURCES     += libmhimap/mhimap.pc
+
+# The MHNG OAUTH client library, which is also hopefully usable by other
+# applications.
+LIBRARIES   += libmhoauth.so
+CONFIG      += libmhoauth_sources
+CONFIG      += libmhoauth_headers
+LIBRARIES   += pkgconfig/mhoauth.pc
+SOURCES     += libmhoauth/mhoauth.pc
 
 # The MHNG library, which handles messing around within MH folders on
 # disk.
@@ -304,6 +318,18 @@ DEPLIBS     += mhng
 DEPLIBS     += mhimap
 SOURCES     += mhimap-idle.c++
 
+# OAUTH2-related activities
+LIBEXECS    += mhng/mhoauth-refresh
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhoauth-refresh.c++
+
+BINARIES    += mhng-add-account
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhng-add-account.c++
+
+# This allows local connection to kick off remote connections
 BINARIES    += mhng-daemon
 AUTODEPS     = false
 DEPLIBS     += mhng
@@ -414,3 +440,14 @@ DEPLIBS     += mhng
 SOURCES     += mhng-show.c++
 COMPILEOPTS += -DSHOW
 COMPILEOPTS += -DPIPE
+
+# Prints out OAUTH2 tokens in a few formats.
+BINARIES    += mhng-pipe-oauth2_sasl
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhng-pipe-oauth2_sasl.c++
+
+BINARIES    += mhng-pipe-oauthbearer
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhng-pipe-oauthbearer.c++

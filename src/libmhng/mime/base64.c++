@@ -39,12 +39,17 @@ std::vector<uint8_t> base64_decode(const std::string& in)
 std::string base64_encode(const uint8_t *in, size_t in_count)
 {
     auto out_len = base64_enclen(in_count) + 1;
-    auto out_vec = std::vector<char>(0, out_len);
+    auto out_vec = std::vector<char>(out_len);
 
-    if (base64_encode(in, in_count, &out_vec[0], out_len) != 0)
+    if (base64_encode(in, in_count, out_vec.data(), out_len) < 0)
         abort();
 
     return std::string(&out_vec[0], out_vec.size());
+}
+
+std::string base64_encode(std::string in)
+{
+    return base64_encode((const uint8_t *)(in.c_str()), in.length());
 }
 
 std::string base64_array2string(const std::vector<uint8_t>& in)

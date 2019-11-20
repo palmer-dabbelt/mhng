@@ -9,6 +9,7 @@ namespace mhimap {
     class client;
 }
 
+#include "account.h++"
 #include <string>
 
 namespace mhimap {
@@ -18,6 +19,9 @@ namespace mhimap {
      * to that.  */
     class folder {
     private:
+        /* Folders must live within an account. */
+        const account _account;
+
         /* Stores the full name (starting from the mailbox root) of
          * this folder. */
         const std::string _name;
@@ -38,11 +42,13 @@ namespace mhimap {
         /* Accessor functions. */
         const std::string name(void) const { return _name; }
         uint32_t uidvalidity(void) const { return _uidvalidity; }
+        const account& get_account(void) const { return _account; }
 
     private:
         /* Creates a new folder given all the information necessary
          * directly.  This DOES NOT contact the IMAP server at all. */
-        folder(const std::string name,
+        folder(const account& account,
+               const std::string name,
                uint32_t uidvalidity);
     };
 }

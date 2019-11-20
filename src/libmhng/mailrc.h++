@@ -25,6 +25,7 @@ namespace mhng {
         std::unordered_map<std::string, address_ptr> _alias_map;
         std::unordered_map<std::string, address_ptr> _name_map;
         std::vector<address_ptr> _bcc;
+        std::vector<std::string> _accounts;
 
     public:
         /* Creates a new mailrc given the full path to the file that

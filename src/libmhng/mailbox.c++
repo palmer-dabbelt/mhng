@@ -8,10 +8,14 @@
 #include "db/mh_messages.h++"
 #include "db/mh_current.h++"
 #include "db/mh_nextid.h++"
+#include "db/mh_accounts.h++"
 #include "db/imap_messages.h++"
-#include <string.h>
-#include <unistd.h>
+#include <libmhoauth/pkce.h++>
+#include <chrono>
 #include <sstream>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
 using namespace mhng;
 
 #ifndef BUFFER_SIZE
@@ -24,7 +28,8 @@ mailbox::mailbox(const std::string& path, bool nomailrc)
       _db(std::make_shared<psqlite::connection>(path + "/metadata.sqlite3")),
       _current_folder(this, _current_folder_func),
       _mailrc(this, _mailrc_func),
-      _daemon(this, _daemon_func)
+      _daemon(this, _daemon_func),
+      _accounts(this, _accounts_func)
 {
 }
 
@@ -39,6 +44,24 @@ folder_ptr mailbox::open_folder(std::string folder_name) const
     /* Now that we know we have access to the folder it's time to
      * simply return a handle for that folder. */
     return std::make_shared<folder>(_self_ptr.lock(), folder_name);
+}
+
+account_ptr mailbox::account(const std::string& name)
+{
+    auto table = std::make_shared<db::mh_accounts>(_self_ptr.lock());
+    return table->select(name);
+}
+
+/* Returns every account that's currently supported. */
+std::vector<account_ptr> mailbox::accounts(void)
+{
+    std::vector<account_ptr> out;
+    auto acc = _accounts.get();
+    for (auto account = acc->begin(); account != acc->end(); ++account) {
+        auto ac = *account;
+        out.push_back(ac);
+    }
+    return out;
 }
 
 void mailbox::set_current_folder(const folder_ptr& folder)
@@ -145,7 +168,8 @@ message_ptr mailbox::insert(const std::string &folder_name,
 
 message_ptr mailbox::insert(const folder_ptr& folder,
                             const mime::message_ptr& mime,
-                            uint32_t imapid)
+                            uint32_t imapid,
+                            const std::string account)
 {
     auto trans = _db->deferred_transaction();
 
@@ -154,7 +178,7 @@ message_ptr mailbox::insert(const folder_ptr& folder,
     uint64_t uid = atoi(message->uid().c_str());
 
     auto table = std::make_shared<db::imap_messages>(_self_ptr.lock());
-    table->insert(message->folder()->name(), imapid, uid);
+    table->insert(message->folder()->name(), imapid, uid, account);
 
     return folder->open(uid);
 }
@@ -163,58 +187,6 @@ void mailbox::did_purge(const folder_ptr& folder, uint32_t imapid)
 {
     auto table = std::make_shared<db::imap_messages>(_self_ptr.lock());
     table->remove(folder->name(), imapid);
-}
-
-std::string mailbox::username(void) const
-{
-    char path[BUFFER_SIZE];
-    snprintf(path, BUFFER_SIZE, "%s/.mhng/username",
-             getenv("HOME"));
-
-    auto file = fopen(path, "r");
-    if (file == NULL) {
-        fprintf(stderr, "Unable to open username file: '%s'\n",
-                path);
-        abort();
-    }
-
-    char line[BUFFER_SIZE];
-    if (fgets(line, BUFFER_SIZE, file) == NULL) {
-        fprintf(stderr, "Empty username file\n");
-        abort();
-    }
-    while (isspace(line[strlen(line)-1]))
-        line[strlen(line)-1] = '\0';
-
-    fclose(file);
-
-    return line;
-}
-
-std::string mailbox::password(void) const
-{
-    char path[BUFFER_SIZE];
-    snprintf(path, BUFFER_SIZE, "%s/.mhng/password",
-             getenv("HOME"));
-
-    auto file = fopen(path, "r");
-    if (file == NULL) {
-        fprintf(stderr, "Unable to open password file: '%s'\n",
-                path);
-        abort();
-    }
-
-    char line[BUFFER_SIZE];
-    if (fgets(line, BUFFER_SIZE, file) == NULL) {
-        fprintf(stderr, "Empty password file\n");
-        abort();
-    }
-    while (isspace(line[strlen(line)-1]))
-        line[strlen(line)-1] = '\0';
-
-    fclose(file);
-
-    return line;
 }
 
 uint64_t mailbox::largest_uid(void) const
@@ -252,6 +224,35 @@ message_ptr mailbox::open(uint64_t uid) const
     return table->select(uid);
 }
 
+void mailbox::add_account(const std::string& name) const
+{
+    auto access_token = libmhoauth::pkce(
+        getenv("MHNG_OAUTH2_CLIENT_ID"),
+        "https://accounts.google.com/o/oauth2/v2/auth",
+        "https://oauth2.googleapis.com/token",
+        getenv("BROWSER"),
+        "http://mail.google.com",
+        name
+    );
+
+    auto table = std::make_shared<db::mh_accounts>(_self_ptr.lock());
+    auto ts = [&](){
+        auto tp = access_token.expires_at();
+        auto ss = std::chrono::time_point_cast<std::chrono::seconds>(tp);
+        auto ns = std::chrono::time_point_cast<std::chrono::nanoseconds>(tp)
+                  - std::chrono::time_point_cast<std::chrono::nanoseconds>(ss);
+        timespec out;
+        out.tv_sec = ss.time_since_epoch().count();
+        out.tv_nsec = ns.count();
+        return out;
+    }();
+    table->insert(name,
+                  getenv("MHNG_OAUTH2_CLIENT_ID"),
+                  access_token.value(),
+                  access_token.refresh_token(),
+                  putil::chrono::datetime(ts));
+}
+
 folder_ptr mailbox::_current_folder_impl(void)
 {
     auto table = std::make_shared<db::mh_current>(_self_ptr.lock());
@@ -281,3 +282,14 @@ daemon::connection_ptr mailbox::_daemon_impl(void)
 
     return std::make_shared<daemon::real_connection>(_path + "/daemon.socket");
 }
+
+std::shared_ptr<std::vector<account_ptr>> mailbox::_accounts_impl(void)
+{
+    auto table = std::make_shared<db::mh_accounts>(_self_ptr.lock());
+    auto out = std::make_shared<std::vector<account_ptr>>();
+    for (const auto& account: table->select())
+        out->push_back(account);
+    return out;
+}
+
+

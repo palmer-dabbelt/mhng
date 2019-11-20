@@ -10,12 +10,14 @@ namespace mhimap {
     class done_command;
 }
 
+#include "account.h++"
 #include "command.h++"
 #include "folder_iter.h++"
 #include "idle_response.h++"
 #include "line_buffer.h++"
 #include "message_iter.h++"
 #include "string_iter.h++"
+#include <libmhoauth/access_token.h++>
 #include <string>
 
 namespace mhimap {
@@ -44,13 +46,16 @@ namespace mhimap {
         std::string current_folder;
         uint32_t current_uidvalidity;
 
+        /* The account this client is associated with. */
+        const account _account;
+
     public:
         /* Creates a new connection to an IMAP server, given the
          * connection object that will be used to create it.  You
          * should probably be using one of the myriad of other client
          * classes that extend this one rather than calling this
          * directly. */
-        client(void);
+        client(const account& account);
 
         /* Returns an iterator that loops through all the folders in
          * this IMAP account.  Note that this probably isn't very
@@ -101,6 +106,9 @@ namespace mhimap {
         /* Sets the read flag on the server for the given message. */
         void mark_as_read(const message &m);
 
+        /* Returns the account name. */
+        mhimap::account get_account(void) { return _account; }
+
     protected:
         /* A pair of functions that do raw readinig and writing
          * from/to the IMAP socket.  These need to be implemented by
@@ -125,9 +133,10 @@ namespace mhimap {
          * subclasses call this as part of their constructor, after
          * read() and write() can communicate securely.  This must be
          * called after eat_hello(), but doesn't have to be called
-         * _directly_ after eat_helly() (for instance, there may be
+         * _directly_ after eat_hello() (for instance, there may be
          * some TLS negotiation in the middle). */
-        int authenticate(const std::string user, const std::string pass);
+        int authenticate(std::string user, std::string pass);
+        int authenticate(std::string user, libmhoauth::access_token token);
 
         /* This should be called directly before an instance of this
          * class is destroyed, and only from direct children of this

@@ -133,13 +133,15 @@ std::vector<uint32_t> db::imap_messages::select_purge(std::string folder)
 
 void db::imap_messages::insert(std::string folder,
                                uint32_t imapid,
-                               uint64_t mhid)
+                               uint64_t mhid,
+                               std::string account)
 {
     auto map = std::map<std::string, std::string>();
     map["folder"] = folder;
     map["uid"] = std::to_string(imapid);
     map["purge"] = "0";
     map["mhid"] = std::to_string(mhid);
+    map["account"] = account;
     auto row = std::make_shared<psqlite::row>(map);
 
     auto resp = _mbox->db()->insert(_table, row);
@@ -162,5 +164,6 @@ psqlite::table::ptr generate_columns(void)
     out.push_back(std::make_shared<psqlite::column_t<bool>>("purge"));
     out.push_back(std::make_shared<psqlite::column_t<uint32_t>>("uid"));
     out.push_back(std::make_shared<psqlite::column_t<uint32_t>>("folder"));
+    out.push_back(std::make_shared<psqlite::column_t<std::string>>("account"));
     return std::make_shared<psqlite::table>("IMAP__messages", out);
 }

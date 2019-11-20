@@ -26,9 +26,8 @@
 
 using namespace mhimap;
 
-gmail_client::gmail_client(const std::string username,
-                           const std::string password)
-    : ssl_client(GMAIL_HOSTNAME, GMAIL_PORT, username, password,
+gmail_client::gmail_client(std::string username, libmhoauth::access_token token)
+    : ssl_client(GMAIL_HOSTNAME, GMAIL_PORT, username, token,
                  "NORMAL" VERS_RC4 VERS_SSLONLY),
       _g2m(),
       _m2g()
@@ -45,6 +44,9 @@ gmail_client::gmail_client(const std::string username,
     add_folder_map("sent", "[Gmail]/Sent Mail");
     add_folder_map("spam", "[Gmail]/Spam");
     add_folder_map("trash", "[Gmail]/All Mail");
+    add_folder_map("important", "[Gmail]/Important");
+    add_folder_map("starred", "[Gmail]/Starred");
+    add_folder_map("rubbish", "[Gmail]/Trash");
     add_folder_map("lists", "Lists");
     add_folder_map("rss", "RSS");
     add_folder_map("promo", "Promo");
@@ -53,6 +55,7 @@ gmail_client::gmail_client(const std::string username,
     add_folder_map("berkeley", "Berkeley");
     add_folder_map("patches", "Patches");
     add_folder_map("lkcl", "LKCL");
+    add_folder_map("indef", "Indef");
 }
 
 typename mhimap::folder_iter gmail_client::folder_iter(void)

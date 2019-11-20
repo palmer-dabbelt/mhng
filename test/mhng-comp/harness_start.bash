@@ -48,9 +48,17 @@ INSERT INTO MH__nextid (single, uid) VALUES (1, 2);
 CREATE TABLE IMAP__messages (folder STRING NOT NULL,
                              uid INTEGER NOT NULL,
                              mhid INTEGER NOT NULL,
+                             account STRING NOT NULL,
                              purge INTEGER CHECK(purge >= 0 AND purge <= 1),
                              UNIQUE(folder, uid),
                              UNIQUE(mhid)
+       );
+
+CREATE TABLE MH__accounts (name STRING NOT NULL,
+                           access_token STRING NOT NULL,
+                           refresh_token STRING NOT NULL,
+                           access_token_expires DATE NOT NULL,
+                           UNIQUE(name)
        );
 EOF
 sqlite3 $MHNG_MAILDIR/metadata.sqlite3 < init.sql

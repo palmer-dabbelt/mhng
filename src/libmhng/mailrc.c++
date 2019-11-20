@@ -35,6 +35,17 @@ mailrc::mailrc(const std::string& path)
         if (strlen(line) == 0)
             continue;
 
+        if (strsta(line, "account ") == true) {
+            auto addr = address::parse_rfc(line + strlen("account "), true);
+            if (!addr->email_known()) {
+                fprintf(stderr, "account without email: %s\n", line);
+                abort();
+            }
+            _accounts.push_back(addr->email());
+            add(addr);
+            continue;
+        }
+
         if (strsta(line, "local ") == true) {
             auto addr = address::parse_rfc(line + strlen("local "), true);
             add(addr);

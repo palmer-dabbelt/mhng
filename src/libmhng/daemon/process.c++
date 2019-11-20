@@ -2,6 +2,7 @@
 /* SPDX-License-Identifier: GPL-2.0+ OR Apache-2.0 OR BSD-3-Clause */
 
 #include "process.h++"
+#include <iostream>
 #include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -85,7 +86,8 @@ void daemon::process::_do_fork(void)
     _pid = ::fork();
     if (_pid == 0) {
         execl(_filename, _name, NULL);
-        perror("Unable to exec\n");
+        perror("Unable to exec");
+        std::cerr << "    _filename: " << _filename << "\n";
         abort();
     }
 
