@@ -13,10 +13,11 @@ using namespace mhimap;
 #define BUFFER_SIZE 1024
 #endif
 
-client::client(void)
+client::client(const account& account)
     : sequence(0),
       logged_out(false),
-      current_folder("")
+      current_folder(""),
+      _account(account)
 {
 }
 

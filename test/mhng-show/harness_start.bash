@@ -49,6 +49,7 @@ INSERT INTO MH__nextid (single, uid) VALUES (1, 2);
 CREATE TABLE IMAP__messages (folder STRING NOT NULL,
                              uid INTEGER NOT NULL,
                              mhid INTEGER NOT NULL,
+                             account STRING NOT NULL,
                              purge INTEGER CHECK(purge >= 0 AND purge <= 1),
                              UNIQUE(folder, uid),
                              UNIQUE(mhid)

@@ -44,7 +44,7 @@ ssl_client::ssl_client(const std::string hostname,
                        const std::string username,
                        const std::string password,
                        const std::string priority)
-    : client(),
+    : client(account(username)),
       session(),
       credentials(),
       buffer(new char[buffer_size])

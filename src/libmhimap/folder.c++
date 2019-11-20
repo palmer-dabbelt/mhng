@@ -12,20 +12,22 @@ using namespace mhimap;
 #endif
 
 folder::folder(const std::string name, client *c)
-    : _name(name),
+    : _account(c->get_account()),
+      _name(name),
       _uidvalidity(c->select(name))
 {
 }
 
 folder folder::rename(const std::string new_name) const
 {
-    return folder(new_name,
-                  _uidvalidity);
+    return folder(_account, new_name, _uidvalidity);
 }
 
-folder::folder(const std::string name,
+folder::folder(const account& account,
+               const std::string name,
                uint32_t uidvalidity)
-    : _name(name),
+    : _account(account),
+      _name(name),
       _uidvalidity(uidvalidity)
 {
 }

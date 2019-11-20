@@ -45,7 +45,7 @@ namespace mhng {
             std::vector<uint32_t> select_purge(std::string folder);
 
             /* Inserts a new message into this table. */
-            void insert(std::string folder, uint32_t imapid, uint64_t mhid);
+            void insert(std::string folder, uint32_t imapid, uint64_t mhid, std::string account);
         };
     }
 }

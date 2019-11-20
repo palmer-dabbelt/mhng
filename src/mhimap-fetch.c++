@@ -170,7 +170,8 @@ int MHIMAP_MAIN(int argc, const char **argv)
             auto trans = args->mbox()->db()->exclusive_transaction();
             auto lmessage = args->mbox()->insert(lfolder,
                                                  mime,
-                                                 imessage.uid()
+                                                 imessage.uid(),
+                                                 imessage.get_account().name()
                 );
         }
 #endif

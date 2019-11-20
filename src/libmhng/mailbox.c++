@@ -145,7 +145,8 @@ message_ptr mailbox::insert(const std::string &folder_name,
 
 message_ptr mailbox::insert(const folder_ptr& folder,
                             const mime::message_ptr& mime,
-                            uint32_t imapid)
+                            uint32_t imapid,
+                            const std::string account)
 {
     auto trans = _db->deferred_transaction();
 
@@ -154,7 +155,7 @@ message_ptr mailbox::insert(const folder_ptr& folder,
     uint64_t uid = atoi(message->uid().c_str());
 
     auto table = std::make_shared<db::imap_messages>(_self_ptr.lock());
-    table->insert(message->folder()->name(), imapid, uid);
+    table->insert(message->folder()->name(), imapid, uid, account);
 
     return folder->open(uid);
 }

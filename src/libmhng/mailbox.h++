@@ -90,7 +90,8 @@ namespace mhng {
 
         message_ptr insert(const folder_ptr& folder,
                            const mime::message_ptr& mime,
-                           uint32_t imapid);
+                           uint32_t imapid,
+                           const std::string account);
 
         /* Clears the purge status of a message. */
         void did_purge(const folder_ptr& folder, uint32_t imapid);

@@ -62,6 +62,7 @@ CREATE TABLE IMAP__messages (folder STRING NOT NULL,
                              uid INTEGER NOT NULL,
                              mhid INTEGER NOT NULL,
                              purge INTEGER CHECK(purge >= 0 AND purge <= 1),
+                             account STRING NOT NULL,
                              UNIQUE(folder, uid),
                              UNIQUE(mhid)
        );
@@ -69,4 +70,5 @@ EOF
 
 sqlite3 $HOME/.mhng/metadata.sqlite3 < $HOME/.mhng/init.sql
 
-echo "Create $HOME/.mhng/{username,password} with your username and password"
+echo "An empty MHng mailbox has been created at $HOME/.mhng."
+echo "You can now use 'mhng-add-account' to create a new account."
