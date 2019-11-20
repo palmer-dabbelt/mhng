@@ -111,6 +111,9 @@ int MHIMAP_MAIN(int argc, const char **argv)
                 continue;
             }
 
+            if (lmessage->imap_account_name() != account->name())
+                continue;
+
             auto l = imessages.find(lmessage->imapid());
             if (l == imessages.end())
                 drop_messages.push_back(lmessage);
@@ -133,6 +136,9 @@ int MHIMAP_MAIN(int argc, const char **argv)
                 continue;
 
             if (lmessage->read_and_unsynced() == false)
+                continue;
+
+            if (lmessage->imap_account_name() != account->name())
                 continue;
 
             set_seen.push_back(lmessage);
