@@ -11,6 +11,7 @@
 #include <iostream>
 #include <libmhng/daemon/message.h++>
 #include <libmhng/daemon/process.h++>
+#include <libmhng/daemon/account.h++>
 #include <libmhng/args.h++>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -63,11 +64,11 @@ static std::condition_variable event_signal;
  * kill them whenever they want! */
 static mhng::daemon::process sync_process(
         __PCONFIGURE__PREFIX "/libexec/mhng/mhimap-sync",
-        "mhimap-sync"
+        {"mhimap-sync"}
     );
 static mhng::daemon::process idle_process(
         __PCONFIGURE__PREFIX "/libexec/mhng/mhimap-idle",
-        "mhimap-idle",
+        {"mhimap-idle"},
         10 * 60
     );
 

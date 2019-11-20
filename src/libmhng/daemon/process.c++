@@ -9,26 +9,26 @@
 #include <sys/wait.h>
 using namespace mhng;
 
-daemon::process::process(const char *filename, const char *name)
+daemon::process::process(std::string filename, std::vector<std::string> args)
     : _running(false),
       _running_lock(),
       _running_signal(),
       _pid(),
       _status(),
       _filename(filename),
-      _name(name),
+      _args(args),
       _timeout(0)
 {
 }
 
-daemon::process::process(const char *filename, const char *name, int timeout)
+daemon::process::process(std::string filename, std::vector<std::string> args, int timeout)
     : _running(false),
       _running_lock(),
       _running_signal(),
       _pid(),
       _status(),
       _filename(filename),
-      _name(name),
+      _args(args),
       _timeout(timeout)
 {
 }
@@ -85,9 +85,14 @@ void daemon::process::_do_fork(void)
 {
     _pid = ::fork();
     if (_pid == 0) {
-        execl(_filename, _name, NULL);
+        auto argv = new char*[_args.size() + 1];
+        for (size_t i = 0; i < _args.size(); ++i)
+            argv[i] = (char *)(_args[i].c_str());
+        argv[_args.size()] = NULL;
+        execv(_filename.c_str(), argv);
         perror("Unable to exec");
         std::cerr << "    _filename: " << _filename << "\n";
+        delete[] argv;
         abort();
     }
 
