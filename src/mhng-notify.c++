@@ -20,6 +20,10 @@ int main(int argc, const char **argv)
     auto args = mhng::args::parse_all_folders(argc, argv);
     auto daemon = args->mbox()->daemon();
 
+#ifndef HAVE_LIBNOTIFY
+    std::cerr << "WARNING: libnotify not found at compile time\n";
+#endif
+
     /* The last message that we've seen. */
     auto last_seen = args->mbox()->largest_uid();
 
