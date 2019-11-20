@@ -82,6 +82,7 @@ namespace mhng {
 
         bool imapid_known(void) const { return _imapid.known(); }
         uint32_t imapid(void) const { return _imapid.data(); }
+        std::string imap_account_name(void);
 
         /* Accessors for slower fields. */
         std::shared_ptr<std::vector<std::string>> raw_pointer(void)

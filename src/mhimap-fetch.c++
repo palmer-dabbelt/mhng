@@ -79,7 +79,7 @@ int MHIMAP_MAIN(int argc, const char **argv)
         std::vector<uint32_t> purge_messages;
         std::map<uint32_t, bool> should_purge;
 
-        for (const auto& id: lfolder->purge()) {
+        for (const auto& id: lfolder->purge(account)) {
             purge_messages.push_back(id);
             should_purge[id] = true;
         }
@@ -94,7 +94,7 @@ int MHIMAP_MAIN(int argc, const char **argv)
             if (l != should_purge.end())
                 continue;
 
-            auto lmessage = lfolder->open_imap(imessage.uid());
+            auto lmessage = lfolder->open_imap(imessage.uid(), account);
             if (lmessage == NULL)
                 fetch_messages.push_back(imessage);
         }
@@ -155,7 +155,7 @@ int MHIMAP_MAIN(int argc, const char **argv)
             client.mark_as_read(imessage);
             client.mark_as_deleted(imessage);
             auto trans = args->mbox()->db()->exclusive_transaction();
-            args->mbox()->did_purge(lfolder, imapid);
+            args->mbox()->did_purge(lfolder, imapid, account);
         }
 #endif
 
@@ -191,7 +191,7 @@ int MHIMAP_MAIN(int argc, const char **argv)
 
             message->remove();
             auto trans = args->mbox()->db()->exclusive_transaction();
-            args->mbox()->did_purge(lfolder, message->imapid());
+            args->mbox()->did_purge(lfolder, message->imapid(), account);
         }
 #endif
 

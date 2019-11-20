@@ -18,8 +18,7 @@ folder::folder(const mailbox_ptr& mbox,
     : _mbox(mbox),
       _name(name),
       _current_message(this, _current_message_func),
-      _messages(this, _messages_func),
-      _purge(this, _purge_func)
+      _messages(this, _messages_func)
 {
 }
 
@@ -67,10 +66,10 @@ void folder::set_current_message(const message_ptr& message)
     _current_message = message;
 }
 
-message_ptr folder::open_imap(uint32_t imapid)
+message_ptr folder::open_imap(uint32_t imapid, const account_ptr& account)
 {
     auto imap = std::make_shared<db::imap_messages>(_mbox);
-    auto uid = imap->select(this->name(), imapid);
+    auto uid = imap->select(this->name(), imapid, account->name());
 
     auto mh = std::make_shared<db::mh_messages>(_mbox);
     auto message = mh->select(uid);
@@ -126,15 +125,6 @@ std::shared_ptr<std::vector<message_ptr>> folder::_messages_impl(void)
     return out;
 }
 
-std::shared_ptr<std::vector<uint32_t>> folder::_purge_impl(void)
-{
-    auto table = std::make_shared<db::imap_messages>(_mbox);
-    auto out = std::make_shared<std::vector<uint32_t>>();
-    for (const auto& uid: table->select_purge(_name))
-        out->push_back(uid);
-    return out;
-}
-
 fake_message_ptr folder::fake_current_message(void)
 {
     auto cur = std::make_shared<db::mh_current>(_mbox);
@@ -142,4 +132,13 @@ fake_message_ptr folder::fake_current_message(void)
     auto seq = std::make_shared<sequence_number>(seq_uint);
 
     return std::make_shared<fake_message>(_mbox, shared_from_this(), seq);
+}
+
+std::vector<uint32_t> folder::purge(const account_ptr& account)
+{
+    auto table = std::make_shared<db::imap_messages>(_mbox);
+    auto out = std::vector<uint32_t>();
+    for (const auto& uid: table->select_purge(_name, account->name()))
+        out.push_back(uid);
+    return out;
 }

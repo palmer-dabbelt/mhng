@@ -101,7 +101,7 @@ namespace mhng {
                            const std::string account);
 
         /* Clears the purge status of a message. */
-        void did_purge(const folder_ptr& folder, uint32_t imapid);
+        void did_purge(const folder_ptr& folder, uint32_t imapid, const account_ptr& account);
 
         /* Returns the single daemon connection that everything is
          * multiplexed over. */

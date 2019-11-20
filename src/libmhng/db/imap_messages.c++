@@ -38,11 +38,13 @@ int64_t db::imap_messages::select(uint64_t uid)
 }
 
 uint64_t db::imap_messages::select(std::string folder,
-                                   uint32_t imapid)
+                                   uint32_t imapid,
+                                   std::string account)
 {
-    auto resp = _mbox->db()->select(_table, "uid='%s' AND folder='%s'",
+    auto resp = _mbox->db()->select(_table, "uid='%s' AND folder='%s' AND account='%s'",
                                     std::to_string(imapid).c_str(),
-                                    folder.c_str()
+                                    folder.c_str(),
+                                    account.c_str()
         );
 
     switch (resp->return_value()) {
@@ -79,11 +81,12 @@ void db::imap_messages::remove(uint64_t mhid)
     }
 }
 
-void db::imap_messages::remove(std::string folder, uint32_t imapid)
+void db::imap_messages::remove(std::string folder, uint32_t imapid, std::string account)
 {
-    auto resp = _mbox->db()->remove(_table, "folder='%s' AND uid=%u",
+    auto resp = _mbox->db()->remove(_table, "folder='%s' AND uid='%u' AND account='%s'",
                                     folder.c_str(),
-                                    imapid);
+                                    imapid,
+                                    account.c_str());
 
     switch (resp->return_value()) {
     case psqlite::error_code::SUCCESS:
@@ -112,10 +115,11 @@ void db::imap_messages::update_purge(uint64_t uid, bool purge)
     }
 }
 
-std::vector<uint32_t> db::imap_messages::select_purge(std::string folder)
+std::vector<uint32_t> db::imap_messages::select_purge(std::string folder, std::string account)
 {
-    auto resp = _mbox->db()->select(_table, "folder='%s' AND purge=1",
-                                    folder.c_str());
+    auto resp = _mbox->db()->select(_table, "folder='%s' AND purge=1 AND account='%s'",
+                                    folder.c_str(),
+                                    account.c_str());
 
     switch (resp->return_value()) {
     case psqlite::error_code::SUCCESS:
@@ -155,6 +159,31 @@ void db::imap_messages::insert(std::string folder,
         abort();
         break;
     }
+}
+
+std::string db::imap_messages::select_account(uint64_t uid)
+{
+    auto resp = _mbox->db()->select(_table, "mhid='%llu'", (long long unsigned)uid);
+
+    switch (resp->return_value()) {
+    case psqlite::error_code::SUCCESS:
+        break;
+    case psqlite::error_code::FAILED_UNIQUE:
+        abort();
+        break;
+    }
+
+    if (resp->result_count() > 1) {
+        fprintf(stderr, "UNIQUE not respected\n");
+        abort();
+    }
+
+    if (resp->result_count() != 1) {
+        fprintf(stderr, "select_account() with no account\n");
+        abort();
+    }
+
+    return resp->rowi(0)->get_str("account");
 }
 
 psqlite::table::ptr generate_columns(void)

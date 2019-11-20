@@ -5,6 +5,7 @@
 #include "db/imap_messages.h++"
 #include "db/mh_current.h++"
 #include "db/mh_messages.h++"
+#include "db/imap_messages.h++"
 #include <string.h>
 #include <unistd.h>
 using namespace mhng;
@@ -44,6 +45,12 @@ message::message(const mailbox_ptr& mbox,
       _raw(this, _raw_func),
       _mime(this, _mime_func)
 {
+}
+
+std::string message::imap_account_name(void)
+{
+    auto table = std::make_shared<db::imap_messages>(_mbox);
+    return table->select_account(atoi(_uid.c_str()));
 }
 
 void message::remove(void)

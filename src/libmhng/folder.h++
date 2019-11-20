@@ -35,10 +35,6 @@ namespace mhng {
         /* Allows access to all messages in this folder. */
         promise<folder, std::vector<message_ptr>> _messages;
 
-        /* Lists the messages that used to be in this folder but need
-         * to be purged from the IMAP server. */
-        promise<folder, std::vector<uint32_t>> _purge;
-
     public:
         /* Creates a new folder handle.  Note that this database
          * handle will end up filling out information as it's
@@ -87,7 +83,7 @@ namespace mhng {
 
         /* Opens a message that's in this folder and matches the given
          * IMAP sequence number. */
-        message_ptr open_imap(uint32_t imap_uid);
+        message_ptr open_imap(uint32_t imap_uid, const account_ptr& account);
 
         /* Returns the path that's associated with this folder. */
         std::string full_path(void) const;
@@ -109,15 +105,7 @@ namespace mhng {
 
         /* Returns the list of messages that are in this folder that
          * we need to purge from the IMAP server. */
-        std::shared_ptr<std::vector<uint32_t>> purge_raw(void)
-            { return _purge; }
-        std::vector<uint32_t> purge(void)
-            {
-                std::vector<uint32_t> out;
-                for (const auto& uid: *(purge_raw()))
-                    out.push_back(uid);
-                return out;
-            }
+        std::vector<uint32_t> purge(const account_ptr& account);
 
     private:
         static message_ptr _current_message_func(folder* f)
@@ -127,10 +115,6 @@ namespace mhng {
         static std::shared_ptr<std::vector<message_ptr>>
         _messages_func(folder* f) { return f->_messages_impl(); }
         std::shared_ptr<std::vector<message_ptr>> _messages_impl(void);
-
-        static std::shared_ptr<std::vector<uint32_t>> _purge_func(folder *f)
-            { return f->_purge_impl(); }
-        std::shared_ptr<std::vector<uint32_t>> _purge_impl(void);
 
         /* I'm not bothering to cache this one because it's not going to be
          * used all that often. */

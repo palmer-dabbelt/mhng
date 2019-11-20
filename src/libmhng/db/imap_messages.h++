@@ -32,20 +32,23 @@ namespace mhng {
 
             /* Lists the UID for a message that matches the given IMAP
              * folder/uid pair. */
-            uint64_t select(std::string folder, uint32_t imapid);
+            uint64_t select(std::string folder, uint32_t imapid, std::string account);
 
             /* Drops a message from the IMAP store. */
             void remove(uint64_t uid);
-            void remove(std::string folder, uint32_t imapid);
+            void remove(std::string folder, uint32_t imapid, std::string account);
 
             /* Updates a message to contain a new "purge" field. */
             void update_purge(uint64_t uid, bool purge);
 
             /* Lists all the messages with the purge flag set. */
-            std::vector<uint32_t> select_purge(std::string folder);
+            std::vector<uint32_t> select_purge(std::string folder, std::string account);
 
             /* Inserts a new message into this table. */
             void insert(std::string folder, uint32_t imapid, uint64_t mhid, std::string account);
+
+            /* Gets the account name associated with this message. */
+            std::string select_account(uint64_t uid);
         };
     }
 }
