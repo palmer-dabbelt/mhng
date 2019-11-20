@@ -45,6 +45,9 @@ gmail_client::gmail_client(const std::string username,
     add_folder_map("sent", "[Gmail]/Sent Mail");
     add_folder_map("spam", "[Gmail]/Spam");
     add_folder_map("trash", "[Gmail]/All Mail");
+    add_folder_map("important", "[Gmail]/Important");
+    add_folder_map("starred", "[Gmail]/Starred");
+    add_folder_map("rubbish", "[Gmail]/Trash");
     add_folder_map("lists", "Lists");
     add_folder_map("rss", "RSS");
     add_folder_map("promo", "Promo");
@@ -53,6 +56,7 @@ gmail_client::gmail_client(const std::string username,
     add_folder_map("berkeley", "Berkeley");
     add_folder_map("patches", "Patches");
     add_folder_map("lkcl", "LKCL");
+    add_folder_map("indef", "Indef");
 }
 
 typename mhimap::folder_iter gmail_client::folder_iter(void)
