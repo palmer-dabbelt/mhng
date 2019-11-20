@@ -46,10 +46,10 @@ int MHIMAP_MAIN(int argc, const char **argv)
          * they were for this mailbox.  If they've changed then there
          * isn't really anything we can do, so we'll just have to give
          * up right now. */
-        if (lfolder->has_uid_validity() == false)
-            lfolder->set_uid_validity(ifolder.uidvalidity());
+        if (lfolder->has_uid_validity(account) == false)
+            lfolder->set_uid_validity(ifolder.uidvalidity(), account);
 
-        if (lfolder->uid_validity() != ifolder.uidvalidity()) {
+        if (lfolder->uid_validity(account) != ifolder.uidvalidity()) {
             fprintf(stderr, "UIDVALIDITY changed for '%s'\n",
                     folder_name.c_str());
             abort();

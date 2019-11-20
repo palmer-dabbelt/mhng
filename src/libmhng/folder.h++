@@ -35,10 +35,6 @@ namespace mhng {
         /* Allows access to all messages in this folder. */
         promise<folder, std::vector<message_ptr>> _messages;
 
-        /* Allows us to query to see if the UID validity is known or
-         * not. */
-        promise<folder, int64_t> _uid_validity;
-
         /* Lists the messages that used to be in this folder but need
          * to be purged from the IMAP server. */
         promise<folder, std::vector<uint32_t>> _purge;
@@ -107,13 +103,9 @@ namespace mhng {
         /* Allows for the modification of the UID VALIDITY field,
          * which IMAP uses to tell clients when they throw away their
          * cache of a mailbox. */
-        std::shared_ptr<int64_t> uid_validity_ptr(void)
-            { return _uid_validity; }
-        bool has_uid_validity(void)
-            { return *(uid_validity_ptr()) >= 0; }
-        uint32_t uid_validity(void)
-            { return (uint32_t)*(uid_validity_ptr()); }
-        void set_uid_validity(uint32_t uidv);
+        bool has_uid_validity(const account_ptr& account);
+        uint32_t uid_validity(const account_ptr& account);
+        void set_uid_validity(uint32_t uidv, const account_ptr& account);
 
         /* Returns the list of messages that are in this folder that
          * we need to purge from the IMAP server. */
@@ -135,10 +127,6 @@ namespace mhng {
         static std::shared_ptr<std::vector<message_ptr>>
         _messages_func(folder* f) { return f->_messages_impl(); }
         std::shared_ptr<std::vector<message_ptr>> _messages_impl(void);
-
-        static std::shared_ptr<int64_t> _uid_validity_func(folder *f)
-            { return f->_uid_validity_impl(); }
-        std::shared_ptr<int64_t> _uid_validity_impl(void);
 
         static std::shared_ptr<std::vector<uint32_t>> _purge_func(folder *f)
             { return f->_purge_impl(); }

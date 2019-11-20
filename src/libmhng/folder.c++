@@ -6,6 +6,7 @@
 #include "db/mh_current.h++"
 #include "db/mh_messages.h++"
 #include "db/imap_messages.h++"
+#include "db/imap_uidvalidity.h++"
 using namespace mhng;
 
 #ifndef BUFFER_SIZE
@@ -18,7 +19,6 @@ folder::folder(const mailbox_ptr& mbox,
       _name(name),
       _current_message(this, _current_message_func),
       _messages(this, _messages_func),
-      _uid_validity(this, _uid_validity_func),
       _purge(this, _purge_func)
 {
 }
@@ -81,11 +81,24 @@ message_ptr folder::open_imap(uint32_t imapid)
     return message;
 }
 
-void folder::set_uid_validity(uint32_t uidv)
+bool folder::has_uid_validity(const account_ptr& account)
 {
-    auto table = std::make_shared<db::mh_current>(_mbox);
-    table->update_uid_validity(this->_name, uidv);
-    _uid_validity = std::make_shared<int64_t>(uidv);
+    auto table = std::make_shared<db::imap_uidvalidity>(_mbox);
+    auto out = table->select(_name, account->name());
+    return out.known();
+}
+
+uint32_t folder::uid_validity(const account_ptr& account)
+{
+    auto table = std::make_shared<db::imap_uidvalidity>(_mbox);
+    auto out = table->select(_name, account->name());
+    return out.data();
+}
+
+void folder::set_uid_validity(uint32_t uidv, const account_ptr& account)
+{
+	auto table = std::make_shared<db::imap_uidvalidity>(_mbox);
+    table->insert(_name, uidv, account->name());
 }
 
 message_ptr folder::_current_message_impl(void)
@@ -111,13 +124,6 @@ std::shared_ptr<std::vector<message_ptr>> folder::_messages_impl(void)
         out->push_back(message);
 
     return out;
-}
-
-std::shared_ptr<int64_t> folder::_uid_validity_impl(void)
-{
-    auto table = std::make_shared<db::mh_current>(_mbox);
-    auto uidv = table->uid_validity(this->_name);
-    return std::make_shared<int64_t>(uidv);
 }
 
 std::shared_ptr<std::vector<uint32_t>> folder::_purge_impl(void)

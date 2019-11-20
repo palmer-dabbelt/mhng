@@ -44,14 +44,6 @@ namespace mhng {
 
             /* Returns the name of the folder that's currently set. */
             std::string select_current(void);
-
-            /* These probably shouldn't just be jammed into this
-             * folder, but I'm fairly lazy so I don't really want to
-             * deal with it.  Note that a return code of "-1" means
-             * there is no uidvalidity set. */
-            int64_t uid_validity(const std::string& folder_name);
-            void update_uid_validity(const std::string& folder_name,
-                                     uint32_t uid_validity);
         };
     }
 }
