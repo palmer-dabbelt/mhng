@@ -442,12 +442,12 @@ COMPILEOPTS += -DSHOW
 COMPILEOPTS += -DPIPE
 
 # Prints out OAUTH2 tokens in a few formats.
-BINARIES    += mhng-pipe-oauth2_sasl
+BINARIES    += mhoauth-pipe-sasl
 AUTODEPS     = false
 DEPLIBS     += mhng
-SOURCES     += mhng-pipe-oauth2_sasl.c++
+SOURCES     += mhoauth-pipe-sasl.c++
 
-BINARIES    += mhng-pipe-oauthbearer
+BINARIES    += mhoauth-pipe-bearer
 AUTODEPS     = false
 DEPLIBS     += mhng
-SOURCES     += mhng-pipe-oauthbearer.c++
+SOURCES     += mhoauth-pipe-bearer.c++
