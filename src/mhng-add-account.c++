@@ -7,13 +7,6 @@
 int main(int argc, const char **argv)
 {
     auto args = mhng::args::parse_account(argc, argv);
-
-    if (args->mbox()->accounts().size() > 0) {
-        std::cerr << "MHng currently only supports a single account\n";
-        return 1;
-    }
-
     args->mbox()->add_account(args->account());
-
     return 0;
 }
