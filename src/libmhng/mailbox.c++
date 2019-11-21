@@ -183,10 +183,10 @@ message_ptr mailbox::insert(const folder_ptr& folder,
     return folder->open(uid);
 }
 
-void mailbox::did_purge(const folder_ptr& folder, uint32_t imapid)
+void mailbox::did_purge(const folder_ptr& folder, uint32_t imapid, const account_ptr& account)
 {
     auto table = std::make_shared<db::imap_messages>(_self_ptr.lock());
-    table->remove(folder->name(), imapid);
+    table->remove(folder->name(), imapid, account->name());
 }
 
 uint64_t mailbox::largest_uid(void) const

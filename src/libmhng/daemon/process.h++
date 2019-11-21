@@ -17,6 +17,7 @@ namespace mhng {
 #include <condition_variable>
 #include <mutex>
 #include <thread>
+#include <vector>
 
 namespace mhng {
     namespace daemon {
@@ -36,8 +37,8 @@ namespace mhng {
             int _pid;
             int _status;
 
-            const char *_filename;
-            const char *_name;
+            std::string _filename;
+            std::vector<std::string> _args;
 
             const int _timeout;
 
@@ -45,10 +46,10 @@ namespace mhng {
             /* Creates a new process -- note that this doesn't
              * actually start the process, it simply creates a
              * placeholder that _can_ start processes. */
-            process(const char *filename, const char *name);
+            process(std::string filename, std::vector<std::string> args);
 
             /* Creates a process with a timeout. */
-            process(const char *filename, const char *name, int timeout);
+            process(std::string filename, std::vector<std::string> args, int timeout);
 
         public:
             /* Forks off the stored process, allowing for it to be

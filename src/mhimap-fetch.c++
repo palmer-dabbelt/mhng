@@ -10,17 +10,13 @@
 
 int MHIMAP_MAIN(int argc, const char **argv)
 {
-    auto args = mhng::args::parse_all_folders(argc, argv);
+    auto args = mhng::args::parse_account(argc, argv);
 
     fprintf(stderr, "IMAP Logging In: %s\n",
             mhng::date::now()->local().c_str());
 
     /* Opens a connection to GMail. */
-    if (args->mbox()->accounts().size() != 1) {
-        std::cerr << "MHng only supports a single account\n";
-        abort();
-    }
-    auto account = args->mbox()->accounts()[0];
+    auto account = args->mbox()->account(args->account());
     mhimap::gmail_client client(account->name(), account->access_token());
 
     /* Look through the IMAP server and synchronize every folder. */
@@ -46,10 +42,10 @@ int MHIMAP_MAIN(int argc, const char **argv)
          * they were for this mailbox.  If they've changed then there
          * isn't really anything we can do, so we'll just have to give
          * up right now. */
-        if (lfolder->has_uid_validity() == false)
-            lfolder->set_uid_validity(ifolder.uidvalidity());
+        if (lfolder->has_uid_validity(account) == false)
+            lfolder->set_uid_validity(ifolder.uidvalidity(), account);
 
-        if (lfolder->uid_validity() != ifolder.uidvalidity()) {
+        if (lfolder->uid_validity(account) != ifolder.uidvalidity()) {
             fprintf(stderr, "UIDVALIDITY changed for '%s'\n",
                     folder_name.c_str());
             abort();
@@ -79,7 +75,7 @@ int MHIMAP_MAIN(int argc, const char **argv)
         std::vector<uint32_t> purge_messages;
         std::map<uint32_t, bool> should_purge;
 
-        for (const auto& id: lfolder->purge()) {
+        for (const auto& id: lfolder->purge(account)) {
             purge_messages.push_back(id);
             should_purge[id] = true;
         }
@@ -94,7 +90,7 @@ int MHIMAP_MAIN(int argc, const char **argv)
             if (l != should_purge.end())
                 continue;
 
-            auto lmessage = lfolder->open_imap(imessage.uid());
+            auto lmessage = lfolder->open_imap(imessage.uid(), account);
             if (lmessage == NULL)
                 fetch_messages.push_back(imessage);
         }
@@ -110,6 +106,9 @@ int MHIMAP_MAIN(int argc, const char **argv)
                     );
                 continue;
             }
+
+            if (lmessage->imap_account_name() != account->name())
+                continue;
 
             auto l = imessages.find(lmessage->imapid());
             if (l == imessages.end())
@@ -135,6 +134,9 @@ int MHIMAP_MAIN(int argc, const char **argv)
             if (lmessage->read_and_unsynced() == false)
                 continue;
 
+            if (lmessage->imap_account_name() != account->name())
+                continue;
+
             set_seen.push_back(lmessage);
         }
 #endif
@@ -155,7 +157,7 @@ int MHIMAP_MAIN(int argc, const char **argv)
             client.mark_as_read(imessage);
             client.mark_as_deleted(imessage);
             auto trans = args->mbox()->db()->exclusive_transaction();
-            args->mbox()->did_purge(lfolder, imapid);
+            args->mbox()->did_purge(lfolder, imapid, account);
         }
 #endif
 
@@ -191,7 +193,7 @@ int MHIMAP_MAIN(int argc, const char **argv)
 
             message->remove();
             auto trans = args->mbox()->db()->exclusive_transaction();
-            args->mbox()->did_purge(lfolder, message->imapid());
+            args->mbox()->did_purge(lfolder, message->imapid(), account);
         }
 #endif
 

@@ -26,7 +26,6 @@ cat > $HOME/.mhng/init.sql <<EOF
 CREATE TABLE MH__current (folder STRING NOT NULL CHECK(folder != ''),
                           seq INTEGER NOT NULL CHECK(seq > 0),
                           cur INTEGER CHECK(cur > 0 AND cur <= 1),
-                          uid_validity INTEGER CHECK(uid_validity >= 0),
                           UNIQUE(folder),
                           UNIQUE(cur)
        );
@@ -74,6 +73,11 @@ CREATE TABLE MH__accounts (name STRING NOT NULL,
 			   access_token_expires DATE NOT NULL,
 			   UNIQUE(name)
        );
+
+CREATE TABLE MH__uidvalidity (account STRING NOT NULL,
+                              folder STRING NOT NULL,
+                              uidvalidity INTEGER NOT NULL,
+                              UNIQUE(folder, uid));
 EOF
 
 sqlite3 $HOME/.mhng/metadata.sqlite3 < $HOME/.mhng/init.sql

@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <thread>
 #include <iostream>
+#include <list>
 #include <libmhng/daemon/message.h++>
 #include <libmhng/daemon/process.h++>
 #include <libmhng/args.h++>
@@ -31,10 +32,10 @@ static void client_main(int client);
 /* Waits for someone to request a synchronization, forks off a
  * synchronization process, and if that is successful updates everyone
  * waiting for a synchronization. */
-static void sync_main(void);
+static void sync_main(mhng::daemon::process* idle);
 
 /* Keeps running the IDLE process forever. */
-static void idle_main(void);
+static void idle_main(mhng::daemon::process* idle);
 
 /* Here we have two counters: one that contains the latest requested
  * synchronization, and another that contains the latest responded
@@ -59,17 +60,10 @@ static std::atomic<uint32_t> event_ticket;
 static std::mutex event_lock;
 static std::condition_variable event_signal;
 
-/* These two processes are global so everyone can just go ahead and
+/* These two process types are global so everyone can just go ahead and
  * kill them whenever they want! */
-static mhng::daemon::process sync_process(
-        __PCONFIGURE__PREFIX "/libexec/mhng/mhimap-sync",
-        "mhimap-sync"
-    );
-static mhng::daemon::process idle_process(
-        __PCONFIGURE__PREFIX "/libexec/mhng/mhimap-idle",
-        "mhimap-idle",
-        10 * 60
-    );
+static std::list<mhng::daemon::process> sync_processes;
+static std::list<mhng::daemon::process> idle_processes;
 
 /* A global context */
 static std::shared_ptr<mhng::args> args = NULL;
@@ -96,9 +90,24 @@ int main(int argc, const char **argv)
 
     args = mhng::args::parse_all_folders(argc, argv);
 
+    for (const auto& account: args->mbox()->accounts()) {
+        sync_processes.emplace_back(
+            __PCONFIGURE__PREFIX "/libexec/mhng/mhimap-sync",
+            std::vector<std::string>({"mhimap-sync", account->name()})
+        );
+    }
+
+    for (const auto& account: args->mbox()->accounts()) {
+        idle_processes.emplace_back(
+            __PCONFIGURE__PREFIX "/libexec/mhng/mhimap-idle",
+            std::vector<std::string>({"mhimap-idle", account->name()}),
+            10 * 60
+        );
+    }
+
     /* This special thread responds to synchronization requests. */
-    {
-        std::thread sync_thread(sync_main);
+    for (auto& sync_process: sync_processes) {
+        std::thread sync_thread(sync_main, &sync_process);
         sync_thread.detach();
     }
 
@@ -111,8 +120,8 @@ int main(int argc, const char **argv)
 
     /* Fires up the IDLE thread, which needs that server connection to
      * have been created so it can send us messages. */
-    {
-        std::thread idle_thread(idle_main);
+    for (auto& idle_process: idle_processes) {
+        std::thread idle_thread(idle_main, &idle_process);
         idle_thread.detach();
     }
 
@@ -223,8 +232,10 @@ void client_main(int client)
 
             net_up = true;
 
-            idle_process.kill();
-            sync_process.kill();
+            for (auto& idle_process: idle_processes)
+                idle_process.kill();
+            for (auto& sync_process: sync_processes)
+                sync_process.kill();
 
             sync_signal.notify_all();
 
@@ -239,8 +250,10 @@ void client_main(int client)
 
             net_up = false;
 
-            idle_process.kill();
-            sync_process.kill();
+            for (auto& idle_process: idle_processes)
+                idle_process.kill();
+            for (auto& sync_process: sync_processes)
+                sync_process.kill();
 
             sync_signal.notify_all();
 
@@ -295,7 +308,7 @@ void client_main(int client)
     close(client);
 }
 
-void sync_main(void)
+void sync_main(mhng::daemon::process* sync_process)
 {
     while (true) {
         /* The first thing to do is to atomicly wait for someone to
@@ -325,7 +338,7 @@ void sync_main(void)
                 /* We need to fork with the lock held because if we
                  * don't then there's a race condition later killing
                  * the process. */
-                sync_process.fork();
+                sync_process->fork();
 
                 /* Our ticket is just the ticket that the latest
                  * requester gave us.  This means that every request
@@ -334,7 +347,7 @@ void sync_main(void)
             };
 
         auto ticket = get_ticket_and_fork();
-        int status = sync_process.join();
+        int status = sync_process->join();
 
         /* If the synchronization didn't succeed then for now just
          * pretend it didn't happen at all and instead just go ahead
@@ -357,11 +370,8 @@ void sync_main(void)
          * and inform all the clients that we've done so. */
         {
             std::unique_lock<std::mutex> lock(sync_lock);
-            if (sync_rep >= ticket) {
-                fprintf(stderr, "Race condition!\n");
-                abort();
-            }
-            sync_rep = ticket;
+            if (sync_rep < ticket)
+                sync_rep = ticket;
     
             if (last_uid > sync_largest_uid)
                 sync_largest_uid = last_uid;
@@ -379,7 +389,7 @@ void sync_main(void)
     }
 }
 
-void idle_main(void)
+void idle_main(mhng::daemon::process* idle_process)
 {
     while (true) {
         /* We only want to bother trying to idle when we already know
@@ -396,10 +406,10 @@ void idle_main(void)
                     return true;
                 });
 
-            idle_process.fork();
+            idle_process->fork();
         }
 
-        int status = idle_process.join();
+        int status = idle_process->join();
 
         if (status != 0) {
             fprintf(stderr, "IDLE failed, retrying\n");
