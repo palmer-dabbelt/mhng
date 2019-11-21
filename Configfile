@@ -451,3 +451,9 @@ BINARIES    += mhoauth-pipe-bearer
 AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhoauth-pipe-bearer.c++
+
+# Refreshes a single OAUTH2 token, in batch mode.
+LIBEXECS    += mhng/mhoauth-refresh_loop
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhoauth-refresh_loop.c++
