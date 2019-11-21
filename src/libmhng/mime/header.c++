@@ -102,6 +102,9 @@ std::string mime::header::utf8(void) const
                 out_offset = strlen(qp);
             }
 
+            if (strcmp(charset, "ks_c_5601-1987") == 0)
+                strcpy(charset, "EUC-KR");
+
             iconv_t icd = iconv_open("UTF-8", charset);
 
             char *raw_p = raw;
