@@ -10,17 +10,13 @@
 
 int MHIMAP_MAIN(int argc, const char **argv)
 {
-    auto args = mhng::args::parse_all_folders(argc, argv);
+    auto args = mhng::args::parse_account(argc, argv);
 
     fprintf(stderr, "IMAP Logging In: %s\n",
             mhng::date::now()->local().c_str());
 
     /* Opens a connection to GMail. */
-    if (args->mbox()->accounts().size() != 1) {
-        std::cerr << "MHng only supports a single account\n";
-        abort();
-    }
-    auto account = args->mbox()->accounts()[0];
+    auto account = args->mbox()->account(args->account());
     mhimap::gmail_client client(account->name(), account->access_token());
 
     /* Look through the IMAP server and synchronize every folder. */
