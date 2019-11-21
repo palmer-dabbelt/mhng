@@ -74,10 +74,10 @@ CREATE TABLE MH__accounts (name STRING NOT NULL,
 			   UNIQUE(name)
        );
 
-CREATE TABLE MH__uidvalidity (account STRING NOT NULL,
-                              folder STRING NOT NULL,
-                              uidvalidity INTEGER NOT NULL,
-                              UNIQUE(folder, uid));
+CREATE TABLE IMAP__uidvalidity (account STRING NOT NULL,
+                                folder STRING NOT NULL,
+                                uidvalidity INTEGER NOT NULL,
+                                UNIQUE(folder, account));
 EOF
 
 sqlite3 $HOME/.mhng/metadata.sqlite3 < $HOME/.mhng/init.sql
