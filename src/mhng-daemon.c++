@@ -37,6 +37,9 @@ static void sync_main(mhng::daemon::process* idle);
 /* Keeps running the IDLE process forever. */
 static void idle_main(mhng::daemon::process* idle);
 
+/* Keeps running the OAUTH2 process forever. */
+static void oauth2_main(mhng::daemon::process* oauth2);
+
 /* Here we have two counters: one that contains the latest requested
  * synchronization, and another that contains the latest responded
  * synchronization.  Essentially the idea here is that client threads
@@ -64,6 +67,7 @@ static std::condition_variable event_signal;
  * kill them whenever they want! */
 static std::list<mhng::daemon::process> sync_processes;
 static std::list<mhng::daemon::process> idle_processes;
+static std::list<mhng::daemon::process> oauth2_processes;
 
 /* A global context */
 static std::shared_ptr<mhng::args> args = NULL;
@@ -105,6 +109,13 @@ int main(int argc, const char **argv)
         );
     }
 
+    for (const auto& account: args->mbox()->accounts()) {
+        oauth2_processes.emplace_back(
+            __PCONFIGURE__PREFIX "/libexec/mhng/mhoauth-refresh_loop",
+            std::vector<std::string>({"mhoauth-refresh_loop", account->name()})
+        );
+    }
+
     /* This special thread responds to synchronization requests. */
     for (auto& sync_process: sync_processes) {
         std::thread sync_thread(sync_main, &sync_process);
@@ -123,6 +134,12 @@ int main(int argc, const char **argv)
     for (auto& idle_process: idle_processes) {
         std::thread idle_thread(idle_main, &idle_process);
         idle_thread.detach();
+    }
+
+    /* Launches threads to babysit the OAUTH2 processes. */
+    for (auto& oauth2_process: oauth2_processes) {
+        std::thread oauth2_thread(oauth2_main, &oauth2_process);
+        oauth2_thread.detach();
     }
 
     /* Accepts every client connection forever! */
@@ -236,6 +253,8 @@ void client_main(int client)
                 idle_process.kill();
             for (auto& sync_process: sync_processes)
                 sync_process.kill();
+            for (auto& oauth2_process: oauth2_processes)
+                oauth2_process.kill();
 
             sync_signal.notify_all();
 
@@ -254,6 +273,8 @@ void client_main(int client)
                 idle_process.kill();
             for (auto& sync_process: sync_processes)
                 sync_process.kill();
+            for (auto& oauth2_process: oauth2_processes)
+                oauth2_process.kill();
 
             sync_signal.notify_all();
 
@@ -416,5 +437,14 @@ void idle_main(mhng::daemon::process* idle_process)
             sleep(5);
             continue;
         }
+    }
+}
+
+void oauth2_main(mhng::daemon::process* oauth2_process)
+{
+    while (true) {
+        oauth2_process->fork();
+        oauth2_process->join();
+        sleep(5);
     }
 }
