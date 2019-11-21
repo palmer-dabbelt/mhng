@@ -156,6 +156,8 @@ int main(int argc, const char **argv)
             fprintf(out, "Subject:    %s\n", str.c_str());
         for (const auto& date: msg->date())
             fprintf(out, "Date:       %s\n", date->local().c_str());
+        if (msg->imapid_known())
+            fprintf(out, "Account:    %s\n", msg->imap_account_name().c_str());
         for (const auto& mid: msg->header_string("Message-ID"))
             fprintf(out, "Message-ID: %s\n", mid.c_str());
 
