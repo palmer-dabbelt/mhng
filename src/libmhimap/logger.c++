@@ -2,6 +2,7 @@
 /* SPDX-License-Identifier: GPL-2.0+ OR Apache-2.0 OR BSD-3-Clause */
 
 #include "logger.h++"
+#include <unistd.h>
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -16,11 +17,13 @@ static bool global_debug = false;
 #endif
 
 logger::logger(const char *fmt, ...)
-    : depth(global_depth++)
+    : depth(global_depth++),
+      pid(getpid())
 {
     if (!global_debug)
         return;
     
+    fprintf(stderr, "[% 8d]", pid);
     for (int i = 0; i < this->depth; i++)
         fprintf(stderr, "  ");
 
@@ -38,6 +41,7 @@ logger::~logger(void)
     if (!global_debug)
         return;
     
+    fprintf(stderr, "[% 8d]", pid);
     for (int i = 0; i < this->depth; i++)
         fprintf(stderr, "  ");
 
@@ -49,6 +53,7 @@ void logger::printf(const char *fmt, ...)
     if (!global_debug)
         return;
 
+    fprintf(stderr, "[% 8d]", pid);
     for (int i = 0; i <= this->depth; i++)
         fprintf(stderr, "  ");
 

@@ -20,6 +20,7 @@ namespace mhimap {
     class logger {
     private:
         int depth;
+        pid_t pid;
 
     public:
         logger(const char *fmt, ...) __attribute__(( format(printf, 2, 3) ));
