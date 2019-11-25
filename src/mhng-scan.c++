@@ -52,7 +52,7 @@ int main(int argc, const char **argv)
             seq_width = 8;
     }
 
-    size_t subject_width = terminal_width - from_width - seq_width - 11;
+    size_t subject_width = terminal_width - from_width - seq_width - 10;
 #endif
 
     /* At this point that argument list contains the entire set of
@@ -74,14 +74,18 @@ int main(int argc, const char **argv)
                subj.c_str()
             );
 #else
-        printf("%s%c %*u %s %s %s%c%s\n",
+        auto subj_crop =
+            mhng::util::string::utf8_cols(subj) > subject_width
+            ? mhng::util::string::utf8_crop_to_cols(subj, subject_width - 1) + "\\"
+            : subj;
+
+        printf("%s%c %*u %s %s %s%s\n",
                msg->unread() ? terminal_bold : "",
                msg->cur() ? '*' : ' ',
                (int)seq_width, msg->seq()->to_uint(),
                msg->first_date()->ddmm().c_str(),
-               mhng::util::string::utf8_pad_to_length(from->nom(), from_width).c_str(),
-               mhng::util::string::utf8_pad_to_length(subj, subject_width).c_str(),
-               strlen(subj.c_str()) > subject_width ? '\\' : ' ',
+               mhng::util::string::utf8_pad_to_cols(from->nom(), from_width).c_str(),
+               subj_crop.c_str(),
                terminal_norm
             );
 #endif
