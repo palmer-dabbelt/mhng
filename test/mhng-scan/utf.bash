@@ -15,8 +15,8 @@ COMMIT TRANSACTION;
 EOF
 
 cat > out.gold <<EOF
-*  1 12/01 fröm@example.com          test                                       
-   2 12/01 from@example.com          test                                       
+*  1 12/01 fröm@example.com          test
+   2 12/01 from@example.com          test
 EOF
 
 #include "harness_end.bash"

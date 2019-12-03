@@ -11,7 +11,9 @@ namespace mhng {
     namespace util {
         namespace string {
             /* Performs a UTF8-aware padding. */
-            std::string utf8_pad_to_length(std::string base, size_t length, char element = ' ');
+            std::string utf8_pad_to_cols(std::string base, size_t cols);
+            std::string utf8_crop_to_cols(std::string base, size_t cols);
+            size_t utf8_cols(std::string in);
 
             /* Converts a string to lower case. */
             static inline std::string tolower(std::string in)
