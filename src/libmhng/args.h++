@@ -49,6 +49,7 @@ namespace mhng {
         unknown<bool> _nomailrc;
         std::vector<std::string> _attach;
         unknown<std::string> _account;
+        std::vector<int> _mime;
 
         /* Sometimes the current message is actually fake. */
         fake_message_ptr _fake_current;
@@ -66,6 +67,7 @@ namespace mhng {
              const unknown<bool>& nomailrc,
              const std::vector<std::string>& attach,
              const unknown<std::string>& account,
+             const std::vector<int>& mime,
              const fake_message_ptr& fake_current)
         : _messages(messages),
           _folders(folders),
@@ -76,6 +78,7 @@ namespace mhng {
           _nomailrc(nomailrc),
           _attach(attach),
           _account(account),
+          _mime(mime),
           _fake_current(fake_current)
         {}
 
@@ -90,6 +93,7 @@ namespace mhng {
         const mailbox_ptr& mbox(void) const { return _mbox; }
         const decltype(_attach)& attach(void) const { return _attach; }
         std::string const account(void) const { return _account.data(); }
+        const decltype(_mime)& mime(void) const { return _mime; }
 
         bool stdout(void) const
             { return _stdout.known() == true && _stdout.data() == true; }
