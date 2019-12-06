@@ -131,6 +131,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
     unknown<std::string> account;
 
     std::vector<std::string> attach;
+    std::vector<int> mime;
 
     auto mhng_folder = default_mhng_folder_path();
 
@@ -208,6 +209,9 @@ args_ptr args::parse(int argc, const char **argv, int flags)
             thread = true;
         } else if (strcmp(argv[i], "--no-mailrc") == 0) {
             nomailrc = true;
+        } else if (strcmp(argv[i], "--mime") == 0) {
+            mime.push_back(atoi(argv[i+1]));
+            i++;
         } else {
             folders_written = true;
             folder_names.push_back(argv[i]);
@@ -272,6 +276,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                           nomailrc,
                                           attach,
                                           account,
+                                          mime,
                                           nullptr);
         } else if (flags & pf_nom) {
             std::vector<message_ptr> messages;
@@ -284,6 +289,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                           nomailrc,
                                           attach,
                                           account,
+                                          mime,
                                           nullptr);
         } else {
             std::vector<message_ptr> messages;
@@ -307,6 +313,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                           nomailrc,
                                           attach,
                                           account,
+                                          mime,
                                           cur->fake());
         }
     }
@@ -365,6 +372,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                      nomailrc,
                                      attach,
                                      account,
+                                     mime,
                                      nullptr);
     }
 
@@ -379,6 +387,7 @@ args_ptr args::parse(int argc, const char **argv, int flags)
                                   nomailrc,
                                   attach,
                                   account,
+                                  mime,
                                   nullptr);
 }
 

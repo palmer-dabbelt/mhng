@@ -190,6 +190,47 @@ int main(int argc, const char **argv)
         }
 #endif
 
+        if (args->mime().size() > 0) {
+            /* FIXME: This is copied from mhng-mime and should probably be a
+             * library function... */
+            /* The first thing we want to do is build up a vector of the
+             * MIME parts that are availiable to this message. */
+            std::vector<mhng::mime::part_ptr> parts;
+            std::map<mhng::mime::part_ptr, size_t> part2depth;
+            for (const auto& msg: args->messages()) {
+                int depth = 0;
+
+                auto root = msg->mime()->root();
+
+                std::function<void(const mhng::mime::part_ptr&)> fill =
+                              [&](const mhng::mime::part_ptr& part) -> void
+                    {
+                        parts.push_back(part);
+                        part2depth[part] = depth;
+
+                        depth++;
+                        for (const auto& child: part->children())
+                            fill(child);
+                        depth--;
+                    };
+
+                fill(root);
+            }
+            /* ... end FIXME. */
+
+            for (const auto& mime: args->mime()) {
+                if ((size_t)mime > parts.size()) {
+                    std::cerr << "invalid mime part\n";
+                    abort();
+                }
+
+                /* mhng-mime lists the parts as 1-indexed. */
+                auto part = parts[mime - 1];
+                for (const auto& line: part->utf8())
+                    fprintf(out, "> %s\n", line.c_str());
+            }
+        }
+
         fclose(out);
     }
 
