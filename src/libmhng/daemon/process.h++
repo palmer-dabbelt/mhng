@@ -37,8 +37,8 @@ namespace mhng {
             int _pid;
             int _status;
 
-            std::string _filename;
-            std::vector<std::string> _args;
+            const std::string _filename;
+            const std::vector<std::string> _args;
 
             const int _timeout;
 
