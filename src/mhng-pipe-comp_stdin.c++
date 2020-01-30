@@ -69,6 +69,7 @@ int main(int argc, const char **argv)
          * perform any sort of necessary address book lookups. */
         std::vector<std::string> lookup;
         std::map<std::string, std::vector<std::string>> oheaders;
+        std::map<std::string, std::vector<std::string>> sheaders;
         for (const auto& header: raw_mime->root()->headers()) {
             if (header->match({"From", "To", "CC", "BCC"})) {
                 auto k = header->key();
@@ -82,6 +83,16 @@ int main(int argc, const char **argv)
                     }
                     o->second.push_back(aa);
                 }
+            } else if (header->match({"In-Reply-To", "References", "References"})) {
+                auto k = header->key();
+                for (const auto v: header->split_id()) {
+                    auto o = sheaders.find(v);
+                    if (o == sheaders.end()) {
+                        sheaders.insert(std::make_pair(k, std::vector<std::string>()));
+                        o = sheaders.find(k);
+                    }
+                    o->second.push_back(v);
+                }
             } else {
                 for (const auto& hraw: header->raw())
                     lookup.push_back(hraw + "\n");
@@ -92,6 +103,11 @@ int main(int argc, const char **argv)
             auto key = pair.first;
             auto val = pair.second;
             lookup.push_back(key + ": " + joinmax(val, ", ", 80, ",\n  ") + "\n");
+        }
+        for (const auto& pair: sheaders) {
+            auto key = pair.first;
+            auto val = pair.second;
+            lookup.push_back(key + ": " + joinmax(val, " ", 80, "\n  ") + "\n");
         }
 
         lookup.push_back("\n");

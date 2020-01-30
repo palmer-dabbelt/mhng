@@ -6,6 +6,7 @@
 #include "db/mh_current.h++"
 #include "db/mh_messages.h++"
 #include "db/imap_messages.h++"
+#include <set>
 #include <string.h>
 #include <unistd.h>
 using namespace mhng;
@@ -111,6 +112,17 @@ std::vector<mime::header_ptr> message::header(const std::string name) const
     return mime()->header(name);
 }
 
+std::vector<std::string> message::header_ids(const std::string name) const
+{
+    std::vector<std::string> out;
+
+    for (const auto& hdr: header(name))
+        for (const auto& str: hdr->split_id())
+            out.push_back(str);
+
+    return out;
+}
+
 message_ptr message::next_message(int offset)
 {
     auto table = std::make_shared<db::mh_messages>(_mbox);
@@ -159,27 +171,68 @@ void message::mark_read_and_synced(void)
 
 std::vector<message_ptr> message::get_messages_in_thread(void) const
 {
-    auto message_id = [&]()
-        {
-            auto headers = header_string("Message-ID");
+    auto message_id = [](auto msg) {
+            auto headers = msg->header_string("Message-ID");
             if (headers.size() != 1)
                 abort();
             return headers[0];
-        }();
+        };
 
-    std::vector<message_ptr> matching_messages;
-    for (const auto& msg: _folder->messages()) {
-        for (const auto& irt: msg->header_string("In-Reply-To")) {
-            if (strcmp(message_id.c_str(), irt.c_str()) == 0) {
-                matching_messages.push_back(msg);
-                for (const auto& mt: msg->get_messages_in_thread())
-                    matching_messages.push_back(mt);
-            }
+    /* Message IDs that are part of the thread. */
+    auto message_ids = [&]()
+        {
+            auto out = std::set<std::string>();
+            auto headers = header_string("Message-ID");
+            if (headers.size() != 1)
+                abort();
+            out.insert(headers[0]);
+
+            for (const auto& ref: header_ids("References"))
+                out.insert(ref);
+            for (const auto& ref: header_ids("In-Reply-To"))
+                out.insert(ref);
+
+            return out;
+        }();
+    std::map<std::string, message_ptr> mid2msg;
+    auto modified = true;
+    auto messages = _folder->messages();
+
+    auto in_thread = [&](auto msg) {
+        auto id = message_id(msg);
+        if (mid2msg.find(id) != mid2msg.end())
+            return;
+
+        modified = true;
+        mid2msg[id] = msg;
+        for (const auto& ref: msg->header_ids("References"))
+            message_ids.insert(ref);
+        for (const auto& ref: msg->header_ids("In-Reply-To"))
+            message_ids.insert(ref);
+    };
+
+    while (modified) {
+        modified = false;
+
+        for (const auto& msg: messages) {
+            for (const auto& ref: msg->header_ids("References"))
+                if (message_ids.find(ref) != message_ids.end())
+                    in_thread(msg);
+            for (const auto& ref: msg->header_ids("In-Reply-To"))
+                if (message_ids.find(ref) != message_ids.end())
+                    in_thread(msg);
         }
-        msg->compact();
     }
 
-    return matching_messages;
+    for (const auto& msg: messages)
+        msg->compact();
+
+    return [&](){
+        std::vector<message_ptr> out;
+        for (const auto& pair: mid2msg)
+            out.push_back(pair.second);
+        return out;
+    }();
 }
 
 std::shared_ptr<std::vector<std::string>> message::_raw_impl(void)

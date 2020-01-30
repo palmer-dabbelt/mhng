@@ -106,6 +106,7 @@ namespace mhng {
         std::vector<address_ptr> header_addr  (const std::string hdr) const;
         std::vector<std::string> header_string(const std::string hdr) const;
         std::vector<date_ptr>    header_date  (const std::string hdr) const;
+        std::vector<std::string> header_ids   (const std::string hdr) const;
 
         std::vector<address_ptr> from(void)
             { return header_addr("From"); }

@@ -46,8 +46,9 @@ namespace mhng {
              * line changes over. */
             std::string single_line(void) const;
 
-            /* Splits up this header based on commas. */
+            /* Splits up this header based on commas, or based on IDs. */
             std::vector<std::string> split_commas(void) const;
+            std::vector<std::string> split_id(void) const;
 
             /* Returns the key of this header, which is the stuff
              * before the colon. */

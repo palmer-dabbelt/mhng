@@ -186,6 +186,31 @@ std::string mime::header::single_line(void) const
     return out;
 }
 
+std::vector<std::string> mime::header::split_id(void) const
+{
+    std::vector<std::string> out;
+
+    auto line = utf8();
+    size_t start = 0;
+    size_t end = 0;
+    while (start < line.size()) {
+        if (isspace(line[end]) || line[end] == '\0') {
+            if (start == end) {
+                start++;
+                end++;
+            } else {
+                out.push_back(line.substr(start, end - start));
+                end++;
+                start = end;
+            }
+        } else {
+            end++;
+        }
+    }
+
+    return out;
+}
+
 std::vector<std::string> mime::header::split_commas(void) const
 {
     std::vector<std::string> out;

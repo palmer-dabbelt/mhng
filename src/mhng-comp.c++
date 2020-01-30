@@ -126,8 +126,12 @@ int main(int argc, const char **argv)
                     fprintf(out, "CC:          %s\n", addr->rfc().c_str());
             for (const auto& str: msg->subject())
                 fprintf(out, "Subject:     %s\n", format_reply(str).c_str());
-            for (const auto& mid: msg->header_string("Message-ID"))
+            for (const auto& mid: msg->header_string("Message-ID")) {
                 fprintf(out, "In-Reply-To: %s\n", mid.c_str());
+                fprintf(out, "References: %s\n", mid.c_str());
+            }
+            for (const auto& mid: msg->header_ids("References"))
+                fprintf(out, "References: %s\n", mid.c_str());
 
             fprintf(out, "\n");
 
@@ -294,6 +298,7 @@ int main(int argc, const char **argv)
         std::vector<std::string> lookup;
         std::string from;
         auto oheaders = std::map<std::string, std::vector<std::string>>();
+        auto sheaders = std::map<std::string, std::vector<std::string>>();
         for (const auto& header: raw_mime->body()->headers()) {
             if (header->match({"From", "To", "CC", "BCC"})) {
                 auto k = header->key();
@@ -310,6 +315,16 @@ int main(int argc, const char **argv)
                     if (strcasecmp(k.c_str(), "from") == 0)
                         from = a->email();
                 }
+            } else if (header->match({"In-Reply-To", "References", "References"})) {
+                auto k = header->key();
+                for (const auto v: header->split_id()) {
+                    auto o = sheaders.find(v);
+                    if (o == sheaders.end()) {
+                        sheaders.insert(std::make_pair(k, std::vector<std::string>()));
+                        o = sheaders.find(k);
+                    }
+                    o->second.push_back(v);
+                }
             } else {
                 for (const auto& hraw: header->raw())
                     lookup.push_back(hraw + "\n");
@@ -320,6 +335,11 @@ int main(int argc, const char **argv)
             auto key = pair.first;
             auto val = pair.second;
             lookup.push_back(key + ": " + joinmax(val, ", ", 80, ",\n  ") + "\n");
+        }
+        for (const auto& pair: sheaders) {
+            auto key = pair.first;
+            auto val = pair.second;
+            lookup.push_back(key + ": " + joinmax(val, " ", 80, "\n  ") + "\n");
         }
 
         /* Date-stamp the message with the current date. */
