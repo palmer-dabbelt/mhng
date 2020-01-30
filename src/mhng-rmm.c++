@@ -5,7 +5,11 @@
 
 int main(int argc, const char **argv)
 {
+#ifdef PIPE
+    auto args = mhng::args::parse_noimplicit(argc, argv);
+#else
     auto args = mhng::args::parse_normal(argc, argv);
+#endif
 
     /* This is all in a single transaction for performance reasons:
      * when removing a lot of messages it's better to only sync once

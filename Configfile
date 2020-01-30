@@ -441,6 +441,13 @@ SOURCES     += mhng-show.c++
 COMPILEOPTS += -DSHOW
 COMPILEOPTS += -DPIPE
 
+# Exactly the same as rmm, but doesn't take any implicit messages
+BINARIES    += mhng-pipe-rmm
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhng-rmm.c++
+COMPILEOPTS += -DPIPE
+
 # Prints out OAUTH2 tokens in a few formats.
 BINARIES    += mhoauth-pipe-sasl
 AUTODEPS     = false
