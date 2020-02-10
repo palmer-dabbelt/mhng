@@ -443,8 +443,28 @@ void idle_main(mhng::daemon::process* idle_process)
 void oauth2_main(mhng::daemon::process* oauth2_process)
 {
     while (true) {
-        oauth2_process->fork();
-        oauth2_process->join();
-        sleep(5);
+        /* We only want to bother trying to oauth when we already know
+         * the network is up.  This waits for the network to go up
+         * before continuing. */
+        {
+            std::unique_lock<std::mutex> lock(sync_lock);
+            sync_signal.wait(
+                lock,
+                [&]{
+                    if (net_up == false)
+                        return false;
+
+                    return true;
+                });
+
+            oauth2_process->fork();
+        }
+
+        int status = oauth2_process->join();
+        if (status != 0) {
+            fprintf(stderr, "OAUTH2 failed, retrying\n");
+            sleep(5);
+            continue;
+        }
     }
 }
