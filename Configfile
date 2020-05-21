@@ -7,7 +7,7 @@ LANGUAGES   += c++
 COMPILEOPTS += -Wall
 COMPILEOPTS += -Werror
 COMPILEOPTS += -Wextra
-COMPILEOPTS += -std=c++14
+COMPILEOPTS += -std=c++17
 COMPILEOPTS += -pedantic
 
 # One of the downsides of C++ is that it appears to define a public

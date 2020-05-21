@@ -35,7 +35,7 @@ static void client_main(int client);
 static void sync_main(mhng::daemon::process* idle);
 
 /* Keeps running the IDLE process forever. */
-static void idle_main(mhng::daemon::process* idle);
+static void idle_main(mhng::daemon::process &idle, std::string account_name);
 
 /* Keeps running the OAUTH2 process forever. */
 static void oauth2_main(mhng::daemon::process* oauth2);
@@ -102,14 +102,6 @@ int main(int argc, const char **argv)
     }
 
     for (const auto& account: args->mbox()->accounts()) {
-        idle_processes.emplace_back(
-            __PCONFIGURE__PREFIX "/libexec/mhng/mhimap-idle",
-            std::vector<std::string>({"mhimap-idle", account->name()}),
-            10 * 60
-        );
-    }
-
-    for (const auto& account: args->mbox()->accounts()) {
         oauth2_processes.emplace_back(
             __PCONFIGURE__PREFIX "/libexec/mhng/mhoauth-refresh_loop",
             std::vector<std::string>({"mhoauth-refresh_loop", account->name()})
@@ -131,8 +123,14 @@ int main(int argc, const char **argv)
 
     /* Fires up the IDLE thread, which needs that server connection to
      * have been created so it can send us messages. */
-    for (auto& idle_process: idle_processes) {
-        std::thread idle_thread(idle_main, &idle_process);
+    for (const auto& account: args->mbox()->accounts()) {
+        auto& idle_process = idle_processes.emplace_back(
+            __PCONFIGURE__PREFIX "/libexec/mhng/mhimap-idle",
+            std::vector<std::string>({"mhimap-idle", account->name()}),
+            10 * 60
+        );
+
+        std::thread idle_thread([&]{idle_main(idle_process, account->name());});
         idle_thread.detach();
     }
 
@@ -410,7 +408,7 @@ void sync_main(mhng::daemon::process* sync_process)
     }
 }
 
-void idle_main(mhng::daemon::process* idle_process)
+void idle_main(mhng::daemon::process &idle_process, std::string account_name)
 {
     while (true) {
         /* We only want to bother trying to idle when we already know
@@ -427,13 +425,14 @@ void idle_main(mhng::daemon::process* idle_process)
                     return true;
                 });
 
-            idle_process->fork();
+            fprintf(stderr, "[%s] starting IDLE\n", account_name.c_str());
+            idle_process.fork();
         }
 
-        int status = idle_process->join();
+        int status = idle_process.join();
 
         if (status != 0) {
-            fprintf(stderr, "IDLE failed, retrying\n");
+            fprintf(stderr, "[%s] IDLE failed, retrying\n", account_name.c_str());
             sleep(5);
             continue;
         }
