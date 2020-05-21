@@ -7,7 +7,7 @@
 #include <termcap.h>
 #include <algorithm>
 
-#ifndef PIPE_SCAN
+#ifdef SCAN_PRETTY
 static char termbuf[2048];
 #endif
 
@@ -16,10 +16,12 @@ static std::string remove_other_white(const std::string& in);
 int main(int argc, const char **argv)
 {
     auto args = mhng::args::parse_all_messages(argc, argv);
+#ifndef PIPE_SCAN
     args->mbox()->set_current_folder(args->folders()[0]);
+#endif
 
     /* Find some information about the terminal. */
-#ifndef PIPE_SCAN
+#ifdef SCAN_PRETTY
     size_t terminal_width = 80;
     char *terminal_bold = (char *)"";
     char *terminal_norm = (char *)"";
@@ -66,7 +68,7 @@ int main(int argc, const char **argv)
         if (strcmp(msg->folder()->name().c_str(), "drafts") == 0)
             from = msg->first_to();
 
-#ifdef PIPE_SCAN
+#ifndef SCAN_PRETTY
         printf("%u %s %s %s\n",
                msg->seq()->to_uint(),
                msg->first_date()->ddmm().c_str(),

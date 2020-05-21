@@ -99,6 +99,7 @@ BINARIES    += mhng-scan
 AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-scan.c++
+COMPILEOPTS += -DSCAN_PRETTY
 TESTSRC     += utf.bash
 
 # Writes some (or by default, many) messages out to SMTP and then
@@ -419,6 +420,14 @@ AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-scan.c++
 COMPILEOPTS += -DPIPE_SCAN
+
+# Like "scan" but avoids changing state
+BINARIES    += mhng-pipe-scan_pretty
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhng-scan.c++
+COMPILEOPTS += -DPIPE_SCAN
+COMPILEOPTS += -DSCAN_PRETTY
 
 # Like "mhng-notify", but just prints out the UID of each message as it goes so
 # scripts can then consume that stream.
