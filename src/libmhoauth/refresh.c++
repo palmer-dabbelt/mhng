@@ -9,6 +9,7 @@
 #include <libmhoauth/process.h++>
 #include <libmhoauth/refresh.h++>
 #include <pson/parser.h++>
+#include <pson/emitter.h++>
 #include <sstream>
 #include <regex>
 using namespace libmhoauth;
@@ -31,6 +32,13 @@ access_token libmhoauth::refresh(std::string client_id,
     auto json = std::dynamic_pointer_cast<pson::tree_object>(
         pson::parse_json_string(http.response().body())
     );
+
+    if (json->get<int>("expires_in").valid() == false) {
+        std::cerr << "Malformed OAUTH refresh response:\n";
+        std::cerr << std::to_string(json) << "\n";
+        abort();
+    }
+
     return access_token(json->get<std::string>("access_token").data(),
                         token,
                         json->get<int>("expires_in").data());
