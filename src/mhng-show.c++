@@ -163,6 +163,16 @@ int main(int argc, const char **argv)
 
         fprintf(out, "\n");
 
+        /* Checks to see if this sort of message should be treated as
+         * pre-wrapped. */
+        auto prewrapped = [&](){
+            for (const auto& h: msg->header_string("X-Mailer"))
+                if (strncmp("git-send-email ", h.c_str(), 15) == 0)
+                    return true;
+
+            return false;
+        }();
+
         /* Check if there's a signature field, in which case we want
          * to verify the signutare -- otherwise just don't worry about
          * the verification at all! */
@@ -179,7 +189,7 @@ int main(int argc, const char **argv)
 
         if (sig != NULL) {
             write_in_box(out, body->utf8(), sigres, wrap_width, trigger_width, terminal_width);
-        } else if (args->nowrap() == false) {
+        } else if (args->nowrap() == false && !prewrapped) {
             for (const auto& line: make_box(body->utf8(), wrap_width, trigger_width, terminal_width))
                 fprintf(out, "%s\n", line.c_str());
         } else {
@@ -187,7 +197,7 @@ int main(int argc, const char **argv)
                 fprintf(out, "%s\n", line.c_str());
         }
 #else
-        if (args->nowrap() == false) {
+        if (args->nowrap() == false && !prewrapped) {
             for (const auto& line: make_box(body->utf8(), wrap_width, trigger_width, terminal_width))
                 fprintf(out, "%s\n", line.c_str());
         } else {
