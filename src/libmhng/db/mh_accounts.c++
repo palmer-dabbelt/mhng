@@ -122,6 +122,32 @@ void db::mh_accounts::update(std::string name,
     }
 }
 
+void db::mh_accounts::get_new_grant(std::string name,
+                                    std::string client_id,
+                                    std::string access_token,
+                                    std::string refresh_token,
+                                    putil::chrono::datetime expires_at)
+{
+	auto map = std::map<std::string, std::string>();
+    map["client_id"] = client_id;
+    map["access_token"] = access_token;
+    map["access_token_expires"] = expires_at.gm();
+    map["refresh_token"] = refresh_token;
+    auto row = std::make_shared<psqlite::row>(map);
+
+    auto resp = _mbox->db()->replace(_table, row, "name='%s'",
+                                     name.c_str());
+
+    switch (resp->return_value()) {
+    case psqlite::error_code::SUCCESS:
+        return;
+    case psqlite::error_code::FAILED_UNIQUE:
+        abort();
+        return;
+    }
+}
+
+
 psqlite::table::ptr generate_columns(void)
 {
     std::vector<psqlite::column::ptr> out;

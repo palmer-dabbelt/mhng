@@ -119,6 +119,7 @@ namespace mhng {
          * do other stuff after calling this, but nothing is going to test
          * that. */
         void add_account(const std::string& name) const;
+        void redo_account_oauth(const std::string& name) const;
 
         /* Obtains the account with the given name. */
         account_ptr account(const std::string& name);

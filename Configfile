@@ -330,6 +330,11 @@ AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-add-account.c++
 
+BINARIES    += mhng-redo-login
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhng-redo-login.c++
+
 # This allows local connection to kick off remote connections
 BINARIES    += mhng-daemon
 AUTODEPS     = false

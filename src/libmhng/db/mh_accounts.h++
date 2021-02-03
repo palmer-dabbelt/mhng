@@ -44,6 +44,15 @@ namespace mhng {
                         std::string access_token,
                         std::string refresh_token,
                         putil::chrono::datetime expires_at);
+
+            /* Performs the login sequence again, in case the grant has been
+             * invalidated (like if you changed your password, for example). */
+            void get_new_grant(std::string name,
+                               std::string client_id,
+                               std::string access_token,
+                               std::string refresh_token,
+                               putil::chrono::datetime expires_at);
+
         };
     }
 }

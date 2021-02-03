@@ -5,6 +5,7 @@
 #define LIBOAUT2__HTTP_REQUEST_HXX
 
 #include <map>
+#include <string>
 
 namespace libmhoauth {
     /* A HTTP request, which comes with a cooresponding response.  Simply

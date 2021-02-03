@@ -253,6 +253,35 @@ void mailbox::add_account(const std::string& name) const
                   putil::chrono::datetime(ts));
 }
 
+void mailbox::redo_account_oauth(const std::string& name) const
+{
+    auto access_token = libmhoauth::pkce(
+        getenv("MHNG_OAUTH2_CLIENT_ID"),
+        "https://accounts.google.com/o/oauth2/v2/auth",
+        "https://oauth2.googleapis.com/token",
+        getenv("BROWSER"),
+        "http://mail.google.com",
+        name
+    );
+
+    auto table = std::make_shared<db::mh_accounts>(_self_ptr.lock());
+    auto ts = [&](){
+        auto tp = access_token.expires_at();
+        auto ss = std::chrono::time_point_cast<std::chrono::seconds>(tp);
+        auto ns = std::chrono::time_point_cast<std::chrono::nanoseconds>(tp)
+                  - std::chrono::time_point_cast<std::chrono::nanoseconds>(ss);
+        timespec out;
+        out.tv_sec = ss.time_since_epoch().count();
+        out.tv_nsec = ns.count();
+        return out;
+    }();
+    table->get_new_grant(name,
+                         getenv("MHNG_OAUTH2_CLIENT_ID"),
+                         access_token.value(),
+                         access_token.refresh_token(),
+                         putil::chrono::datetime(ts));
+}
+
 folder_ptr mailbox::_current_folder_impl(void)
 {
     auto table = std::make_shared<db::mh_current>(_self_ptr.lock());
