@@ -226,6 +226,11 @@ message_ptr mailbox::open(uint64_t uid) const
 
 void mailbox::add_account(const std::string& name) const
 {
+    if (getenv("MHNG_OAUTH2_CLIENT_ID") == nullptr) {
+        std::cerr << "Set $MHNG_OAUTH2_CLIENT_ID\n";
+        abort();
+    }
+
     auto access_token = libmhoauth::pkce(
         getenv("MHNG_OAUTH2_CLIENT_ID"),
         "https://accounts.google.com/o/oauth2/v2/auth",
