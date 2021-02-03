@@ -56,6 +56,7 @@ gmail_client::gmail_client(std::string username, libmhoauth::access_token token)
     add_folder_map("patches", "Patches");
     add_folder_map("lkcl", "LKCL");
     add_folder_map("indef", "Indef");
+    add_folder_map("riscv", "RISC-V");
 }
 
 typename mhimap::folder_iter gmail_client::folder_iter(void)
