@@ -20,7 +20,22 @@ int main(int argc, const char **argv)
     auto args = mhng::args::parse_all_folders(argc, argv);
     auto daemon = args->mbox()->daemon();
 
-#ifndef HAVE_LIBNOTIFY
+#ifdef HAVE_LIBNOTIFY
+    bool supports_body_markup = false;
+    {
+        auto caps = notify_get_server_caps();
+        if (caps != NULL) {
+            for (auto c = caps; c != NULL; c = c->next) {
+                if (strcmp((char*)c->data, "body-markup") == 0)
+                    supports_body_markup = true;
+            }
+            g_list_free(caps);
+        }
+    }
+
+    if (!supports_body_markup)
+        std::cerr << "INFO: notification server does not support body markup\n";
+#else
     std::cerr << "WARNING: libnotify not found at compile time\n";
 #endif
 
@@ -54,12 +69,21 @@ int main(int argc, const char **argv)
 
                 std::stringstream body;
 
-                for (const auto& addr: msg->from())
-                    body << "<tt>From:    " << html(addr->rfc()) << "</tt>\n";
-                for (const auto& addr: msg->to())
-                    body << "<tt>To:      " << html(addr->rfc()) << "</tt>\n";
-                for (const auto& str: msg->subject())
-                    body << "<tt>Subject: " << html(str) << "</tt>\n";
+                if (supports_body_markup) {
+                    for (const auto& addr: msg->from())
+                        body << "<tt>From:    " << html(addr->rfc()) << "</tt>\n";
+                    for (const auto& addr: msg->to())
+                        body << "<tt>To:      " << html(addr->rfc()) << "</tt>\n";
+                    for (const auto& str: msg->subject())
+                        body << "<tt>Subject: " << html(str) << "</tt>\n";
+                } else {
+                    for (const auto& addr: msg->from())
+                        body << "From:    " << addr->rfc() << "\n";
+                    for (const auto& addr: msg->to())
+                        body << "To:      " << addr->rfc() << "\n";
+                    for (const auto& str: msg->subject())
+                        body << "Subject: " << str << "\n";
+                }
 
                 body.str(body.str().erase(body.str().length()-1));
 
