@@ -35,7 +35,7 @@ access_token libmhoauth::refresh(std::string client_id,
 
     if (json->get<int>("expires_in").valid() == false) {
         std::cerr << "Malformed OAUTH refresh response:\n";
-        std::cerr << std::to_string(json) << "\n";
+        std::cerr << json->debug() << "\n";
         abort();
     }
 
