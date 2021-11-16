@@ -21,7 +21,7 @@
 using namespace mhimap;
 
 #ifndef CAFILE
-#define CAFILE "/usr/share/ca-certificates/mozilla/VeriSign_Universal_Root_Certification_Authority.crt"
+#define CAFILE "/usr/share/ca-certificates/mozilla/GTS_Root_R1.crt"
 #endif
 
 #ifndef CAFMT
