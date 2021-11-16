@@ -297,7 +297,7 @@ int main(int argc, const char **argv)
         for (const auto& header: raw_mime->body()->headers()) {
             if (header->match({"From", "To", "CC", "BCC"})) {
                 auto k = header->key();
-                for (const auto v: header->split_commas()) {
+                for (const auto& v: header->split_commas()) {
                     auto a = args->mbox()->mrc()->emailias(v);
                     auto aa = a->rfc();
                     auto o = oheaders.find(k);
