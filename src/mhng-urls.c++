@@ -25,12 +25,12 @@ int main(int argc, const char **argv)
 
     /* The first thing we want to do is build up a vector of the
      * URLs found when walking this message. */
-    std::vector<std::string> urls;
+    std::vector<std::pair<std::string, std::string>> urls;
     std::map<mhng::mime::part_ptr, size_t> part2depth;
     for (const auto& msg: args->messages())
         for (const auto& line: msg->body_utf8())
             for (const auto& url: find_urls_in(line))
-                urls.push_back(url);
+                urls.push_back({msg->imap_account_name(), url});
 
     /* If we were given any arbitrary numbers on the commandline then
      * go ahead and open the cooresponding URLs in a web browser. */
@@ -42,16 +42,19 @@ int main(int argc, const char **argv)
             abort();
         }
 
-        auto url = urls[num - 1];
+	auto acc = urls[num - 1].first;
+        auto url = urls[num - 1].second;
 
         if (args->stdout() == true) {
             printf("%s\n", url.c_str());
         } else {
             char command[BUFFER_SIZE];
-            snprintf(command, BUFFER_SIZE, "%s \"%s\"",
+            snprintf(command, BUFFER_SIZE, "%s --user \"%s\" -- \"%s\"",
                      getenv("BROWSER"),
+		     acc.c_str(),
                      url.c_str()
                 );
+	    fprintf(stderr, "command: %s\n", command);
             if (system(command) != 0)
                 fprintf(stderr, "command '%s' failed\n",
                         command);
@@ -65,7 +68,7 @@ int main(int argc, const char **argv)
     for (size_t i = 0; i < urls.size(); ++i) {
         printf("%llu %s\n",
 	       (long long unsigned)(i+1),
-	       urls[i].c_str()
+	       urls[i].second.c_str()
 	       );
     }
 
