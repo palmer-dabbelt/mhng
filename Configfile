@@ -455,6 +455,12 @@ SOURCES     += mhng-show.c++
 COMPILEOPTS += -DSHOW
 COMPILEOPTS += -DPIPE
 
+# Prints the IMAP account name for the given messages
+BINARIES    += mhng-pipe-imap_account_name
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhng-pipe-imap_account_name.c++
+
 # Prints out OAUTH2 tokens in a few formats.
 BINARIES    += mhoauth-pipe-sasl
 AUTODEPS     = false
