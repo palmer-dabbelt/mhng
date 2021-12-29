@@ -89,6 +89,19 @@ mailrc::mailrc(const std::string& path)
             continue;
         }
 
+	if (strsta(line, "old ") == true) {
+            auto nline = line + strlen("old ");
+            while (isspace(*nline)) nline++;
+	    auto sline = nline + 1;
+	    while (!isspace(*sline)) sline++;
+	    auto oline = sline + 1;
+            while (isspace(*oline)) oline++;
+            auto naddr = address::parse_rfc(std::string(nline).substr(0, sline - nline), false);
+            auto oaddr = address::parse_rfc(oline, false);
+            add_old(naddr, oaddr);
+            continue;
+        }
+
         fprintf(stderr, "Unable to parse mailrc line: '%s'\n", line);
         abort();
     }
@@ -96,8 +109,15 @@ mailrc::mailrc(const std::string& path)
     fclose(file);
 }
 
-address_ptr mailrc::email(const std::string& email)
+address_ptr mailrc::email(const std::string& email_in)
 {
+    auto email = [&](){
+        auto l = _old_map.find(util::string::tolower(email_in));
+	if (l != _old_map.end())
+	    return l->second;
+	return email_in;
+    }();
+
     auto l = _mail_map.find(util::string::tolower(email));
     if (l == _mail_map.end())
         return address::from_email(email, false);
@@ -135,4 +155,9 @@ void mailrc::add(const address_ptr& addr)
 void mailrc::add_bcc(const address_ptr& addr)
 {
     _bcc.push_back(addr);
+}
+
+void mailrc::add_old(const address_ptr& new_addr, const address_ptr& old_addr)
+{
+  _old_map[old_addr->email()] = new_addr->email();
 }

@@ -24,6 +24,7 @@ namespace mhng {
         std::unordered_map<std::string, address_ptr> _mail_map;
         std::unordered_map<std::string, address_ptr> _alias_map;
         std::unordered_map<std::string, address_ptr> _name_map;
+	std::unordered_map<std::string, std::string> _old_map;
         std::vector<address_ptr> _bcc;
         std::vector<std::string> _accounts;
 
@@ -52,6 +53,10 @@ namespace mhng {
 
         /* Adds a new BCC to this database. */
         void add_bcc(const address_ptr& addr);
+
+	/* Substitutes in the new email for the old email, whenever the old
+	 * email is seen/shown. */
+	void add_old(const address_ptr& new_addr, const address_ptr& old_addr);
     };
 }
 
