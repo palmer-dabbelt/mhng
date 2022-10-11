@@ -2,7 +2,7 @@
 /* SPDX-License-Identifier: GPL-2.0+ OR Apache-2.0 OR BSD-3-Clause */
 
 #include "account.h++"
-#include "db/mh_accounts.h++"
+#include "db/mh_oauth2cred.h++"
 #include "mime/base64.h++"
 using namespace mhng;
 
@@ -28,7 +28,7 @@ libmhoauth::access_token account::refresh(void)
         return out;
     }(); 
 
-    auto accounts = std::make_shared<db::mh_accounts>(_mbox);
+    auto accounts = std::make_shared<db::mh_oauth2cred>(_mbox);
     accounts->update(
         name(),
         ref.value(),

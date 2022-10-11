@@ -67,11 +67,21 @@ CREATE TABLE IMAP__messages (folder STRING NOT NULL,
        );
 
 CREATE TABLE MH__accounts (name STRING NOT NULL,
-                           client_id STRING NOT NULL,
-                           access_token STRING NOT NULL,
-                           refresh_token STRING NOT NULL,
-			   access_token_expires DATE NOT NULL,
+			   auth STRING NOT NULL,
 			   UNIQUE(name)
+       );
+
+CREATE TABLE MH__oauth2cred(name STRING NOT NULL,
+                            client_id STRING NOT NULL,
+                            access_token STRING NOT NULL,
+                            refresh_token STRING NOT NULL,
+			    access_token_expires DATE NOT NULL,
+			    UNIQUE(name)
+       );
+
+CREATE TABLE MH__userpass(name STRING NOT NULL,
+			  pass STRING NOT NULL,
+			  UNIQUE(name)
        );
 
 CREATE TABLE IMAP__uidvalidity (account STRING NOT NULL,

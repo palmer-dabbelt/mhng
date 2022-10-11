@@ -1,7 +1,7 @@
 /* Copyright (C) 2019 Palmer Dabbelt <palmerdabbelt@google.com> */
 /* SPDX-License-Identifier: GPL-2.0+ OR Apache-2.0 OR BSD-3-Clause */
 
-#include "mh_accounts.h++"
+#include "mh_oauth2cred.h++"
 using namespace mhng;
 
 static psqlite::table::ptr generate_columns(void);
@@ -12,13 +12,13 @@ static auto get_chrono(std::string time)
     return std::chrono::system_clock::from_time_t(mhng.unix());
 }
 
-db::mh_accounts::mh_accounts(const mailbox_ptr& mbox)
+db::mh_oauth2cred::mh_oauth2cred(const mailbox_ptr& mbox)
     : _table(generate_columns()),
       _mbox(mbox)
 {
 }
 
-std::vector<account_ptr> db::mh_accounts::select(void)
+std::vector<account_ptr> db::mh_oauth2cred::select(void)
 {
     auto resp = _mbox->db()->select(_table);
 
@@ -47,7 +47,7 @@ std::vector<account_ptr> db::mh_accounts::select(void)
     return out;
 }
 
-account_ptr db::mh_accounts::select(std::string name)
+account_ptr db::mh_oauth2cred::select(std::string name)
 {
     auto resp = _mbox->db()->select(_table, "name='%s'", name.c_str());
 
@@ -74,7 +74,7 @@ account_ptr db::mh_accounts::select(std::string name)
     );
 }
 
-void db::mh_accounts::insert(std::string name,
+void db::mh_oauth2cred::insert(std::string name,
                              std::string client_id,
                              std::string access_token,
                              std::string refresh_token,
@@ -99,7 +99,7 @@ void db::mh_accounts::insert(std::string name,
     }
 }
 
-void db::mh_accounts::update(std::string name,
+void db::mh_oauth2cred::update(std::string name,
                              std::string access_token,
                              std::string refresh_token,
                              putil::chrono::datetime expires_at)
@@ -122,7 +122,7 @@ void db::mh_accounts::update(std::string name,
     }
 }
 
-void db::mh_accounts::get_new_grant(std::string name,
+void db::mh_oauth2cred::get_new_grant(std::string name,
                                     std::string client_id,
                                     std::string access_token,
                                     std::string refresh_token,
@@ -156,5 +156,5 @@ psqlite::table::ptr generate_columns(void)
     out.push_back(std::make_shared<psqlite::column_t<std::string>>("access_token"));
     out.push_back(std::make_shared<psqlite::column_t<std::string>>("refresh_token"));
     out.push_back(std::make_shared<psqlite::column_t<std::string>>("access_token_expires"));
-    return std::make_shared<psqlite::table>("MH__accounts", out);
+    return std::make_shared<psqlite::table>("MH__oauth2cred", out);
 }

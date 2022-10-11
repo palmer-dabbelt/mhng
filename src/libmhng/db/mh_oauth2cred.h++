@@ -1,8 +1,8 @@
 /* Copyright (C) 2019 Palmer Dabbelt <palmerdabbelt@google.com> */
 /* SPDX-License-Identifier: GPL-2.0+ OR Apache-2.0 OR BSD-3-Clause */
 
-#ifndef MHNG__DB__MH_ACCOUNTS_HXX
-#define MHNG__DB__MH_ACCOUNTS_HXX
+#ifndef MHNG__DB__MH_OAUTH2CRED_HXX
+#define MHNG__DB__MH_OAUTH2CRED_HXX
 
 #include <libmhng/mailbox.h++>
 #include <libmhng/account.h++>
@@ -13,7 +13,7 @@ namespace mhng {
     namespace db {
         /* Represents the main MH table, which stores every message
          * that exists in the mailbox. */
-        class mh_accounts {
+        class mh_oauth2cred {
         private:
             psqlite::table::ptr _table;
             mailbox_ptr _mbox;
@@ -23,7 +23,7 @@ namespace mhng {
              * it a mechanism for accessing the database.  Note that
              * this will create the necessary table if it doesn't
              * exist. */
-            mh_accounts(const mailbox_ptr& mbox);
+            mh_oauth2cred(const mailbox_ptr& mbox);
 
         public:
             /* Just gets every single account. */

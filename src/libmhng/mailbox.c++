@@ -8,7 +8,7 @@
 #include "db/mh_messages.h++"
 #include "db/mh_current.h++"
 #include "db/mh_nextid.h++"
-#include "db/mh_accounts.h++"
+#include "db/mh_oauth2cred.h++"
 #include "db/imap_messages.h++"
 #include <libmhoauth/pkce.h++>
 #include <chrono>
@@ -48,7 +48,7 @@ folder_ptr mailbox::open_folder(std::string folder_name) const
 
 account_ptr mailbox::account(const std::string& name)
 {
-    auto table = std::make_shared<db::mh_accounts>(_self_ptr.lock());
+    auto table = std::make_shared<db::mh_oauth2cred>(_self_ptr.lock());
     return table->select(name);
 }
 
@@ -240,7 +240,7 @@ void mailbox::add_oauth2_account(const std::string& name) const
         name
     );
 
-    auto table = std::make_shared<db::mh_accounts>(_self_ptr.lock());
+    auto table = std::make_shared<db::mh_oauth2cred>(_self_ptr.lock());
     auto ts = [&](){
         auto tp = access_token.expires_at();
         auto ss = std::chrono::time_point_cast<std::chrono::seconds>(tp);
@@ -269,7 +269,7 @@ void mailbox::redo_account_oauth(const std::string& name) const
         name
     );
 
-    auto table = std::make_shared<db::mh_accounts>(_self_ptr.lock());
+    auto table = std::make_shared<db::mh_oauth2cred>(_self_ptr.lock());
     auto ts = [&](){
         auto tp = access_token.expires_at();
         auto ss = std::chrono::time_point_cast<std::chrono::seconds>(tp);
@@ -319,7 +319,7 @@ daemon::connection_ptr mailbox::_daemon_impl(void)
 
 std::shared_ptr<std::vector<account_ptr>> mailbox::_accounts_impl(void)
 {
-    auto table = std::make_shared<db::mh_accounts>(_self_ptr.lock());
+    auto table = std::make_shared<db::mh_oauth2cred>(_self_ptr.lock());
     auto out = std::make_shared<std::vector<account_ptr>>();
     for (const auto& account: table->select())
         out->push_back(account);
