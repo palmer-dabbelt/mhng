@@ -8,8 +8,11 @@ using namespace mhng;
 
 libmhoauth::access_token account::refresh(void)
 {
+    if (!_oauth2.known())
+        abort();
+
     auto ref = libmhoauth::refresh(
-        _client_id,
+        (*_oauth2).client_id,
         "https://oauth2.googleapis.com/token",
         access_token().refresh_token()
     );
@@ -33,7 +36,7 @@ libmhoauth::access_token account::refresh(void)
         putil::chrono::datetime(ts)
     );
 
-    _access_token = ref;
+    (*_oauth2).access_token = ref;
 
     return ref;
 }
@@ -42,4 +45,9 @@ std::string account::sasl(void) const
 {
     return base64_encode(std::string("user=") + name() + "\001"
                          + "auth=Bearer " + access_token().value() + "\001\001");
+}
+
+const libmhoauth::access_token& account::access_token(void) const
+{
+    return _oauth2.data().access_token;
 }

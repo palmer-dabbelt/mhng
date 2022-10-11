@@ -40,12 +40,27 @@ namespace mhng {
                 return _data;
             }
 
+        T& data(void)
+            {
+                if (_known == false) {
+                    fprintf(stderr, "unknown not known\n");
+                    abort();
+                }
+
+                return _data;
+            }
+
         T operator=(const T& data)
             {
                 _data = data;
                 _known = true;
                 return data;
             }
+
+        T& operator*(void)
+        {
+            return data();
+        };
     };
 }
 

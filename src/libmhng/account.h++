@@ -13,16 +13,38 @@ namespace mhng {
 }
 
 #include "mailbox.h++"
+#include "unknown.h++"
 #include <string>
 
 namespace mhng {
-    /* Stores an account, which is implicitly an oauth2 account. */
-	class account {
+    /*
+     * Stores an account, which may be either an oauth2 account or a user/pass
+     * account.
+     */
+    class account {
+    private:
+        class oauth2 {
+        public:
+            const std::string client_id;
+            libmhoauth::access_token access_token;
+
+            oauth2(const decltype(client_id)& _client_id,
+                   const decltype(access_token)& _access_token)
+            : client_id(_client_id),
+              access_token(_access_token)
+            {}
+        };
+
+        class userpass {
+            const std::string user;
+            const std::string pass;
+        };
     private:
         const mailbox_ptr _mbox;
         const std::string _name;
-        const std::string _client_id;
-        libmhoauth::access_token _access_token;
+
+        unknown<oauth2> _oauth2;
+        unknown<userpass> _userpass;
 
     public:
         account(const mailbox_ptr& mbox,
@@ -31,13 +53,12 @@ namespace mhng {
                 const libmhoauth::access_token& access_token)
         : _mbox(mbox),
           _name(name),
-          _client_id(client_id),
-          _access_token(access_token)
+          _oauth2(oauth2(client_id, access_token))
         {}
     
     public:
         const decltype(_name)& name(void) const { return _name; }
-        const decltype(_access_token)& access_token(void) const { return _access_token; }
+        const libmhoauth::access_token& access_token(void) const;
         libmhoauth::access_token refresh(void);
         std::string sasl(void) const;
     };

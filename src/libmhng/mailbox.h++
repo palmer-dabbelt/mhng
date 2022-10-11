@@ -118,7 +118,8 @@ namespace mhng {
         /* Adds a new account.  For now this is only gmail.  In theory you can
          * do other stuff after calling this, but nothing is going to test
          * that. */
-        void add_account(const std::string& name) const;
+        void add_oauth2_account(const std::string& name) const;
+        void add_userpass_account(const std::string& name) const;
         void redo_account_oauth(const std::string& name) const;
 
         /* Obtains the account with the given name. */

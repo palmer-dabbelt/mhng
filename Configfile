@@ -325,10 +325,10 @@ AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhoauth-refresh.c++
 
-BINARIES    += mhng-add-account
+BINARIES    += mhng-add-account-oauth2
 AUTODEPS     = false
 DEPLIBS     += mhng
-SOURCES     += mhng-add-account.c++
+SOURCES     += mhng-add-account-oauth2.c++
 
 BINARIES    += mhng-redo-login
 AUTODEPS     = false

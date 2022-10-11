@@ -224,7 +224,7 @@ message_ptr mailbox::open(uint64_t uid) const
     return table->select(uid);
 }
 
-void mailbox::add_account(const std::string& name) const
+void mailbox::add_oauth2_account(const std::string& name) const
 {
     if (getenv("MHNG_OAUTH2_CLIENT_ID") == nullptr) {
         std::cerr << "Set $MHNG_OAUTH2_CLIENT_ID\n";

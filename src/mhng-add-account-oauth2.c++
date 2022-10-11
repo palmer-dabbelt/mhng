@@ -7,6 +7,6 @@
 int main(int argc, const char **argv)
 {
     auto args = mhng::args::parse_account(argc, argv);
-    args->mbox()->add_account(args->account());
+    args->mbox()->add_oauth2_account(args->account());
     return 0;
 }
