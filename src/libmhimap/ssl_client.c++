@@ -39,108 +39,38 @@ static inline int gnutls_tcp_connect(const std::string hostname,
                                      uint16_t port);
 static inline void *get_in_addr(const struct sockaddr *sa);
 
-ssl_client::ssl_client(const std::string hostname,
-                       uint16_t port,
-                       std::string username,
+ssl_client::ssl_client(const std::string _hostname,
+                       uint16_t _port,
+                       std::string _username,
                        libmhoauth::access_token token,
-                       std::string priority)
-    : client(account(username)),
+                       std::string _priority)
+    : client(account(_username)),
+      hostname(_hostname),
+      port(_port),
+      username(_username),
+      priority(_priority),
       session(),
       credentials(),
       buffer(new char[buffer_size])
 {
-    logger l("ssl_client::ssl_client('%s', %d, '%s', ..., '%s')",
-             hostname.c_str(), port, username.c_str(), priority.c_str());
+    basic_init([this, _username, token]{ return authenticate(_username, token); });
+}
 
-    try {
-        /* GNUTLS boilerplate from the manual. */
-        try {
-            l.printf("server_fd = gnutls_tcp_connect('%s', %d)",
-                     hostname.c_str(), port);
-            server_fd = gnutls_tcp_connect(hostname.c_str(), port);
-        } catch (const gnutls::exception& e) {
-            std::cerr << "GNUTLS exception thrown during gnutls_tcp_connect\n";
-            throw e;
-        }
-
-        try {
-            l.printf("credentials.set_x509_trust_file('%s', %d)", CAFILE, CAFMT);
-            credentials.set_x509_trust_file(CAFILE, CAFMT);
-            session.set_credentials(credentials);
-        } catch (const gnutls::exception& e) {
-            std::cerr << "GNUTLS exception thrown during session.set_credentials\n";
-            throw e;
-        }
-
-        try {
-            l.printf("session.set_priority('%s', NULL)", priority.c_str());
-            session.set_priority(priority.c_str(), NULL);
-        } catch (const gnutls::exception& e) {
-            std::cerr << "GNUTLS exception thrown during session.set_priority\n";
-            throw e;
-        }
-
-        try {
-            l.printf("session.set_server_name(..._DNS, '%s')", hostname.c_str());
-            session.set_server_name(GNUTLS_NAME_DNS, cstr_len(hostname));
-        } catch (const gnutls::exception& e) {
-            std::cerr << "GNUTLS exception thrown during session.set_server_name\n";
-            throw e;
-        }
-
-        try {
-            l.printf("session.set_transport_ptr(%d)", server_fd);
-            session.set_transport_ptr((gnutls_transport_ptr_t) (ptrdiff_t) server_fd);
-        } catch (const gnutls::exception& e) {
-            std::cerr << "GNUTLS exception thrown during session.set_transport_ptr\n";
-            throw e;
-        }
-
-        l.printf("session.handshake()");
-        auto finished = false;
-        for (size_t i = 0; !finished && i < RETRIES; ++i) {
-            try {
-                ssize_t ret = session.handshake();
-                if (ret < 0) {
-                    throw std::runtime_error("Handshake failed");
-                }
-                finished = true;
-            } catch (const gnutls::exception& e) {
-                std::cerr << "GNUTLS exception thrown during handshake, retrying\n";
-                std::cerr << "  " << std::string(e.what()) << "\n";
-            }
-        }
-
-        /* We're already secure, so we can proceed directly to the
-         * authentication phase. */
-        try {
-            if (eat_hello() != 0) {
-                fprintf(stderr, "Unexpected hello from IMAP\n");
-                abort();
-            }
-        } catch (const gnutls::exception& e) {
-            std::cerr << "GNUTLS exception thrown during eat_hello\n";
-            throw e;
-        }
-
-        try {
-            if (authenticate(username, token) != 0) {
-                fprintf(stderr, "Unable to authenticate as '%s'\n", username.c_str());
-                abort();
-            }
-        } catch (const gnutls::exception& e) {
-            std::cerr << "GNUTLS exception thrown during authentication\n";
-            throw e;
-        }
-    } catch (const gnutls::exception& e) {
-        std::cerr << "GNUTLS exception thrown\n";
-        std::cerr << "  " << std::string(e.what()) << "\n";
-        abort();
-    } catch (...) {
-        std::cerr << "GNUTLS exception thrown\n";
-        std::cerr << "  Maybe " CAFILE " doesn't exist?\n";
-        abort();
-    }
+ssl_client::ssl_client(const std::string _hostname,
+                       uint16_t _port,
+                       std::string _username,
+                       std::string password,
+                       std::string _priority)
+    : client(account(_username)),
+      hostname(_hostname),
+      port(_port),
+      username(_username),
+      priority(_priority),
+      session(),
+      credentials(),
+      buffer(new char[buffer_size])
+{
+    basic_init([this, _username, password]{ return authenticate(_username, password); });
 }
 
 ssl_client::~ssl_client(void) {
@@ -269,3 +199,101 @@ void *get_in_addr(const struct sockaddr *sa)
 
     abort();
 }
+
+void ssl_client::basic_init(std::function<int()> authenticate)
+{
+    logger l("ssl_client::ssl_client('%s', %d, '%s', ..., '%s')",
+             hostname.c_str(), port, username.c_str(), priority.c_str());
+
+    try {
+        /* GNUTLS boilerplate from the manual. */
+        try {
+            l.printf("server_fd = gnutls_tcp_connect('%s', %d)",
+                     hostname.c_str(), port);
+            server_fd = gnutls_tcp_connect(hostname.c_str(), port);
+        } catch (const gnutls::exception& e) {
+            std::cerr << "GNUTLS exception thrown during gnutls_tcp_connect\n";
+            throw e;
+        }
+
+        try {
+            l.printf("credentials.set_x509_trust_file('%s', %d)", CAFILE, CAFMT);
+            credentials.set_x509_trust_file(CAFILE, CAFMT);
+            session.set_credentials(credentials);
+        } catch (const gnutls::exception& e) {
+            std::cerr << "GNUTLS exception thrown during session.set_credentials\n";
+            throw e;
+        }
+
+        try {
+            l.printf("session.set_priority('%s', NULL)", priority.c_str());
+            session.set_priority(priority.c_str(), NULL);
+        } catch (const gnutls::exception& e) {
+            std::cerr << "GNUTLS exception thrown during session.set_priority\n";
+            throw e;
+        }
+
+        try {
+            l.printf("session.set_server_name(..._DNS, '%s')", hostname.c_str());
+            session.set_server_name(GNUTLS_NAME_DNS, cstr_len(hostname));
+        } catch (const gnutls::exception& e) {
+            std::cerr << "GNUTLS exception thrown during session.set_server_name\n";
+            throw e;
+        }
+
+        try {
+            l.printf("session.set_transport_ptr(%d)", server_fd);
+            session.set_transport_ptr((gnutls_transport_ptr_t) (ptrdiff_t) server_fd);
+        } catch (const gnutls::exception& e) {
+            std::cerr << "GNUTLS exception thrown during session.set_transport_ptr\n";
+            throw e;
+        }
+
+        l.printf("session.handshake()");
+        auto finished = false;
+        for (size_t i = 0; !finished && i < RETRIES; ++i) {
+            try {
+                ssize_t ret = session.handshake();
+                if (ret < 0) {
+                    throw std::runtime_error("Handshake failed");
+                }
+                finished = true;
+            } catch (const gnutls::exception& e) {
+                std::cerr << "GNUTLS exception thrown during handshake, retrying\n";
+                std::cerr << "  " << std::string(e.what()) << "\n";
+            }
+        }
+
+        /* We're already secure, so we can proceed directly to the
+         * authentication phase. */
+        try {
+            if (eat_hello() != 0) {
+                fprintf(stderr, "Unexpected hello from IMAP\n");
+                abort();
+            }
+        } catch (const gnutls::exception& e) {
+            std::cerr << "GNUTLS exception thrown during eat_hello\n";
+            throw e;
+        }
+
+        try {
+            if (authenticate() != 0) {
+                fprintf(stderr, "Unable to authenticate as '%s'\n", username.c_str());
+                abort();
+            }
+        } catch (const gnutls::exception& e) {
+            std::cerr << "GNUTLS exception thrown during authentication\n";
+            throw e;
+        }
+    } catch (const gnutls::exception& e) {
+        std::cerr << "GNUTLS exception thrown\n";
+        std::cerr << "  " << std::string(e.what()) << "\n";
+        abort();
+    } catch (...) {
+        std::cerr << "GNUTLS exception thrown\n";
+        std::cerr << "  Maybe " CAFILE " doesn't exist?\n";
+        abort();
+    }
+}
+
+

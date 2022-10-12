@@ -17,7 +17,9 @@ int MHIMAP_MAIN(int argc, const char **argv)
 
     /* Opens a connection to GMail. */
     auto account = args->mbox()->account(args->account());
-    mhimap::gmail_client client(account->name(), account->access_token());
+    auto client = account->is_oauth2()
+        ? mhimap::gmail_client(account->name(), account->access_token())
+        : mhimap::gmail_client(account->name(), account->password());
 
     /* Look through the IMAP server and synchronize every folder. */
     for (auto fit = client.folder_iter(); !fit.done(); ++fit) {

@@ -328,7 +328,14 @@ SOURCES     += mhoauth-refresh.c++
 BINARIES    += mhng-add-account-oauth2
 AUTODEPS     = false
 DEPLIBS     += mhng
-SOURCES     += mhng-add-account-oauth2.c++
+SOURCES     += mhng-add-account.c++
+COMPILEOPTS += -DOAUTH2
+
+BINARIES    += mhng-add-account-userpass
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhng-add-account.c++
+COMPILEOPTS += -DUSERPASS
 
 BINARIES    += mhng-redo-login
 AUTODEPS     = false
@@ -462,11 +469,6 @@ DEPLIBS     += mhng
 SOURCES     += mhng-pipe-imap_account_name.c++
 
 # Prints out OAUTH2 tokens in a few formats.
-BINARIES    += mhoauth-pipe-sasl
-AUTODEPS     = false
-DEPLIBS     += mhng
-SOURCES     += mhoauth-pipe-sasl.c++
-
 BINARIES    += mhoauth-pipe-bearer
 AUTODEPS     = false
 DEPLIBS     += mhng
@@ -477,3 +479,9 @@ LIBEXECS    += mhng/mhoauth-refresh_loop
 AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhoauth-refresh_loop.c++
+
+# Prints out passwords.
+BINARIES   += mhimap-pipe-plain
+AUTODEPS    = false
+DEPLIBS    += mhng
+SOURCES    += mhimap-pipe-plain.c++

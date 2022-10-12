@@ -14,6 +14,7 @@ namespace mhng {
 
 #include "mailbox.h++"
 #include "unknown.h++"
+#include <optional>
 #include <string>
 
 namespace mhng {
@@ -36,15 +37,19 @@ namespace mhng {
         };
 
         class userpass {
-            const std::string user;
+        public:
             const std::string pass;
+
+            userpass(const decltype(pass)& _pass)
+            : pass(_pass)
+            {}
         };
     private:
         const mailbox_ptr _mbox;
         const std::string _name;
 
-        unknown<oauth2> _oauth2;
-        unknown<userpass> _userpass;
+        std::optional<oauth2> _oauth2;
+        std::optional<userpass> _userpass;
 
     public:
         account(const mailbox_ptr& mbox,
@@ -53,14 +58,25 @@ namespace mhng {
                 const libmhoauth::access_token& access_token)
         : _mbox(mbox),
           _name(name),
-          _oauth2(oauth2(client_id, access_token))
+          _oauth2(oauth2(client_id, access_token)),
+          _userpass()
+        {}
+
+        account(const mailbox_ptr& mbox,
+                std::string name,
+                std::string pass)
+        : _mbox(mbox),
+          _name(name),
+          _oauth2(),
+          _userpass(userpass(pass))
         {}
     
     public:
-        const decltype(_name)& name(void) const { return _name; }
+        std::string name(void) const { return _name; }
         const libmhoauth::access_token& access_token(void) const;
         libmhoauth::access_token refresh(void);
-        std::string sasl(void) const;
+        std::string password(void) const;
+        bool is_oauth2(void) const { return _oauth2.has_value(); }
     };
 }
 

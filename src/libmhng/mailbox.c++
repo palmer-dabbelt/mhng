@@ -9,6 +9,8 @@
 #include "db/mh_current.h++"
 #include "db/mh_nextid.h++"
 #include "db/mh_oauth2cred.h++"
+#include "db/mh_accounts.h++"
+#include "db/mh_userpass.h++"
 #include "db/imap_messages.h++"
 #include <libmhoauth/pkce.h++>
 #include <chrono>
@@ -48,7 +50,7 @@ folder_ptr mailbox::open_folder(std::string folder_name) const
 
 account_ptr mailbox::account(const std::string& name)
 {
-    auto table = std::make_shared<db::mh_oauth2cred>(_self_ptr.lock());
+    auto table = std::make_shared<db::mh_accounts>(_self_ptr.lock());
     return table->select(name);
 }
 
@@ -240,22 +242,48 @@ void mailbox::add_oauth2_account(const std::string& name) const
         name
     );
 
-    auto table = std::make_shared<db::mh_oauth2cred>(_self_ptr.lock());
-    auto ts = [&](){
-        auto tp = access_token.expires_at();
-        auto ss = std::chrono::time_point_cast<std::chrono::seconds>(tp);
-        auto ns = std::chrono::time_point_cast<std::chrono::nanoseconds>(tp)
-                  - std::chrono::time_point_cast<std::chrono::nanoseconds>(ss);
-        timespec out;
-        out.tv_sec = ss.time_since_epoch().count();
-        out.tv_nsec = ns.count();
-        return out;
-    }();
-    table->insert(name,
-                  getenv("MHNG_OAUTH2_CLIENT_ID"),
-                  access_token.value(),
-                  access_token.refresh_token(),
-                  putil::chrono::datetime(ts));
+    {
+        auto table = std::make_shared<db::mh_oauth2cred>(_self_ptr.lock());
+        auto ts = [&](){
+            auto tp = access_token.expires_at();
+            auto ss = std::chrono::time_point_cast<std::chrono::seconds>(tp);
+            auto ns = std::chrono::time_point_cast<std::chrono::nanoseconds>(tp)
+                      - std::chrono::time_point_cast<std::chrono::nanoseconds>(ss);
+            timespec out;
+            out.tv_sec = ss.time_since_epoch().count();
+            out.tv_nsec = ns.count();
+            return out;
+        }();
+        table->insert(name,
+                      getenv("MHNG_OAUTH2_CLIENT_ID"),
+                      access_token.value(),
+                      access_token.refresh_token(),
+                      putil::chrono::datetime(ts));
+    }
+
+    {
+        auto table = std::make_shared<db::mh_accounts>(_self_ptr.lock());
+        table->insert(name, "oauth2");
+    }
+}
+
+void mailbox::add_userpass_account(const std::string& name) const
+{
+    {
+        std::cout << "password:\n";
+        std::string pass = [](){
+            std::string out;
+            std::getline(std::cin, out);
+            return out;
+        }();
+        auto table = std::make_shared<db::mh_userpass>(_self_ptr.lock());
+        table->insert(name, pass);
+    }
+
+    {
+        auto table = std::make_shared<db::mh_accounts>(_self_ptr.lock());
+        table->insert(name, "userpass");
+    }
 }
 
 void mailbox::redo_account_oauth(const std::string& name) const
@@ -319,7 +347,7 @@ daemon::connection_ptr mailbox::_daemon_impl(void)
 
 std::shared_ptr<std::vector<account_ptr>> mailbox::_accounts_impl(void)
 {
-    auto table = std::make_shared<db::mh_oauth2cred>(_self_ptr.lock());
+    auto table = std::make_shared<db::mh_accounts>(_self_ptr.lock());
     auto out = std::make_shared<std::vector<account_ptr>>();
     for (const auto& account: table->select())
         out->push_back(account);

@@ -7,6 +7,7 @@
 #include "client.h++"
 #include <libmhoauth/access_token.h++>
 #include <gnutls/gnutlsxx.h>
+#include <functional>
 #include <string>
 
 namespace mhimap {
@@ -18,6 +19,11 @@ namespace mhimap {
         const static size_t buffer_size = 1024;
 
     private:
+        std::string hostname;
+        uint16_t port;
+        std::string username;
+        std::string priority;
+
         /* Holds the connection to the server. */
         int server_fd;
         gnutls::client_session session;
@@ -35,6 +41,13 @@ namespace mhimap {
                    std::string priority="NORMAL"
             );
 
+        ssl_client(const std::string hostname,
+                   uint16_t port,
+                   std::string username,
+                   std::string password,
+                   std::string priority="NORMAL"
+            );
+
         ~ssl_client(void);
 
         /* vtable methods from libmhimap::client. */
@@ -43,6 +56,8 @@ namespace mhimap {
     protected:
         ssize_t read(char *buffer, ssize_t buffer_size);
         ssize_t write(char *buffer, ssize_t buffer_size);
+    private:
+        void basic_init(std::function<int()> auth);
     };
 }
 

@@ -321,7 +321,7 @@ int client::authenticate(std::string user, std::string pass)
     logger l("client::authenticate('%s', ...) [password]", user.c_str());
 
     l.printf("login(...)");
-    command login(this, "AUTHENTICATE %s %s", user.c_str(), pass.c_str());
+    command login(this, "LOGIN %s %s", user.c_str(), pass.c_str());
     do {
         l.printf("gets(...)");
         gets(buffer, BUFFER_SIZE);

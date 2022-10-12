@@ -8,7 +8,7 @@ using namespace mhng;
 
 libmhoauth::access_token account::refresh(void)
 {
-    if (!_oauth2.known())
+    if (!_oauth2.has_value())
         abort();
 
     auto ref = libmhoauth::refresh(
@@ -41,13 +41,12 @@ libmhoauth::access_token account::refresh(void)
     return ref;
 }
 
-std::string account::sasl(void) const
-{
-    return base64_encode(std::string("user=") + name() + "\001"
-                         + "auth=Bearer " + access_token().value() + "\001\001");
-}
-
 const libmhoauth::access_token& account::access_token(void) const
 {
-    return _oauth2.data().access_token;
+    return _oauth2.value().access_token;
+}
+
+std::string account::password(void) const
+{
+    return _userpass.value().pass;
 }

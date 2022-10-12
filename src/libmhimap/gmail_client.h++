@@ -32,6 +32,8 @@ namespace mhimap {
          * really why it exists. */
         gmail_client(std::string username, libmhoauth::access_token token);
 
+        gmail_client(std::string username, std::string password);
+
         /* mh::client overrides. */
         typename mhimap::folder_iter folder_iter(void);
         virtual uint32_t select(const std::string name);
@@ -41,6 +43,7 @@ namespace mhimap {
          * should really be used instead of directly touching the two
          * maps above. */
         void add_folder_map(std::string mh, std::string gmail);
+        void add_all_folder_maps(void);
     };
 }
 

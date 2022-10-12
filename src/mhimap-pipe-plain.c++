@@ -7,6 +7,6 @@
 int main(int argc, const char **argv)
 {
     auto args = mhng::args::parse_account(argc, argv);
-    std::cout << args->mbox()->account(args->account())->sasl() << "\n";
+    std::cout << args->mbox()->account(args->account())->password() << "\n";
     return 0;
 }

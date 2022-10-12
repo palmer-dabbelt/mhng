@@ -32,31 +32,16 @@ gmail_client::gmail_client(std::string username, libmhoauth::access_token token)
       _g2m(),
       _m2g()
 {
-    /* FIXME: I'm pretty sure some of these folder names change when
-     * your gmail language isn't English... */
+    add_all_folder_maps();
+}
 
-    /* FIXME: Should there be some sort of case-insensitive matching
-     * here? */
-
-    add_folder_map("inbox", "INBOX");
-    add_folder_map("drafts", "[Gmail]/Drafts");
-    add_folder_map("queue", "Queue");
-    add_folder_map("sent", "[Gmail]/Sent Mail");
-    add_folder_map("spam", "[Gmail]/Spam");
-    add_folder_map("trash", "[Gmail]/All Mail");
-    add_folder_map("important", "[Gmail]/Important");
-    add_folder_map("starred", "[Gmail]/Starred");
-    add_folder_map("rubbish", "[Gmail]/Trash");
-    add_folder_map("lists", "Lists");
-    add_folder_map("rss", "RSS");
-    add_folder_map("promo", "Promo");
-    add_folder_map("linux", "Linux");
-    add_folder_map("upstream", "Upstream");
-    add_folder_map("berkeley", "Berkeley");
-    add_folder_map("patches", "Patches");
-    add_folder_map("lkcl", "LKCL");
-    add_folder_map("indef", "Indef");
-    add_folder_map("riscv", "RISC-V");
+gmail_client::gmail_client(std::string username, std::string password)
+    : ssl_client(GMAIL_HOSTNAME, GMAIL_PORT, username, password,
+                 "NORMAL" VERS_RC4 VERS_SSLONLY),
+      _g2m(),
+      _m2g()
+{
+    add_all_folder_maps();
 }
 
 typename mhimap::folder_iter gmail_client::folder_iter(void)
@@ -97,4 +82,33 @@ void gmail_client::add_folder_map(const std::string m, const std::string g)
 {
     _g2m[g] = m;
     _m2g[m] = g;
+}
+
+void gmail_client::add_all_folder_maps(void)
+{
+    /* FIXME: I'm pretty sure some of these folder names change when
+     * your gmail language isn't English... */
+
+    /* FIXME: Should there be some sort of case-insensitive matching
+     * here? */
+
+    add_folder_map("inbox", "INBOX");
+    add_folder_map("drafts", "[Gmail]/Drafts");
+    add_folder_map("queue", "Queue");
+    add_folder_map("sent", "[Gmail]/Sent Mail");
+    add_folder_map("spam", "[Gmail]/Spam");
+    add_folder_map("trash", "[Gmail]/All Mail");
+    add_folder_map("important", "[Gmail]/Important");
+    add_folder_map("starred", "[Gmail]/Starred");
+    add_folder_map("rubbish", "[Gmail]/Trash");
+    add_folder_map("lists", "Lists");
+    add_folder_map("rss", "RSS");
+    add_folder_map("promo", "Promo");
+    add_folder_map("linux", "Linux");
+    add_folder_map("upstream", "Upstream");
+    add_folder_map("berkeley", "Berkeley");
+    add_folder_map("patches", "Patches");
+    add_folder_map("lkcl", "LKCL");
+    add_folder_map("indef", "Indef");
+    add_folder_map("riscv", "RISC-V");
 }

@@ -94,7 +94,9 @@ int main(int argc, const char **argv)
 
     args = mhng::args::parse_all_folders(argc, argv);
 
+    fprintf(stderr, "starting\n");
     for (const auto& account: args->mbox()->accounts()) {
+        fprintf(stderr, "account->name %s\n", account->name().c_str());
         sync_processes.emplace_back(
             __PCONFIGURE__PREFIX "/libexec/mhng/mhimap-sync",
             std::vector<std::string>({"mhimap-sync", account->name()})
@@ -102,6 +104,9 @@ int main(int argc, const char **argv)
     }
 
     for (const auto& account: args->mbox()->accounts()) {
+        if (!account->is_oauth2())
+            continue;
+
         oauth2_processes.emplace_back(
             __PCONFIGURE__PREFIX "/libexec/mhng/mhoauth-refresh_loop",
             std::vector<std::string>({"mhoauth-refresh_loop", account->name()})
@@ -130,7 +135,11 @@ int main(int argc, const char **argv)
             10 * 60
         );
 
-        std::thread idle_thread([&]{idle_main(idle_process, account->name());});
+        std::thread idle_thread(
+            [account, &idle_process] {
+                idle_main(idle_process, account->name());
+            }
+        );
         idle_thread.detach();
     }
 
