@@ -58,6 +58,17 @@ void mime::message::add_header(const std::string& key,
     add_header(header);
 }
 
+std::string mime::message::debug(void) const
+{
+    std::string out = "NO DEBUG STRING";
+
+    for (const auto& line: _root->raw())
+        if (strncasecmp("Message-ID:", line.c_str(), strlen("Message-ID:")) == 0)
+            out = line;
+
+    return out;
+}
+
 std::string to_lower(const std::string uppers)
 {
     char buffer[BUFFER_SIZE];

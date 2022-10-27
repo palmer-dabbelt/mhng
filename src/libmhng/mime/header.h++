@@ -13,6 +13,7 @@ namespace mhng {
     }
 }
 
+#include <optional>
 #include <vector>
 #include <string>
 
@@ -39,7 +40,8 @@ namespace mhng {
              * header: it merges the whole header onto a single line
              * and decodes any quoted-printable sort of stuff to
              * UTF-8. */
-            std::string utf8(void) const;
+            std::optional<std::string> utf8_maybe(void) const;
+            std::string utf8(void) const { return utf8_maybe().value(); }
 
             /* Forms the header (only the value part, not the key) as
              * a single line, stripping all but one space when the

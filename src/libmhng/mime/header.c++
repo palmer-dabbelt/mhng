@@ -19,7 +19,7 @@ mime::header::header(const std::string& first_line)
 {
 }
 
-std::string mime::header::utf8(void) const
+std::optional<std::string> mime::header::utf8_maybe(void) const
 {
     char line[BUFFER_SIZE];
     snprintf(line, BUFFER_SIZE, "%s", single_line().c_str());
@@ -72,7 +72,7 @@ std::string mime::header::utf8(void) const
                 if (strstr(qp, "?=") == NULL) {
                     fprintf(stderr, "Unable to terminate QP section\n");
                     fprintf(stderr, "  line: '%s'\n", line + i);
-                    abort();
+                    return {};
                 }
                 strstr(qp, "?=")[0] = '\0';
 
@@ -119,10 +119,11 @@ std::string mime::header::utf8(void) const
                                &utf_p,
                                &utf_l);
             if ((ssize_t)err == -1) {
-                perror("Unable to decode line");
+                perror("Unable to decode line in header");
                 fprintf(stderr, "  line '%s'\n", raw);
                 fprintf(stderr, "  charset: '%s'\n", charset);
-                abort();
+                iconv_close(icd);
+                return {};
             }
 
             *utf_p = '\0';

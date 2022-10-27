@@ -267,7 +267,7 @@ std::vector<std::string> mime::part::utf8(void) const
                                    &utf,
                                    &utf_len);
                 if ((ssize_t)err == -1) {
-                    perror("Unable to decode line");
+                    perror("Unable to decode line in body");
                     fprintf(stderr, "  line '%s'\n", line.c_str());
                     fprintf(stderr, "  charset: '%s'\n", _charset.data().c_str());
                     fprintf(stderr, "  maps to: '%s'\n", charset.c_str());

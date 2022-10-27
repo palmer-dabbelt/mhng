@@ -112,14 +112,34 @@ message_ptr mailbox::insert(const std::string &folder_name,
 
     /* Walk through the headers to try and fill out some relevant
      * fields. */
-    for (const auto& header: mime->header("Date"))
-        date = std::make_shared<mhng::date>(header->utf8());
-    for (const auto& header: mime->header("From"))
-        from = address::parse_rfc(header->utf8(), false);
-    for (const auto& header: mime->header("To"))
-        to = address::parse_rfc(header->utf8(), false);
-    for (const auto& header: mime->header("Subject"))
-        subject = header->utf8();
+    for (const auto& header: mime->header("Date")) {
+        auto ho = header->utf8_maybe();
+        if (ho.has_value())
+            date = std::make_shared<mhng::date>(ho.value());
+        else
+            fprintf(stderr, "Unable to parse Date: %s\n", mime->debug().c_str());
+    }
+    for (const auto& header: mime->header("From")) {
+        auto ho = header->utf8_maybe();
+        if (ho.has_value())
+            from = address::parse_rfc(ho.value(), false);
+        else
+            fprintf(stderr, "Unable to parse From: %s\n", mime->debug().c_str());
+    }
+    for (const auto& header: mime->header("To")) {
+        auto ho = header->utf8_maybe();
+        if (ho.has_value())
+            to = address::parse_rfc(ho.value(), false);
+        else
+            fprintf(stderr, "Unable to parse To: %s\n", mime->debug().c_str());
+    }
+    for (const auto& header: mime->header("Subject")) {
+        auto ho = header->utf8_maybe();
+        if (ho.has_value())
+            subject = ho.value();
+        else
+            fprintf(stderr, "Unable to parse Subject: %s\n", mime->debug().c_str());
+    }
 
     if (from == NULL)
         from = address::parse_rfc("", false);

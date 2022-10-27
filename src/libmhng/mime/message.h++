@@ -60,6 +60,9 @@ namespace mhng {
             void add_header(const header_ptr& header);
             void add_header(const std::string& key,
                             const std::string& value);
+
+            /* Prints a debug version of the message string. */
+            std::string debug(void) const;
         };
     }
 }
