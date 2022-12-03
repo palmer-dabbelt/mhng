@@ -37,6 +37,7 @@ INSERT INTO MH__current (folder, seq) VALUES ("lists", 1);
 INSERT INTO MH__current (folder, seq) VALUES ("linux", 1);
 INSERT INTO MH__current (folder, seq) VALUES ("berkeley", 1);
 INSERT INTO MH__current (folder, seq) VALUES ("upstream", 1);
+INSERT INTO MH__current (folder, seq) VALUES ("riscv", 1);
 
 CREATE TABLE MH__messages (uid INTEGER PRIMARY KEY CHECK(uid > 0),
                            seq INTEGER NOT NULL CHECK(seq > 0),

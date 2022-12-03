@@ -10,7 +10,7 @@ int main(int argc, const char **argv)
     auto args = mhng::args::parse_all_folders(argc, argv);
     bool did_out = false;
 
-    std::vector<std::string> important_folders = {"inbox", "drafts"};
+    std::vector<std::string> important_folders = {"inbox", "drafts", "riscv"};
 
     for (const auto& folder: args->folders()) {
         auto f = find(important_folders.begin(),
