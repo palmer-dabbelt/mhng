@@ -167,7 +167,7 @@ int main(int argc, const char **argv)
     }
 
     /* Go ahead and insert this message into the database. */
-    auto message = args->mbox()->insert("drafts", mime);
+    auto message = args->mbox()->insert(FOLDER, mime);
 
     /* Clean up after ourselves... */
     {

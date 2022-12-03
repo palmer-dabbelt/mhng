@@ -369,8 +369,16 @@ BINARIES    += mhng-pipe-comp_stdin
 AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-pipe-comp_stdin.c++
+COMPILEOPTS += -DFOLDER=\"drafts\"
 TESTSRC     += attachment_base64.bash
 TESTSRC     += eating_date.bash
+
+# Takes a single message as stdin and places it into the inbox.
+BINARIES    += mhng-pipe-fetch_stdin
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhng-pipe-comp_stdin.c++
+COMPILEOPTS += -DFOLDER=\"drafts\"
 
 # Produces the raw contents of the given set of messages on stdout.
 # This is pretty similar to "mhng-show", but it has two important
