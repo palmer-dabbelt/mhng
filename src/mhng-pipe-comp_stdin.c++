@@ -121,7 +121,7 @@ int main(int argc, const char **argv)
         auto env_date = getenv("MHNG_COMP_DATE");
         auto date_str = (env_date == NULL) ? date->local() : std::string(env_date);
         mime->add_header("Date", date_str);
-        mime->body()->add_header("Date", date_str);
+        mime->root()->add_header("Date", date_str);
     }
 
     /* Generate a unique identifier that cooresponds to this message,
@@ -163,7 +163,7 @@ int main(int argc, const char **argv)
         auto message_id_str = (message_id_env == NULL) ? std::string(message_id) : std::string(message_id_env);
 
         mime->add_header("Message-ID", message_id_str);
-        mime->body()->add_header("Message-ID", message_id_str);
+        mime->root()->add_header("Message-ID", message_id_str);
     }
 
     /* Go ahead and insert this message into the database. */
