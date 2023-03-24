@@ -145,6 +145,12 @@ DEPLIBS     += mhng
 SOURCES     += mhng-show.c++
 COMPILEOPTS += -DPREV
 
+BINARIES    += mhng-body
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhng-show.c++
+COMPILEOPTS += -DBODY
+
 # This one is really just a mhng-rmm && mhng-{next,prev}, but it's all
 # put in a single binary for ease of use.
 BINARIES    += mhng-mtn

@@ -37,7 +37,7 @@ static void write_line(FILE *o, char c,
 
 int main(int argc, const char **argv)
 {
-#if defined(SHOW)
+#if defined(SHOW) || defined(BODY)
     auto args = mhng::args::parse_normal(argc, argv);
 #elif (defined(NEXT) || defined(PREV))
     auto args = mhng::args::parse_fakecur(argc, argv);
@@ -75,7 +75,7 @@ int main(int argc, const char **argv)
      * attempt to move the current message pointer around based on
      * what was given on the commandline, or we move to the
      * next/previous message based on sequence numbers. */
-# if defined(SHOW)
+# if defined(SHOW) || defined(BODY)
     if (folders.size() == 1 && messages.size() == 1) {
         args->mbox()->set_current_folder(folders[0]);
         folders[0]->set_current_message(messages[0]);
@@ -139,6 +139,7 @@ int main(int argc, const char **argv)
      * re-formatting From lines in the original messages, as this is
      * designed for human consumption. */
     for (const auto& msg: messages) {
+#ifndef BODY
         if (msg->unread()) {
             msg->mark_read_and_unsynced();
             should_sync = true;
@@ -162,6 +163,7 @@ int main(int argc, const char **argv)
             fprintf(out, "Message-ID: %s\n", mid.c_str());
 
         fprintf(out, "\n");
+#endif
 
         /* Checks to see if this sort of message should be treated as
          * pre-wrapped. */
