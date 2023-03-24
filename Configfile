@@ -378,7 +378,7 @@ BINARIES    += mhng-pipe-fetch_stdin
 AUTODEPS     = false
 DEPLIBS     += mhng
 SOURCES     += mhng-pipe-comp_stdin.c++
-COMPILEOPTS += -DFOLDER=\"drafts\"
+COMPILEOPTS += -DFOLDER=\"inbox\"
 
 # Produces the raw contents of the given set of messages on stdout.
 # This is pretty similar to "mhng-show", but it has two important
