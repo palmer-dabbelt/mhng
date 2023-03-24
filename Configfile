@@ -422,6 +422,12 @@ DEPLIBS     += mhng
 SOURCES     += mhng-pipe-headers.c++
 COMPILEOPTS += -DHEADER
 
+BINARIES    += mhng-pipe-from
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhng-pipe-headers.c++
+COMPILEOPTS += -DFROM
+
 # Looks up an address in the current mailrc
 BINARIES    += mhng-pipe-lookup_address
 AUTODEPS     = false

@@ -6,7 +6,7 @@
 
 int main(int argc, const char **argv)
 {
-#if defined(HEADERS)
+#if defined(HEADERS) || defined(FROM)
     auto args = mhng::args::parse_normal(argc, argv);
 #elif defined(HEADER)
     if (argc < 2) {
@@ -24,23 +24,28 @@ int main(int argc, const char **argv)
     auto messages = args->messages();
 
     for (const auto& msg: messages) {
+#if defined(FROM)
+        for (const auto& addr: msg->from())
+            printf("%s\n", addr->email().c_str());
+#else /* defined(FROM) */
         for (const auto& header: msg->mime()->root()->headers()) {
-#if defined(HEADERS)
+# if defined(HEADERS)
             printf("%s: %s\n",
                    header->key_downcase().c_str(),
                    header->utf8().c_str()
                 );
-#elif defined(HEADER)
+# elif defined(HEADER)
             if (strcasecmp(argv[1], header->key().c_str()) != 0)
                 continue;
 
             printf("%s\n",
                    header->utf8().c_str()
                 );
-#else
-#error "Define HEADERS or HEADER"
-#endif
+# else /* defined(HEADERS) || defined(HEADER) */
+# error "Define HEADERS or HEADER"
+# endif
         }
+#endif /* defined(FROM) */
     }
 
     return 0;
