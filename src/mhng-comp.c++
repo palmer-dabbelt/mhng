@@ -138,7 +138,7 @@ int main(int argc, const char **argv)
 
             int trailing_newlines = 0;
             for (const auto& line: msg->body_utf8()) {
-                if (strcmp(line.c_str(), "--") == 0)
+                if (!args->nowrap() && strcmp(line.c_str(), "--") == 0)
                     break;
 
                 if (strcmp(line.c_str(), "") == 0) {
