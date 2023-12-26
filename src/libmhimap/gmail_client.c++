@@ -111,4 +111,6 @@ void gmail_client::add_all_folder_maps(void)
     add_folder_map("lkcl", "LKCL");
     add_folder_map("indef", "Indef");
     add_folder_map("riscv", "RISC-V");
+    add_folder_map("reports", "Reports");
+    add_folder_map("garmin", "Garmin");
 }
