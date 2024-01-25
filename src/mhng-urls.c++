@@ -20,8 +20,10 @@ static bool is_url_terminator(char c);
 int main(int argc, const char **argv)
 {
     auto args = mhng::args::parse_numbers(argc, argv);
+#ifndef PIPE
     args->mbox()->set_current_folder(args->folders()[0]);
     args->folders()[0]->set_current_message(args->messages()[0]);
+#endif
 
     /* The first thing we want to do is build up a vector of the
      * URLs found when walking this message. */

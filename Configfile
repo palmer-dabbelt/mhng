@@ -505,3 +505,10 @@ BINARIES   += mhimap-pipe-plain
 AUTODEPS    = false
 DEPLIBS    += mhng
 SOURCES    += mhimap-pipe-plain.c++
+
+# Prints URLs, but doesn't change state.
+BINARIES    += mhng-pipe-urls
+AUTODEPS     = false
+DEPLIBS     += mhng
+SOURCES     += mhng-urls.c++
+COMPILEOPTS += -DPIPE
