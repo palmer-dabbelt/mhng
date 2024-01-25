@@ -195,6 +195,11 @@ args_ptr args::parse(int argc, const char **argv, int flags)
             folders_written = true;
             folder_names.push_back(argv[i]+1);
             last_folder = argv[i]+1;
+        } else if (argv[i][0] == ':') {
+            messages_written = true;
+            message_seqs.push_back(
+                std::make_pair(last_folder, atoi(argv[i] + 1))
+            );
         } else if (strcmp(argv[i], "--stdout") == 0) {
             stdout = true;
         } else if (strcmp(argv[i], "--nowrap") == 0) {
