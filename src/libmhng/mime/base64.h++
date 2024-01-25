@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
 
 /* This file provides safe C++ interfaces to the base64 encoding library. */
 
