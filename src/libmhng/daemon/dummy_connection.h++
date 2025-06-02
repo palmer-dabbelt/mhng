@@ -27,7 +27,7 @@ namespace mhng {
             dummy_connection(void);
 
             /* Closes the connection to the server. */
-            ~dummy_connection(void);
+            virtual ~dummy_connection(void);
 
         public:
             virtual response_ptr send(const message_ptr& message);

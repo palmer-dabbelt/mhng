@@ -42,7 +42,7 @@ namespace mhng {
             real_connection(const std::string& path);
 
             /* Closes the real_connection to the server. */
-            ~real_connection(void);
+            virtual ~real_connection(void);
 
         public:
             /* Sends a message and returns an object that can be used
