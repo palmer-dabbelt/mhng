@@ -10,6 +10,7 @@ COMPILEOPTS += -Wextra
 COMPILEOPTS += -std=c++17
 COMPILEOPTS += -pedantic
 COMPILEOPTS += -Wno-deprecated-declarations
+COMPILEOPTS += -Wno-unused-parameter
 
 # One of the downsides of C++ is that it appears to define a public
 # interface for libraries.  This header compiler simply copies headers
