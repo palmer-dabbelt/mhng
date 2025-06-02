@@ -17,6 +17,7 @@ mkdir -p $HOME/.mhng/mail/lists
 mkdir -p $HOME/.mhng/mail/linux
 mkdir -p $HOME/.mhng/mail/berkeley
 mkdir -p $HOME/.mhng/mail/upstream
+mkdir -p $HOME/.mhng/mail/riscv
 
 # Initialize the SQLite database that's necessary to make anything
 # work with some default options.  Doing this greatly simplifies the
