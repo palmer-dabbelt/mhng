@@ -4,6 +4,8 @@
 #ifndef LIBMHIMAP__SSL_CLIENT_HXX
 #define LIBMHIMAP__SSL_CLIENT_HXX
 
+#define GNUTLS_GNUTLSXX_NO_HEADERONLY
+
 #include "client.h++"
 #include <libmhoauth/access_token.h++>
 #include <gnutls/gnutlsxx.h>
