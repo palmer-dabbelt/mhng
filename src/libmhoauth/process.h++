@@ -12,7 +12,7 @@
 namespace libmhoauth {
     class process {
     private:
-        const pid_t _pid;
+        const pid_t _pid __attribute__((unused));
 
     public:
         process(pid_t pid)
