@@ -151,7 +151,7 @@ http_server::uv::~uv(void)
 void http_server::uv::connection_wrapper(uv_stream_t *server, int status __attribute__((unused)))
 {
     auto that = (struct uv *)(((uv_handle_t *)server)->data);
-    that->cb_connection(std::move(std::make_unique<connection>(&that->tcp)));
+    that->cb_connection(std::make_unique<connection>(&that->tcp));
 }
 
 http_server::request::request(std::unique_ptr<uv::connection> uvconn)
