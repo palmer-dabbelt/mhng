@@ -21,7 +21,13 @@
 using namespace mhimap;
 
 #ifndef CAFILE
+#ifdef __APPLE__
+#define CAFILE "/opt/homebrew/share/ca-certificates/cacert.pem"
+#elif defined(__LINUX__)
 #define CAFILE "/usr/share/ca-certificates/mozilla/GTS_Root_R1.crt"
+#else
+#error "Unknown default CA target"
+#endif
 #endif
 
 #ifndef CAFMT
