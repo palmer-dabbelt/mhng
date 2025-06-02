@@ -11,6 +11,9 @@
 #elif defined(__arm__)
 #define SIZET_FORMAT "%u"
 #define SSIZET_FORMAT "%d"
+#elif defined(__arm64__)
+#define SIZET_FORMAT "%lu"
+#define SSIZET_FORMAT "%ld"
 #endif
 #endif /* SIZET_FORMAT */
 
