@@ -13,6 +13,7 @@
 #include "db/mh_userpass.h++"
 #include "db/imap_messages.h++"
 #include <libmhoauth/pkce.h++>
+#include <algorithm>
 #include <chrono>
 #include <sstream>
 #include <string.h>
@@ -294,6 +295,7 @@ void mailbox::add_userpass_account(const std::string& name) const
         std::string pass = [](){
             std::string out;
             std::getline(std::cin, out);
+	    out.erase(std::remove_if(out.begin(), out.end(), ::isspace), out.end());
             return out;
         }();
         auto table = std::make_shared<db::mh_userpass>(_self_ptr.lock());
