@@ -2,7 +2,9 @@
 /* SPDX-License-Identifier: GPL-2.0+ OR Apache-2.0 OR BSD-3-Clause */
 
 #include <libmhimap/gmail_client.h++>
+#include <libmhimap/logger.h++>
 #include <libmhng/args.h++>
+#include <vector>
 
 #ifndef MHIMAP_MAIN
 #define MHIMAP_MAIN main
@@ -10,7 +12,14 @@
 
 int MHIMAP_MAIN(int argc, const char **argv)
 {
-    auto args = mhng::args::parse_account(argc, argv);
+    std::vector<const char *> fargv;
+    for (int i = 0; i < argc; ++i) {
+        if (strcmp(argv[i], "--verbose") == 0)
+            mhimap::logger::set_debug(true);
+        else
+            fargv.push_back(argv[i]);
+    }
+    auto args = mhng::args::parse_account(fargv.size(), fargv.data());
 
     fprintf(stderr, "IMAP Logging In: %s\n",
             mhng::date::now()->local().c_str());

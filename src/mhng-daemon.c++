@@ -92,14 +92,29 @@ int main(int argc, const char **argv)
     }
 #endif
 
-    args = mhng::args::parse_all_folders(argc, argv);
+    bool verbose_imap = false;
+    std::vector<const char *> fargv;
+    for (int i = 0; i < argc; ++i) {
+        if (strcmp(argv[i], "--verbose-imap") == 0)
+            verbose_imap = true;
+        else
+            fargv.push_back(argv[i]);
+    }
+    args = mhng::args::parse_all_folders(fargv.size(), fargv.data());
+
+    auto imap_args = [&](std::string cmd, std::string account) {
+        std::vector<std::string> a = {cmd, account};
+        if (verbose_imap)
+            a.push_back("--verbose");
+        return a;
+    };
 
     fprintf(stderr, "starting\n");
     for (const auto& account: args->mbox()->accounts()) {
         fprintf(stderr, "account->name %s\n", account->name().c_str());
         sync_processes.emplace_back(
             __PCONFIGURE__PREFIX "/libexec/mhng/mhimap-sync",
-            std::vector<std::string>({"mhimap-sync", account->name()})
+            imap_args("mhimap-sync", account->name())
         );
     }
 
@@ -131,7 +146,7 @@ int main(int argc, const char **argv)
     for (const auto& account: args->mbox()->accounts()) {
         auto& idle_process = idle_processes.emplace_back(
             __PCONFIGURE__PREFIX "/libexec/mhng/mhimap-idle",
-            std::vector<std::string>({"mhimap-idle", account->name()}),
+            imap_args("mhimap-idle", account->name()),
             10 * 60
         );
 
