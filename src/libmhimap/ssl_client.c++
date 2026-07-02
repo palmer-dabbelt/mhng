@@ -140,7 +140,7 @@ int gnutls_tcp_connect(const std::string hostname, uint16_t port)
     err = getaddrinfo(hostname.c_str(), port_s, &hints, &result);
     if (err != 0) {
         fprintf(stderr, "getaddrinfo: '%s'\n", gai_strerror(err));
-        abort();
+        throw std::runtime_error(std::string("getaddrinfo: ") + gai_strerror(err));
     }
 
     for (struct addrinfo *rp = result; rp != NULL; rp = rp->ai_next) {
@@ -296,9 +296,7 @@ void ssl_client::basic_init(std::function<int()> authenticate)
         std::cerr << "  " << std::string(e.what()) << "\n";
         abort();
     } catch (...) {
-        std::cerr << "GNUTLS exception thrown\n";
-        std::cerr << "  Maybe " CAFILE " doesn't exist?\n";
-        abort();
+        throw;
     }
 }
 
