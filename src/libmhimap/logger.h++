@@ -31,6 +31,8 @@ namespace mhimap {
 
         void printf(const char *fmt, ...)
             __attribute__(( format(printf, 2, 3) ));
+
+        static void set_debug(bool debug);
     };
 }
 

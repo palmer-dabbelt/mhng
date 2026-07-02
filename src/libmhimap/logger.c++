@@ -15,6 +15,11 @@ static bool global_debug = true;
 static bool global_debug = false;
 #endif
 
+void logger::set_debug(bool debug)
+{
+    global_debug = debug;
+}
+
 logger::logger(const char *fmt, ...)
     : depth(global_depth++)
 {
