@@ -2,8 +2,6 @@
 /* SPDX-License-Identifier: GPL-2.0+ OR Apache-2.0 OR BSD-3-Clause */
 
 #include "string.h++"
-#include <codecvt>
-#include <locale>
 
 std::string mhng::util::string::utf8_pad_to_cols(std::string base, size_t cols)
 {
@@ -35,6 +33,9 @@ std::string mhng::util::string::utf8_crop_to_cols(std::string base, size_t cols)
 
 size_t mhng::util::string::utf8_cols(std::string in)
 {
-    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv;
-    return conv.from_bytes(in).size();
+    size_t cols = 0;
+    for (unsigned char c : in)
+        if ((c & 0xC0) != 0x80)
+            cols++;
+    return cols;
 }
