@@ -46,9 +46,10 @@
     <key>ProcessType</key>
     <string>Background</string>
 
-    <key>StandardOutPath</key>
-    <string>@HOME@/.mhng/netwatch.log</string>
-    <key>StandardErrorPath</key>
-    <string>@HOME@/.mhng/netwatch.log</string>
+    <!--
+      No StandardOutPath/StandardErrorPath: net-dispatch.sh now opens
+      ~/.mhng/netwatch.log itself and rotates it on start, so launchd
+      must NOT also hold that file open.
+    -->
 </dict>
 </plist>

@@ -2,6 +2,7 @@
 /* SPDX-License-Identifier: GPL-2.0+ OR Apache-2.0 OR BSD-3-Clause */
 
 #include <libmhng/args.h++>
+#include <libmhng/logfile.h++>
 #ifdef HAVE_LIBNOTIFY
 #include <libnotify/notify.h>
 #endif
@@ -18,6 +19,12 @@ static std::string html(const std::string& str);
 int main(int argc, const char **argv)
 {
     auto args = mhng::args::parse_all_folders(argc, argv);
+
+    /* Own our own log (see mhng-daemon) rather than relying on the
+     * LaunchAgent StandardErrorPath, and rotate it by size. */
+    auto log = mhng::redirect_log(args->mbox()->path() + "/notify.log");
+    log->start_rotation_thread(60);
+
     auto daemon = args->mbox()->daemon();
 
 #ifdef HAVE_LIBNOTIFY

@@ -6,15 +6,18 @@ killall mhng-daemon
 killall mhng-notify
 trap - TERM
 
+# mhng-daemon and mhng-notify now open (and rotate) their own logs --
+# ~/.mhng/daemon.log and ~/.mhng/notify.log respectively -- so there's
+# no shell redirect here anymore.  See mhng::logfile.
 ( while true
 do
-    mhng-daemon &>> ~/.mhng/daemon.log
+    mhng-daemon
     sleep 10s
 done ) &
 
 ( while true
 do
-    mhng-notify &>> ~/.mhng/notify.log
+    mhng-notify
     sleep 10s
 done ) &
 

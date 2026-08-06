@@ -13,6 +13,7 @@
 #include <libmhng/daemon/message.h++>
 #include <libmhng/daemon/process.h++>
 #include <libmhng/args.h++>
+#include <libmhng/logfile.h++>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <sys/wait.h>
@@ -79,8 +80,6 @@ int main(int argc, const char **argv)
     sync_rep = 0;
     net_up = true;
 
-    std::cerr << "\n\n\n\n\n\nMHng Daemon Starting" << std::endl;
-
 #ifdef __APPLE__
     {
         struct sigaction sa;
@@ -101,6 +100,17 @@ int main(int argc, const char **argv)
             fargv.push_back(argv[i]);
     }
     args = mhng::args::parse_all_folders(fargv.size(), fargv.data());
+
+    /* Own our own log rather than relying on a shell redirect or a
+     * LaunchAgent StandardErrorPath: redirect stdout/stderr into
+     * ~/.mhng/daemon.log and rotate it by size so it can't grow forever.
+     * This has to happen before we log anything, and after arg parsing so
+     * we know where the mailbox (and hence the log) lives.  The IMAP/OAUTH
+     * children we fork()+exec() below inherit this redirect for free. */
+    auto log = mhng::redirect_log(args->mbox()->path() + "/daemon.log");
+    log->start_rotation_thread(60);
+
+    std::cerr << "\n\n\n\n\n\nMHng Daemon Starting" << std::endl;
 
     auto imap_args = [&](std::string cmd, std::string account) {
         std::vector<std::string> a = {cmd, account};

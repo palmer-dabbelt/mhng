@@ -37,9 +37,10 @@
     <key>ProcessType</key>
     <string>Background</string>
 
-    <key>StandardOutPath</key>
-    <string>@HOME@/.mhng/notify.log</string>
-    <key>StandardErrorPath</key>
-    <string>@HOME@/.mhng/notify.log</string>
+    <!--
+      No StandardOutPath/StandardErrorPath: mhng-notify now opens
+      ~/.mhng/notify.log itself (see mhng::logfile) and rotates it by
+      size, so launchd must NOT also hold that file open.
+    -->
 </dict>
 </plist>

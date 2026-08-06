@@ -42,9 +42,10 @@
     <key>ProcessType</key>
     <string>Background</string>
 
-    <key>StandardOutPath</key>
-    <string>@HOME@/.mhng/daemon.log</string>
-    <key>StandardErrorPath</key>
-    <string>@HOME@/.mhng/daemon.log</string>
+    <!--
+      No StandardOutPath/StandardErrorPath: mhng-daemon now opens
+      ~/.mhng/daemon.log itself (see mhng::logfile) and rotates it by
+      size, so launchd must NOT also hold that file open.
+    -->
 </dict>
 </plist>
