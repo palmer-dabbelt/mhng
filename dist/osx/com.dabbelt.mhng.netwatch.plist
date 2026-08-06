@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Fires net-dispatch.sh whenever macOS' network configuration changes.
+
+  This is the macOS analog of dist/nm-dispatch.sh (the NetworkManager
+  dispatcher hook on Linux).  There's no dispatcher-script mechanism on
+  macOS, so instead we lean on launchd's WatchPaths: configd rewrites
+  these files on every network state change (link up/down, DHCP, VPN,
+  sleep/wake), which relaunches the job.  The job then tells the mhng
+  daemon whether the network is up or down.
+
+  RunAtLoad seeds the daemon with the current state at login.
+
+  @PREFIX@ is substituted by install.sh.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.dabbelt.mhng.netwatch</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>@PREFIX@/libexec/mhng/mhng-osx-net-dispatch</string>
+    </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>@PREFIX@/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+
+    <key>WatchPaths</key>
+    <array>
+        <string>/etc/resolv.conf</string>
+        <string>/var/run/resolv.conf</string>
+        <string>/Library/Preferences/SystemConfiguration</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+    <!-- Coalesce the burst of file changes a single network event causes. -->
+    <key>ThrottleInterval</key>
+    <integer>5</integer>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>StandardOutPath</key>
+    <string>@HOME@/.mhng/netwatch.log</string>
+    <key>StandardErrorPath</key>
+    <string>@HOME@/.mhng/netwatch.log</string>
+</dict>
+</plist>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Runs mhng-notify as a per-user LaunchAgent.
+
+  This is the macOS analog of the "while true; mhng-notify" loop in
+  mhng-launch-gui-daemons.  On systems built without libnotify,
+  mhng-notify just exits immediately, which is harmless -- ThrottleInterval
+  keeps launchd from busy-restarting it in that case.
+
+  @PREFIX@ / @HOME@ are substituted by install.sh.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.dabbelt.mhng.notify</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>@PREFIX@/bin/mhng-notify</string>
+    </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>@PREFIX@/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+
+    <!-- Keep it running forever, restarting on crash. -->
+    <key>KeepAlive</key>
+    <true/>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>StandardOutPath</key>
+    <string>@HOME@/.mhng/notify.log</string>
+    <key>StandardErrorPath</key>
+    <string>@HOME@/.mhng/notify.log</string>
+</dict>
+</plist>

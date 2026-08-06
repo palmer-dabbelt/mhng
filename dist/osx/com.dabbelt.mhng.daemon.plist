@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Runs mhng-daemon as a per-user LaunchAgent.
+
+  This is the macOS analog of the "while true; mhng-daemon" loop in
+  mhng-launch-gui-daemons.  Running it as a LaunchAgent (rather than
+  from a shell started over SSH/tmux/etc.) is what makes DNS work: a
+  LaunchAgent is bootstrapped into the gui/<uid> domain, so the IMAP
+  children it fork()+exec()s inherit a Mach bootstrap port that can
+  reach mDNSResponder.  Started from the wrong session, every child
+  inherits a broken bootstrap port and getaddrinfo() fails forever with
+  "nodename nor servname provided" even though the network is fine --
+  the bootstrap port survives exec(), so fresh IMAP processes don't help.
+
+  @PREFIX@ / @HOME@ are substituted by install.sh.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.dabbelt.mhng.daemon</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>@PREFIX@/bin/mhng-daemon</string>
+    </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>@PREFIX@/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+
+    <!-- Keep it running forever, restarting on crash. -->
+    <key>KeepAlive</key>
+    <true/>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>StandardOutPath</key>
+    <string>@HOME@/.mhng/daemon.log</string>
+    <key>StandardErrorPath</key>
+    <string>@HOME@/.mhng/daemon.log</string>
+</dict>
+</plist>
