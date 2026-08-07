@@ -92,13 +92,43 @@ int main(int argc, const char **argv)
 #endif
 
     bool verbose_imap = false;
+    bool allow_without_launchctl = false;
     std::vector<const char *> fargv;
     for (int i = 0; i < argc; ++i) {
         if (strcmp(argv[i], "--verbose-imap") == 0)
             verbose_imap = true;
+        else if (strcmp(argv[i], "--allow-running-without-launchctl") == 0)
+            allow_without_launchctl = true;
         else
             fargv.push_back(argv[i]);
     }
+
+#ifdef __APPLE__
+    /* When launchd spawns us as a LaunchAgent it sets XPC_SERVICE_NAME to
+     * the job label; a shell or detached session leaves it unset or "0".
+     * Outside launchd the process inherits a bootstrap port that can't
+     * reach mDNSResponder, so getaddrinfo() fails forever ("nodename nor
+     * servname provided") in every IMAP child we fork()+exec() -- even
+     * while the network is up.  Bail out early with a clear message rather
+     * than spin the retry loop, unless the operator has opted in.  This
+     * runs before redirect_log() so the message reaches the terminal. */
+    if (!allow_without_launchctl) {
+        const char *xpc = getenv("XPC_SERVICE_NAME");
+        bool launchd_managed = (xpc != NULL) && (strcmp(xpc, "0") != 0);
+        if (!launchd_managed) {
+            fprintf(stderr,
+                "mhng-daemon: refusing to start outside launchd on macOS.\n"
+                "  A process started from a shell or detached session inherits a\n"
+                "  bootstrap port that cannot reach mDNSResponder, so getaddrinfo()\n"
+                "  fails forever in every IMAP child even while the network is up.\n"
+                "  Start it via its LaunchAgent instead:\n"
+                "    launchctl kickstart -k gui/$(id -u)/com.dabbelt.mhng.daemon\n"
+                "  Pass --allow-running-without-launchctl to override this check.\n");
+            exit(1);
+        }
+    }
+#endif
+
     args = mhng::args::parse_all_folders(fargv.size(), fargv.data());
 
     /* Own our own log rather than relying on a shell redirect or a
