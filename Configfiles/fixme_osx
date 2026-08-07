@@ -7,6 +7,7 @@ LANGUAGES += c++
 LINKOPTS    += -liconv
 LINKOPTS    += -lsqlite3
 LINKOPTS    += -lncurses
+LINKOPTS    += -lresolv
 COMPILEOPTS += -I/usr/include/uuid
 EOF
 fi
