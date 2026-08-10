@@ -43,6 +43,21 @@
     <string>Background</string>
 
     <!--
+      The daemon holds one fd per in-flight client request; a backlog of
+      requests waiting on a slow sync can pile up.  launchd's default soft
+      limit of 256 open files is low enough that a backlog exhausts it, at
+      which point even opening the TLS CA file fails ("Error while reading
+      file") and sync wedges permanently.  Raise it for headroom -- the
+      daemon also raises RLIMIT_NOFILE itself, but this documents intent
+      and covers the case where it cannot.
+    -->
+    <key>SoftResourceLimits</key>
+    <dict>
+        <key>NumberOfFiles</key>
+        <integer>4096</integer>
+    </dict>
+
+    <!--
       No StandardOutPath/StandardErrorPath: mhng-daemon now opens
       ~/.mhng/daemon.log itself (see mhng::logfile) and rotates it by
       size, so launchd must NOT also hold that file open.

@@ -3,6 +3,8 @@
 
 #include <atomic>
 #include <cassert>
+#include <cerrno>
+#include <chrono>
 #include <condition_variable>
 #include <mutex>
 #include <unistd.h>
@@ -17,6 +19,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <sys/wait.h>
+#include <sys/resource.h>
 #include <signal.h>
 
 #ifndef BUFFER_SIZE
@@ -29,6 +32,18 @@ static int create_socket(const std::string path);
 /* This thread fires on a new client connection.  It blocks a whole
  * bunch handling connections from the client  */
 static void client_main(int client);
+
+/* Returns true if the client on the far end of this socket has gone
+ * away (orderly shutdown or error), peeking without consuming data.  A
+ * client_main thread that is blocked waiting for a sync to progress uses
+ * this to notice a disconnected peer instead of holding the fd (and the
+ * thread) open forever -- the leak that used to wedge the whole daemon
+ * once ~250 waiters piled up and RLIMIT_NOFILE was hit. */
+static bool client_gone(int client);
+
+/* How long a waiting client_main thread sleeps between re-checking both
+ * its wakeup condition and whether the peer is still connected. */
+static const std::chrono::seconds client_wait_poll(5);
 
 /* Waits for someone to request a synchronization, forks off a
  * synchronization process, and if that is successful updates everyone
@@ -79,6 +94,30 @@ int main(int argc, const char **argv)
     sync_req = 0;
     sync_rep = 0;
     net_up = true;
+
+    /* The daemon holds one fd (and one thread) per in-flight client
+     * request, and requests that block waiting for a slow or stalled
+     * sync can accumulate.  launchd's default soft limit of 256 open
+     * files is low enough that a backlog can exhaust it, at which point
+     * even opening the TLS CA file fails ("Error while reading file")
+     * and every login wedges permanently.  Raise the soft limit toward
+     * the hard limit so a backlog degrades gracefully.  (client_gone()
+     * keeps the backlog from being a true leak; this is headroom.) */
+    {
+        struct rlimit rl;
+        if (getrlimit(RLIMIT_NOFILE, &rl) == 0) {
+            rlim_t want = 4096;
+            rlim_t cap = (rl.rlim_max == RLIM_INFINITY || rl.rlim_max > want)
+                         ? want : rl.rlim_max;
+            if (rl.rlim_cur < cap) {
+                rl.rlim_cur = cap;
+                if (setrlimit(RLIMIT_NOFILE, &rl) < 0)
+                    perror("setrlimit(RLIMIT_NOFILE)");
+            }
+        } else {
+            perror("getrlimit(RLIMIT_NOFILE)");
+        }
+    }
 
 #ifdef __APPLE__
     {
@@ -267,6 +306,19 @@ int create_socket(const std::string path)
     return server;
 }
 
+bool client_gone(int client)
+{
+    char c;
+    ssize_t r = recv(client, &c, 1, MSG_PEEK | MSG_DONTWAIT);
+    if (r == 0)
+        return true;                    /* orderly shutdown by the peer */
+    if (r < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
+        return false;                   /* connected, just nothing to read */
+    if (r < 0)
+        return true;                    /* real socket error -> treat as gone */
+    return false;                       /* data pending -> still connected */
+}
+
 void client_main(int client)
 {
     while (true) {
@@ -299,7 +351,10 @@ void client_main(int client)
             std::unique_lock<std::mutex> lock(sync_lock);
             auto ticket = ++sync_req;
             sync_signal.notify_all();
-            sync_signal.wait(lock, [&]{ return ticket <= sync_rep; });
+            while (!(ticket <= sync_rep)) {
+                if (client_gone(client)) { close(client); return; }
+                sync_signal.wait_for(lock, client_wait_poll);
+            }
         }
             break;
 
@@ -348,7 +403,10 @@ void client_main(int client)
             std::unique_lock<std::mutex> lock(sync_lock);
             auto uid = msg->new_message_uid();
 
-            sync_signal.wait(lock, [&]{ return uid < sync_largest_uid; });
+            while (!(uid < sync_largest_uid)) {
+                if (client_gone(client)) { close(client); return; }
+                sync_signal.wait_for(lock, client_wait_poll);
+            }
             break;
         }
 
@@ -357,7 +415,12 @@ void client_main(int client)
             std::unique_lock<std::mutex> lock(event_lock);
             auto ticket = msg->folder_event_ticket();
 
-            sync_signal.wait(lock, [&]{ return ticket < event_ticket; });
+            /* event_ticket is guarded by event_lock and signalled on
+             * event_signal, so wait on that cv rather than sync_signal. */
+            while (!(ticket < event_ticket)) {
+                if (client_gone(client)) { close(client); return; }
+                event_signal.wait_for(lock, client_wait_poll);
+            }
             std::cerr << "Finished FOLDER_EVENT(ticket=" << std::to_string(ticket) << ")\n";
             break;
         }
