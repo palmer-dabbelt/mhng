@@ -6,6 +6,7 @@
 #include "message.h++"
 #include <iconv.h>
 #include <string.h>
+#include <strings.h>
 using namespace mhng;
 
 #ifndef BUFFER_SIZE
@@ -44,7 +45,10 @@ std::optional<std::string> mime::header::utf8_maybe(void) const
 
             char raw[BUFFER_SIZE];
             size_t out_offset = 0;
-            if (strncmp(line + i + strlen(charset) + 2, "?B?", 3) == 0) {
+            /* RFC 2047 says the encoding character is case insensitive,
+             * and git send-email emits a lower-case 'q'. */
+            const char *enc = line + i + strlen(charset) + 2;
+            if (strncasecmp(enc, "?B?", 3) == 0) {
                 char base64[BUFFER_SIZE];
                 snprintf(base64, BUFFER_SIZE,
                          "%s", line + i + strlen(charset) + 5);
@@ -66,7 +70,7 @@ std::optional<std::string> mime::header::utf8_maybe(void) const
                 auto dec_str = base64_array2string(dec);
                 strcpy(raw, dec_str.c_str());
                 out_offset = strlen(base64);
-            } else if (strncmp(line + i + strlen(charset) + 2, "?Q?", 3) == 0) {
+            } else if (strncasecmp(enc, "?Q?", 3) == 0) {
                 char qp[BUFFER_SIZE];
                 snprintf(qp, BUFFER_SIZE, "%s", line + i + strlen(charset) + 5);
                 if (strstr(qp, "?=") == NULL) {
@@ -100,6 +104,11 @@ std::optional<std::string> mime::header::utf8_maybe(void) const
                 raw[ri] = '\0';
 
                 out_offset = strlen(qp);
+            } else {
+                /* Some encoding we've never heard of: pass the encoded
+                 * word through verbatim, as decoding it would mean
+                 * handing iconv() whatever was left on the stack. */
+                goto actually_not_special;
             }
 
             if (strcmp(charset, "ks_c_5601-1987") == 0)
