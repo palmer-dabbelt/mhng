@@ -332,6 +332,7 @@ COMPILEOPTS += -DDOWN
 BINARIES    += mhng-pipe-headers
 SOURCES     += mhng-pipe-headers.c++
 COMPILEOPTS += -DHEADERS
+TESTSRC     += rfc2047_case.bash
 
 BINARIES    += mhng-pipe-header
 SOURCES     += mhng-pipe-headers.c++
