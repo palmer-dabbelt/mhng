@@ -98,12 +98,14 @@ message_ptr mailbox::insert(const std::string &folder_name,
     auto uid = idtbl->select();
     idtbl->update(uid + 1);
 
-    /* Fin a new sequence number for this message. */
+    /* Fin a new sequence number for this message.  Ask the database for
+     * the maximum directly rather than walking folder->messages(): that
+     * builds a message object per row, and each one parses a date and
+     * issues two more queries, so inserting N messages into a folder
+     * that already holds N of them used to cost O(N^2) queries. */
     auto folder = open_folder(folder_name);
-    unsigned seq = 1;
-    for (const auto& message: folder->messages())
-        if (message->seq()->to_uint() >= seq)
-            seq = message->seq()->to_uint() + 1;
+    auto seqtbl = std::make_shared<db::mh_messages>(_self_ptr.lock());
+    unsigned seq = seqtbl->max_seq(folder_name) + 1;
 
     /* Determine some other relevant information for this message. */
     std::shared_ptr<date> date = NULL;

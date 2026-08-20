@@ -257,6 +257,32 @@ size_t db::mh_messages::count(const std::string& folder_name)
     return -1;
 }
 
+unsigned db::mh_messages::max_seq(const std::string& folder_name)
+{
+    /* UNIQUE(folder, seq) indexes this, so the largest sequence number
+     * is just the first row of a descending walk.  The ORDER BY rides
+     * along on the WHERE clause the same way select(folder, seq, offset)
+     * does -- psqlite has no aggregate helper, and its column-list
+     * select() isn't exported. */
+    auto resp = _mbox->db()->select(_table,
+                                    "folder='%s' ORDER BY seq DESC LIMIT 1",
+                                    folder_name.c_str());
+
+    switch (resp->return_value()) {
+    case psqlite::error_code::SUCCESS:
+        break;
+    case psqlite::error_code::FAILED_UNIQUE:
+        abort();
+        break;
+    }
+
+    /* An empty folder has no maximum; callers start numbering at 1. */
+    if (resp->result_count() == 0)
+        return 0;
+
+    return resp->rowi(0)->get_uint("seq");
+}
+
 psqlite::table::ptr generate_columns(void)
 {
     std::vector<psqlite::column::ptr> out;

@@ -69,6 +69,14 @@ namespace mhng {
             /* Returns the count of the number of messages inside the
              * given folder. */
             size_t count(const std::string& folder_name);
+
+            /* Returns the largest sequence number in the given
+             * folder, or 0 if the folder contains no messages.  This
+             * exists so callers that just need to allocate the next
+             * sequence number don't have to select() every message in
+             * the folder (which parses a date and issues two more
+             * queries per message) just to take the maximum. */
+            unsigned max_seq(const std::string& folder_name);
         };
     }
 }
