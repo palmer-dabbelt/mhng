@@ -73,25 +73,41 @@ static void gnutls_ssl_init(void) __attribute__((constructor));
 static inline int gnutls_tcp_connect(const std::string hostname,
                                      uint16_t port);
 static inline void *get_in_addr(const struct sockaddr *sa);
-static bool is_retryable(int code);
 static void wait_for_transport(int fd, bool want_write);
+
+bool mhimap::tls_error_is_retryable(int code)
+{
+    return code == GNUTLS_E_AGAIN || code == GNUTLS_E_INTERRUPTED;
+}
+
+int trust_credentials::load_trust_files(const char * const *paths, size_t count)
+{
+    logger l("trust_credentials::load_trust_files(..., " SIZET_FORMAT ")", count);
+
+    for (size_t i = 0; i < count; ++i) {
+        l.printf("gnutls_certificate_set_x509_trust_file('%s')", paths[i]);
+
+        /* This counts the CAs it managed to load, so a bundle that's
+         * readable but empty is a miss here just like a missing one --
+         * which is what we want, as it can't verify anything. */
+        int certs = gnutls_certificate_set_x509_trust_file(cred, paths[i],
+                                                           CAFMT);
+        if (certs > 0) {
+            l.printf("  => loaded %d CAs", certs);
+            return certs;
+        }
+    }
+
+    return 0;
+}
 
 void trust_credentials::load_trust(void)
 {
     logger l("trust_credentials::load_trust()");
-    std::string tried;
+    size_t count = sizeof(ca_bundle_paths) / sizeof(*ca_bundle_paths);
 
-    for (const auto &path: ca_bundle_paths) {
-        l.printf("gnutls_certificate_set_x509_trust_file('%s')", path);
-        int certs = gnutls_certificate_set_x509_trust_file(cred, path, CAFMT);
-        if (certs > 0) {
-            l.printf("  => loaded %d CAs", certs);
-            return;
-        }
-
-        tried += "\n  ";
-        tried += path;
-    }
+    if (load_trust_files(ca_bundle_paths, count) > 0)
+        return;
 
     /* GNUTLS' own notion of a system trust store: a keychain on some
      * platforms, whatever bundle GNUTLS was built against on the rest.
@@ -102,6 +118,12 @@ void trust_credentials::load_trust(void)
     if (certs > 0) {
         l.printf("  => loaded %d CAs", certs);
         return;
+    }
+
+    std::string tried;
+    for (size_t i = 0; i < count; ++i) {
+        tried += "\n  ";
+        tried += ca_bundle_paths[i];
     }
 
     throw std::runtime_error("Unable to load any trusted CAs, tried the "
@@ -179,7 +201,7 @@ ssize_t ssl_client::read(char *buffer, ssize_t buffer_size)
              * bought us ten copies of the same message before we gave
              * up, so report the error that actually mattered and let
              * the caller deal with a dead connection. */
-            if (!is_retryable(e.get_code())) {
+            if (!tls_error_is_retryable(e.get_code())) {
                 std::cerr << "Lost the connection to the IMAP server\n";
                 std::cerr << "  " << std::string(e.what()) << "\n";
                 return -1;
@@ -193,11 +215,6 @@ ssize_t ssl_client::read(char *buffer, ssize_t buffer_size)
 
     std::cerr << "Too many GNUTLS exceptions thrown\n";
     return -1;
-}
-
-bool is_retryable(int code)
-{
-    return code == GNUTLS_E_AGAIN || code == GNUTLS_E_INTERRUPTED;
 }
 
 void wait_for_transport(int fd, bool want_write)
@@ -493,7 +510,7 @@ void ssl_client::basic_init(std::function<int()> authenticate)
                  * a state where another handshake() can get anywhere:
                  * anything else has invalidated it, so retrying just
                  * burns through the retry count. */
-                if (!is_retryable(e.get_code()))
+                if (!tls_error_is_retryable(e.get_code()))
                     throw;
 
                 std::cerr << "GNUTLS exception thrown during handshake, retrying\n";

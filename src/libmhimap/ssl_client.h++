@@ -13,6 +13,11 @@
 #include <string>
 
 namespace mhimap {
+    /* TRUE when retrying whatever GNUTLS call produced 'code' could
+     * actually get somewhere.  Everything else has invalidated the
+     * session, after which every call just fails the same way. */
+    bool tls_error_is_retryable(int code);
+
     /* gnutlsxx keeps the C credentials handle protected and doesn't
      * wrap gnutls_certificate_set_x509_system_trust() at all, so this
      * exists to expose just enough of it to load a CA bundle the way
@@ -24,6 +29,12 @@ namespace mhimap {
          * the system trust store.  Throws a std::runtime_error naming
          * everything it tried if none of them produce any CAs. */
         void load_trust(void);
+
+        /* Loads the CAs from the first of 'paths' that has any,
+         * returning how many were loaded and 0 if none of them do.
+         * Split out of load_trust() so it can be pointed at something
+         * other than the machine's real trust store. */
+        int load_trust_files(const char * const *paths, size_t count);
     };
 
     /* An IMAP client, which represents a client-side connection to an

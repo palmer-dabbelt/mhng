@@ -268,6 +268,16 @@ COMPILEOPTS += -DFLAGS
 LIBEXECS    += mhng/mhimap-idle
 SOURCES     += mhimap-idle.c++
 
+# Exercises the libmhimap error paths that only a broken network or a
+# rude server gets you to, which isn't something a test can arrange
+# against a real IMAP server.
+LIBEXECS    += mhng/mhimap-selftest
+SOURCES     += mhimap-selftest.c++
+TESTSRC     += line_buffer_overflow.bash
+TESTSRC     += read_failure.bash
+TESTSRC     += retryable.bash
+TESTSRC     += ca_bundle_fallback.bash
+
 # OAUTH2-related activities
 LIBEXECS    += mhng/mhoauth-refresh
 SOURCES     += mhoauth-refresh.c++
