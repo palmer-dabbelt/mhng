@@ -89,6 +89,35 @@ static std::list<mhng::daemon::process> oauth2_processes;
 static std::shared_ptr<mhng::args> args = NULL;
 static std::mutex args_lock;
 
+/* Failures come in runs: a server that just dropped us will usually
+ * drop us again, and a CA bundle that's gone missing isn't going to
+ * come back on its own.  Retrying every five seconds forever just
+ * fills the log and hammers the server, so back the retries off. */
+static const int retry_delay_min = 5;
+static const int retry_delay_max = 60;
+
+/* Waits out the current backoff and then doubles it, but gives up on
+ * the wait as soon as the network changes state: there's no reason to
+ * sit out the rest of a minute earned by a dead network when the lid
+ * has just been opened. */
+static void wait_before_retry(int &delay)
+{
+    bool was_up = net_up;
+
+    for (int i = 0; i < delay; ++i) {
+        sleep(1);
+
+        if (net_up != was_up) {
+            delay = retry_delay_min;
+            return;
+        }
+    }
+
+    delay *= 2;
+    if (delay > retry_delay_max)
+        delay = retry_delay_max;
+}
+
 int main(int argc, const char **argv)
 {
     sync_req = 0;
@@ -456,6 +485,8 @@ void client_main(int client)
 
 void sync_main(mhng::daemon::process* sync_process)
 {
+    int retry_delay = retry_delay_min;
+
     while (true) {
         /* The first thing to do is to atomicly wait for someone to
          * request a synchronization while obtaining a response
@@ -500,10 +531,13 @@ void sync_main(mhng::daemon::process* sync_process)
          * and try again.  Note that there's a simple rate limit in
          * here... */
         if (status != 0) {
-            fprintf(stderr, "Synchronization failed, retrying\n");
-            sleep(5);
+            fprintf(stderr, "Synchronization failed, retrying in %d seconds\n",
+                    retry_delay);
+            wait_before_retry(retry_delay);
             continue;
         }
+
+        retry_delay = retry_delay_min;
 
         /* After synchronization go and figure out what the largest
          * UID we've yet seen is. */
@@ -537,6 +571,8 @@ void sync_main(mhng::daemon::process* sync_process)
 
 void idle_main(mhng::daemon::process &idle_process, std::string account_name)
 {
+    int retry_delay = retry_delay_min;
+
     while (true) {
         /* We only want to bother trying to idle when we already know
          * the network is up.  This waits for the network to go up
@@ -559,15 +595,20 @@ void idle_main(mhng::daemon::process &idle_process, std::string account_name)
         int status = idle_process.join();
 
         if (status != 0) {
-            fprintf(stderr, "[%s] IDLE failed, retrying\n", account_name.c_str());
-            sleep(5);
+            fprintf(stderr, "[%s] IDLE failed, retrying in %d seconds\n",
+                    account_name.c_str(), retry_delay);
+            wait_before_retry(retry_delay);
             continue;
         }
+
+        retry_delay = retry_delay_min;
     }
 }
 
 void oauth2_main(mhng::daemon::process* oauth2_process)
 {
+    int retry_delay = retry_delay_min;
+
     while (true) {
         /* We only want to bother trying to oauth when we already know
          * the network is up.  This waits for the network to go up
@@ -588,9 +629,12 @@ void oauth2_main(mhng::daemon::process* oauth2_process)
 
         int status = oauth2_process->join();
         if (status != 0) {
-            fprintf(stderr, "OAUTH2 failed, retrying\n");
-            sleep(5);
+            fprintf(stderr, "OAUTH2 failed, retrying in %d seconds\n",
+                    retry_delay);
+            wait_before_retry(retry_delay);
             continue;
         }
+
+        retry_delay = retry_delay_min;
     }
 }
