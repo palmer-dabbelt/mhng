@@ -271,7 +271,7 @@ SOURCES     += mhimap-idle.c++
 # Exercises the libmhimap error paths that only a broken network or a
 # rude server gets you to, which isn't something a test can arrange
 # against a real IMAP server.
-LIBEXECS    += mhng/mhimap-selftest
+TESTEXECS   += mhimap-selftest
 SOURCES     += mhimap-selftest.c++
 TESTSRC     += line_buffer_overflow.bash
 TESTSRC     += read_failure.bash
