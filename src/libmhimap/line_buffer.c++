@@ -95,8 +95,11 @@ ssize_t line_buffer::get(char *buffer, ssize_t buffer_size)
             /* Figure out how much data to stick into the buffer,
              * ensuring that it doesn't overflow anything.  Note that
              * this means we will DROP data when lines are too long --
-             * the user can detect this by checking the size. */
-            ssize_t to_copy = (i > buffer_size) ? buffer_size : i;
+             * the user can detect this by checking the size.  The '- 1'
+             * leaves room for the '\0' below: without it a line that
+             * exactly fills the caller's buffer wrote one byte past
+             * the end of it. */
+            ssize_t to_copy = (i >= buffer_size) ? buffer_size - 1 : i;
             memcpy(buffer, data, to_copy);
             buffer[to_copy] = '\0';
 
