@@ -487,10 +487,12 @@ ssize_t client::gets(char *buffer, ssize_t buffer_size)
         l.printf("read   ==> '%*s'", (int)n_read, linebuf.recharge_buffer());
         l.printf("n_read ==> " SSIZET_FORMAT, n_read);
 
-        /* Just die on any errors. */
+        /* A dropped connection is a normal thing for a mail server to
+         * do, not a bug worth dumping core over: exit non-zero so the
+         * daemon that spawned us just tries again. */
         if (n_read < 0) {
-            fprintf(stderr, "Read failure\n");
-            abort();
+            fprintf(stderr, "Read failure, giving up on this connection\n");
+            exit(1);
         }
 
         linebuf.recharge_commit(n_read);

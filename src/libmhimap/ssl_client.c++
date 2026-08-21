@@ -4,10 +4,12 @@
 #include "ssl_client.h++"
 #include "logger.h++"
 #include <arpa/inet.h>
+#include <errno.h>
 #include <gnutls/gnutlsxx.h>
 #include <gnutls/x509.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <poll.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <iostream>
@@ -60,10 +62,19 @@ static const char *ca_bundle_paths[] = {
 
 #define cstr_len(str) str.c_str(), strlen(str.c_str())
 
+/* How long to wait for the transport to become ready before giving up
+ * on a GNUTLS_E_AGAIN.  The server has nothing to say for minutes at a
+ * time during an IDLE, so this has to be generous. */
+#ifndef TRANSPORT_TIMEOUT_MS
+#define TRANSPORT_TIMEOUT_MS (30 * 60 * 1000)
+#endif
+
 static void gnutls_ssl_init(void) __attribute__((constructor));
 static inline int gnutls_tcp_connect(const std::string hostname,
                                      uint16_t port);
 static inline void *get_in_addr(const struct sockaddr *sa);
+static bool is_retryable(int code);
+static void wait_for_transport(int fd, bool want_write);
 
 void trust_credentials::load_trust(void)
 {
@@ -150,15 +161,58 @@ ssize_t ssl_client::read(char *buffer, ssize_t buffer_size)
 
     for (size_t i = 0; i < RETRIES; ++i) {
         try {
-            return session.recv(buffer, buffer_size);
-        } catch (const gnutls::exception& e) {
+            ssize_t n_read = session.recv(buffer, buffer_size);
+
+            /* A zero-length read is a clean shutdown by the server.
+             * Callers keep asking for data until they've got a whole
+             * line, so they need to be told there won't be one. */
+            if (n_read == 0) {
+                std::cerr << "IMAP server closed the connection\n";
+                return -1;
+            }
+
+            return n_read;
+        } catch (gnutls::exception& e) {
+            /* Every error but GNUTLS_E_AGAIN and GNUTLS_E_INTERRUPTED
+             * invalidates the session, after which recv() just keeps
+             * returning GNUTLS_E_INVALID_SESSION.  Retrying those only
+             * bought us ten copies of the same message before we gave
+             * up, so report the error that actually mattered and let
+             * the caller deal with a dead connection. */
+            if (!is_retryable(e.get_code())) {
+                std::cerr << "Lost the connection to the IMAP server\n";
+                std::cerr << "  " << std::string(e.what()) << "\n";
+                return -1;
+            }
+
             std::cerr << "GNUTLS exception thrown during read(), retrying\n";
             std::cerr << "  " << std::string(e.what()) << "\n";
+            wait_for_transport(server_fd, session.get_record_direction());
         }
     }
 
     std::cerr << "Too many GNUTLS exceptions thrown\n";
-    abort();
+    return -1;
+}
+
+bool is_retryable(int code)
+{
+    return code == GNUTLS_E_AGAIN || code == GNUTLS_E_INTERRUPTED;
+}
+
+void wait_for_transport(int fd, bool want_write)
+{
+    /* GNUTLS_E_AGAIN means the transport couldn't make progress yet,
+     * so wait for it rather than spinning through the retries as fast
+     * as the CPU allows.  gnutls_record_get_direction() says which way
+     * GNUTLS wants to move next. */
+    struct pollfd pfd;
+    pfd.fd = fd;
+    pfd.events = want_write ? POLLOUT : POLLIN;
+    pfd.revents = 0;
+
+    if (poll(&pfd, 1, TRANSPORT_TIMEOUT_MS) < 0 && errno != EINTR)
+        perror("poll() failed while waiting for the IMAP server");
 }
 
 ssize_t ssl_client::write(char *buffer, ssize_t buffer_size)
@@ -434,11 +488,26 @@ void ssl_client::basic_init(std::function<int()> authenticate)
                     throw std::runtime_error("Handshake failed");
                 }
                 finished = true;
-            } catch (const gnutls::exception& e) {
+            } catch (gnutls::exception& e) {
+                /* Only GNUTLS_E_AGAIN and friends leave the session in
+                 * a state where another handshake() can get anywhere:
+                 * anything else has invalidated it, so retrying just
+                 * burns through the retry count. */
+                if (!is_retryable(e.get_code()))
+                    throw;
+
                 std::cerr << "GNUTLS exception thrown during handshake, retrying\n";
                 std::cerr << "  " << std::string(e.what()) << "\n";
+                wait_for_transport(server_fd, session.get_record_direction());
             }
         }
+
+        /* Falling out of the loop unfinished used to look exactly like
+         * a successful handshake, which turned into a pile of
+         * confusing errors from the very first read(). */
+        if (!finished)
+            throw std::runtime_error("TLS handshake with '" + hostname
+                                     + "' never completed");
 
         /* We're already secure, so we can proceed directly to the
          * authentication phase. */
@@ -462,9 +531,11 @@ void ssl_client::basic_init(std::function<int()> authenticate)
             throw e;
         }
     } catch (const gnutls::exception& e) {
-        std::cerr << "GNUTLS exception thrown\n";
-        std::cerr << "  " << std::string(e.what()) << "\n";
-        abort();
+        /* Failing to set a connection up is something servers, CA
+         * bundles and networks do to us all the time, so hand it to
+         * the caller as an error rather than dumping core. */
+        throw std::runtime_error("GNUTLS error while connecting to '"
+                                 + hostname + "': " + e.what());
     } catch (...) {
         throw;
     }
