@@ -39,6 +39,21 @@ using namespace mhimap;
 #define CAFMT GNUTLS_X509_FMT_PEM
 #endif
 
+/* CAFILE isn't the only place a CA bundle can live, and on macOS it's
+ * a Homebrew path that vanishes for a moment every time
+ * ca-certificates is upgraded -- which used to leave every IMAP
+ * connection failing with "Error while reading file" until someone
+ * noticed.  These are tried in order when CAFILE doesn't pan out. */
+static const char *ca_bundle_paths[] = {
+    CAFILE,
+    "/etc/ssl/cert.pem",                      /* macOS, FreeBSD */
+    "/opt/homebrew/etc/ca-certificates/cert.pem",
+    "/opt/homebrew/share/ca-certificates/cacert.pem",
+    "/usr/local/etc/ca-certificates/cert.pem",
+    "/etc/ssl/certs/ca-certificates.crt",     /* Debian, Alpine */
+    "/etc/pki/tls/certs/ca-bundle.crt",       /* Fedora, RHEL */
+};
+
 #ifndef RETRIES
 #define RETRIES 10
 #endif
@@ -49,6 +64,38 @@ static void gnutls_ssl_init(void) __attribute__((constructor));
 static inline int gnutls_tcp_connect(const std::string hostname,
                                      uint16_t port);
 static inline void *get_in_addr(const struct sockaddr *sa);
+
+void trust_credentials::load_trust(void)
+{
+    logger l("trust_credentials::load_trust()");
+    std::string tried;
+
+    for (const auto &path: ca_bundle_paths) {
+        l.printf("gnutls_certificate_set_x509_trust_file('%s')", path);
+        int certs = gnutls_certificate_set_x509_trust_file(cred, path, CAFMT);
+        if (certs > 0) {
+            l.printf("  => loaded %d CAs", certs);
+            return;
+        }
+
+        tried += "\n  ";
+        tried += path;
+    }
+
+    /* GNUTLS' own notion of a system trust store: a keychain on some
+     * platforms, whatever bundle GNUTLS was built against on the rest.
+     * It's last because on macOS it usually points right back at the
+     * Homebrew path we just failed to read. */
+    l.printf("gnutls_certificate_set_x509_system_trust()");
+    int certs = gnutls_certificate_set_x509_system_trust(cred);
+    if (certs > 0) {
+        l.printf("  => loaded %d CAs", certs);
+        return;
+    }
+
+    throw std::runtime_error("Unable to load any trusted CAs, tried the "
+                             "GNUTLS system trust store and:" + tried);
+}
 
 ssl_client::ssl_client(const std::string _hostname,
                        uint16_t _port,
@@ -346,8 +393,8 @@ void ssl_client::basic_init(std::function<int()> authenticate)
         }
 
         try {
-            l.printf("credentials.set_x509_trust_file('%s', %d)", CAFILE, CAFMT);
-            credentials.set_x509_trust_file(CAFILE, CAFMT);
+            l.printf("credentials.load_trust()");
+            credentials.load_trust();
             session.set_credentials(credentials);
         } catch (const gnutls::exception& e) {
             std::cerr << "GNUTLS exception thrown during session.set_credentials\n";

@@ -13,6 +13,19 @@
 #include <string>
 
 namespace mhimap {
+    /* gnutlsxx keeps the C credentials handle protected and doesn't
+     * wrap gnutls_certificate_set_x509_system_trust() at all, so this
+     * exists to expose just enough of it to load a CA bundle the way
+     * we want to. */
+    class trust_credentials: public gnutls::certificate_credentials {
+    public:
+        /* Loads a set of trusted CAs, trying the compiled-in bundle,
+         * then a list of well-known bundle paths, then GNUTLS' idea of
+         * the system trust store.  Throws a std::runtime_error naming
+         * everything it tried if none of them produce any CAs. */
+        void load_trust(void);
+    };
+
     /* An IMAP client, which represents a client-side connection to an
      * IMAP server. */
     class ssl_client: public client {
@@ -29,7 +42,7 @@ namespace mhimap {
         /* Holds the connection to the server. */
         int server_fd;
         gnutls::client_session session;
-        gnutls::certificate_credentials credentials;
+        trust_credentials credentials;
 
         /* Here's where we hold a single line buffer. */
         char *buffer;
